@@ -19,6 +19,8 @@ enum JournalSaveError: LocalizedError {
 final class AppModel {
     private(set) var cycles: [CycleResult] = []
     private(set) var output: PipelineOutput?
+    /// 当前生效的评分配置（实验室的对比与采用以它为基准）
+    private(set) var config: ScoringConfig = .default
     private(set) var snapshot: HealthSnapshot?
     private(set) var journal: [JournalEntry] = []
     private(set) var lastUpdated: Date?
@@ -78,6 +80,13 @@ final class AppModel {
 
     /// 当前数据来源，决定保存日志后是否从 SwiftData 重新读取
     private(set) var source: DataSourceKind = .synthetic
+
+    /// 实验室采用新配置后，用重算的结果替换当前界面数据。
+    func apply(_ output: PipelineOutput, config: ScoringConfig) {
+        self.output = output
+        self.cycles = output.cycles
+        self.config = config
+    }
 
     /// 某个醒来日的日志（本地零点）。
     func journalEntry(on night: Date) -> JournalEntry? {
@@ -140,6 +149,7 @@ final class AppModel {
             calendar: calendar
         ))
         self.output = output
+        self.config = config
         self.snapshot = scenario.snapshot
         self.journal = scenario.journal
         self.cycles = output.cycles
@@ -163,6 +173,7 @@ final class AppModel {
         let now = Date()
         let start = calendar.date(byAdding: .day, value: -180, to: now) ?? now
         do {
+            config = try await repository.currentConfig() ?? .default
             cycles = try await repository.cycles(from: start, to: now)
             journal = try await repository.journal(from: start, to: now)
             snapshot = await AppBootstrap.shared.environment.sync?.cachedSnapshot()

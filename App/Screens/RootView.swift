@@ -165,8 +165,7 @@ struct RouteDestination: View {
         case .report: ReportView(model: model)
         case .coach: CoachView(model: model)
         case .settings: SettingsView()
-        case .lab: LabRootView(model: LabModel(source: .synthetic))
-        case .labNight: LabRootView(model: LabModel(source: .synthetic))
+        case .lab, .labNight: LabRootView(model: LabModel(source: .synthetic), app: model)
         case .diagnostics: DiagnosticsView()
         case .onboarding: OnboardingView()
         }

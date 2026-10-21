@@ -4,6 +4,8 @@ import VigorHealth
 
 struct LabRootView: View {
     @Bindable var model: LabModel
+    /// 应用的数据（流水线结果）：基线、明细、参数版本、校准与导出都以它为准
+    let app: AppModel
     @State private var isImporting = false
 
     var body: some View {
@@ -33,6 +35,8 @@ struct LabRootView: View {
                     }
                 }
             }
+
+            PipelineLabSections(app: app)
 
             OverviewSection(summary: model.summary)
 

@@ -151,6 +151,14 @@ public actor ScoreRepository {
         return try record.flatMap { try Self.decoder.decode(ScoringConfig.self, from: $0.payload) }
     }
 
+    /// 所有保存过的配置版本，按版本号降序（最新的在前）。回滚与对比使用。
+    public func configHistory() throws -> [ScoringConfig] {
+        let records = try modelContext.fetch(FetchDescriptor<ConfigRecord>(
+            sortBy: [SortDescriptor(\.version, order: .reverse)]
+        ))
+        return try records.map { try Self.decoder.decode(ScoringConfig.self, from: $0.payload) }
+    }
+
     static func dayString(_ day: DateComponents) -> String {
         String(format: "%04d-%02d-%02d", day.year ?? 0, day.month ?? 0, day.day ?? 0)
     }

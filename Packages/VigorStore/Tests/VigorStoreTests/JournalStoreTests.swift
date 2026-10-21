@@ -52,4 +52,20 @@ struct JournalStoreTests {
         #expect(read.map(\.energy) == [3, 1])
         #expect(try await repository.journal(from: nextDay.addingTimeInterval(1), to: nextDay.addingTimeInterval(86_400)).isEmpty)
     }
+
+    @Test("配置版本历史：按版本号降序，当前版本可回滚到更早的版本")
+    func configHistoryOrdersVersions() async throws {
+        let repository = try makeRepository()
+        var first = ScoringConfig.default
+        first.configVersion = 1
+        var second = ScoringConfig.default
+        second.configVersion = 2
+        second.lateNightWeight = 0.5
+        try await repository.saveConfig(first)
+        try await repository.saveConfig(second)
+        let history = try await repository.configHistory()
+        #expect(history.map(\.configVersion) == [2, 1])
+        #expect(history.first?.lateNightWeight == 0.5)
+        #expect(try await repository.currentConfig()?.configVersion == 2)
+    }
 }

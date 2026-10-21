@@ -106,3 +106,9 @@
 - 测试：VigorStore 15 个通过（新增 3 个：共享状态往返、旧载荷解码、约定的键与 App Group 标识）；其他包不变
 - 构建：iOS ✅（含手表与两个小组件，`Vigor.app/Watch/VigorWatch.app`、`Vigor.app/PlugIns/VigorWidgets.appex`、`VigorWatch.app/PlugIns/VigorWatchWidgets.appex` 已确认）  watchOS ✅（`VigorWatch` scheme，generic watchOS Simulator）
 - 备注：手表模拟器运行时不可用（D-084），训练模式与小组件的真实刷新只能在真机上验证。App Intents 读取顺序已修正（D-081）。
+
+### F4 实验室升级与校准界面 —— ✅ 完成（权重采用见 D-088）
+- 提交：见 `git log --oneline`（提交信息 `feat(lab): ...`）
+- 测试：VigorHealth 40 个通过（新增 6 个：版本对比、消融、消融基准与评分器一致、校准样本、CSV/JSON 导出）；VigorStore 16 个通过（新增 1 个：配置版本历史）
+- 构建：iOS ✅  watchOS —（F4 不改手表代码）
+- 备注：新增 `LabAnalysis`、`DailyExport`（VigorScoring），`PipelineLabModel` 与 `PipelineLabSections`（App）。截图检查见 F8。
