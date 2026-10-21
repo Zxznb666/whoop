@@ -86,3 +86,11 @@
   - 教练：模板与端侧适配，界面显示“今日一句”。
 - 未完成：Claude 教练的 key 录入与确认弹窗；周报与月报的 AI 总结；备份的导入导出界面；实验室中的校准界面与回滚；决策摘要见 `docs/DECISIONS.md`（D-001 至 D-067）；施工报告见 `docs/BUILD-REPORT.md`，其中的“摘要”部分仍需补充。
 - 详见 `docs/BUILD-REPORT.md`。
+
+## 补完 F1–F8（施工文档 M5-completion-build-prompt.md）
+
+### F1 日志录入 —— ✅ 完成
+- 提交：见 `git log --oneline`（提交信息 `feat(journal): ...`）
+- 测试：VigorScoring 111 个通过（新增 5 个：题目编解码、旧记录解码、自动填充）；VigorStore 12 个通过（新增 3 个：往返、同日覆盖、区间查询）；VigorEngine 13 个通过（新增 5 个：日志提醒）
+- 构建：iOS ✅  watchOS —
+- 备注：日志页顶部“今天的日志”卡片；题目设置在日志页右上角与设置页；决策 D-071 至 D-074。真机上的提醒投递未验证。

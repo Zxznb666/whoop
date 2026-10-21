@@ -12,6 +12,8 @@ enum Route: Hashable {
     case metric(MetricKind)
     case browse
     case journal
+    case journalEdit(Date)
+    case journalQuestions
     case report
     case coach
     case settings
@@ -26,7 +28,8 @@ enum Route: Hashable {
         case .recovery, .settings, .lab, .labNight, .diagnostics, .onboarding: .summary
         case .sleep: .sleep
         case .strain, .workout: .strain
-        case .journal: .journal
+        case .journal, .journalEdit: .journal
+        case .journalQuestions: .summary
         case .metric, .browse, .report, .coach: .browse
         }
     }
@@ -41,6 +44,8 @@ enum Route: Hashable {
         case "metric:rhr": .metric(.restingHeartRate)
         case "browse": .browse
         case "journal": .journal
+        case "journal:edit": .journalEdit(Calendar.current.startOfDay(for: Date()))
+        case "journal:questions": .journalQuestions
         case "report": .report
         case "coach": .coach
         case "settings": .settings
@@ -155,6 +160,8 @@ struct RouteDestination: View {
         case .metric(let kind): MetricDetailView(model: model, kind: kind)
         case .browse: BrowseView(model: model)
         case .journal: JournalView(model: model)
+        case .journalEdit(let night): JournalEditView(model: model, night: night)
+        case .journalQuestions: JournalQuestionsView()
         case .report: ReportView(model: model)
         case .coach: CoachView(model: model)
         case .settings: SettingsView()

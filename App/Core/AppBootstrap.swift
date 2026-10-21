@@ -1,6 +1,7 @@
 import Foundation
 import HealthKit
 import VigorEngine
+import VigorScoring
 
 /// 启动时的装配：注册后台任务、开启观察者，并提供统一的刷新入口。
 @MainActor
@@ -65,9 +66,30 @@ final class AppBootstrap {
                 announcedRecovery: NotificationScheduler.announcedRecovery,
                 sent: NotificationScheduler.sent
             )
-            await NotificationScheduler.schedule(planned)
+            let reminders = await journalReminders(now: Date())
+            await NotificationScheduler.schedule(planned + reminders)
         } catch {
             DiagnosticsLog.record("刷新失败：\(error)")
+        }
+    }
+
+    /// 醒来后的日志提醒（PRD §6.5）。读取失败只记录，不影响恢复分数的通知。
+    private func journalReminders(now: Date) async -> [PlannedNotification] {
+        guard let repository = environment.repository else { return [] }
+        do {
+            let calendar = Calendar.current
+            let latest = try await repository.cycles(from: now.addingTimeInterval(-86_400), to: now).last
+            let journal = try await repository.journal(from: now.addingTimeInterval(-7 * 86_400), to: now)
+            return NotificationPlanner.journalReminder(
+                latestWake: latest?.wakeTime,
+                journaledNights: Set(journal.map(\.night)),
+                sent: NotificationScheduler.sent,
+                now: now,
+                calendar: calendar
+            )
+        } catch {
+            DiagnosticsLog.record("日志提醒计算失败：\(error)")
+            return []
         }
     }
 }

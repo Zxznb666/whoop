@@ -36,7 +36,11 @@ enum NotificationScheduler {
             content.title = item.title
             content.body = item.body
             content.sound = .default
-            let request = UNNotificationRequest(identifier: item.identifier, content: content, trigger: nil)
+            // 日志提醒放在恢复分数通知之后：按触发时间延迟投递，其余立即发送
+            let trigger: UNNotificationTrigger? = item.kind == .journalReminder
+                ? UNTimeIntervalNotificationTrigger(timeInterval: max(60, item.fireDate.timeIntervalSinceNow), repeats: false)
+                : nil
+            let request = UNNotificationRequest(identifier: item.identifier, content: content, trigger: trigger)
             do {
                 try await UNUserNotificationCenter.current().add(request)
                 sent.insert(item.identifier)

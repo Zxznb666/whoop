@@ -5,6 +5,14 @@ import VigorHealth
 import VigorScoring
 import VigorStore
 
+enum JournalSaveError: LocalizedError {
+    case storeUnavailable
+
+    var errorDescription: String? {
+        "数据存储未就绪，请稍后重试。"
+    }
+}
+
 /// 界面的数据来源：模拟器使用固定日期的合成数据（截图可复现），真机使用 SwiftData 中的周期记录。
 @MainActor
 @Observable
@@ -27,7 +35,8 @@ final class AppModel {
         return Calendar(identifier: .gregorian).date(from: components) ?? Date()
     }()
 
-    private var calendar: Calendar {
+    /// 界面使用的日历（日志的醒来日、洞察与周报都按它划分日期）
+    var calendar: Calendar {
         var calendar = Calendar(identifier: .gregorian)
         calendar.timeZone = TimeZone(identifier: "Asia/Shanghai") ?? .current
         return calendar
@@ -67,7 +76,42 @@ final class AppModel {
         return BodyAge.compute(chronologicalAge: chronological, sex: snapshot.profile.sex, inputs: inputs)
     }
 
+    /// 当前数据来源，决定保存日志后是否从 SwiftData 重新读取
+    private(set) var source: DataSourceKind = .synthetic
+
+    /// 某个醒来日的日志（本地零点）。
+    func journalEntry(on night: Date) -> JournalEntry? {
+        journal.first { $0.night == night }
+    }
+
+    /// 日志页“自动填充”的只读值，取醒来日前一天的健康数据。
+    func autoFill(for night: Date) -> JournalAutoFill {
+        JournalAutoFill.summarize(snapshot, night: night, calendar: calendar)
+    }
+
+    /// 保存一天的日志：先写入 SwiftData，界面立即更新，然后在后台刷新分数（洞察与生病预警随之生效）。
+    func saveJournal(_ entry: JournalEntry) async throws {
+        guard let repository = AppBootstrap.shared.environment.repository else {
+            throw JournalSaveError.storeUnavailable
+        }
+        try await repository.saveJournal(entry)
+        journal.removeAll { $0.night == entry.night }
+        journal.append(entry)
+        journal.sort { $0.night < $1.night }
+        Task {
+            await AppBootstrap.shared.refreshNow()
+            await reloadStored()
+        }
+    }
+
+    /// 从 SwiftData 重新读取（只在真机数据来源下有意义；合成数据不会被覆盖）。
+    private func reloadStored() async {
+        guard source == .live, let repository = AppBootstrap.shared.environment.repository else { return }
+        await reloadFromStore(repository: repository)
+    }
+
     func load(source: DataSourceKind) async {
+        self.source = source
         #if targetEnvironment(simulator)
         if source == .synthetic {
             loadSynthetic()

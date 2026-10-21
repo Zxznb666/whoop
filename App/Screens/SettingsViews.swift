@@ -36,6 +36,9 @@ struct SettingsView: View {
                     .onChange(of: maxHeartRate) { AppSettings.maxHeartRateOverride = maxHeartRate }
                 }
             }
+            Section("日志") {
+                NavigationLink("日志题目", value: Route.journalQuestions)
+            }
             Section("说明") {
                 Text("设置保存在本机。修改后，下一次刷新时生效。")
                     .font(.footnote)
@@ -134,48 +137,6 @@ struct OnboardingView: View {
             DiagnosticsLog.record("授权失败：\(error)")
         }
         #endif
-    }
-}
-
-struct JournalView: View {
-    let model: AppModel
-
-    var body: some View {
-        List {
-            Section {
-                Text("日志问卷的填写界面在后续版本完成。这里显示最近的记录与影响洞察。")
-                    .font(.footnote)
-                    .foregroundStyle(.secondary)
-            }
-            Section("影响洞察（按效应量排序）") {
-                if model.insights.isEmpty {
-                    Text("每组至少需要 5 个样本才会显示。").foregroundStyle(.secondary)
-                }
-                ForEach(model.insights.prefix(8)) { insight in
-                    VStack(alignment: .leading, spacing: 4) {
-                        Text(insight.sentence).font(.callout)
-                        Text(String(format: "p = %.3f · 做了 %d 次 / 没做 %d 次", insight.pValue, insight.treatedCount, insight.controlCount))
-                            .font(.caption)
-                            .foregroundStyle(.secondary)
-                    }
-                }
-            }
-            Section("最近记录") {
-                if model.journal.isEmpty {
-                    Text("还没有记录").foregroundStyle(.secondary)
-                }
-                ForEach(model.journal.suffix(14).reversed(), id: \.night) { entry in
-                    HStack {
-                        Text(entry.night, format: .dateTime.month().day())
-                        Spacer()
-                        Text(entry.behaviors.filter(\.value).keys.sorted().joined(separator: "、"))
-                            .foregroundStyle(.secondary)
-                    }
-                    .font(.callout)
-                }
-            }
-        }
-        .navigationTitle("日志")
     }
 }
 

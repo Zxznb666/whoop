@@ -8,6 +8,7 @@ public enum NotificationKind: String, Sendable, Hashable, Codable {
     case illness
     case bedtimeReminder
     case weeklyReport
+    case journalReminder
 }
 
 public struct PlannedNotification: Sendable, Hashable {
@@ -93,6 +94,34 @@ public enum NotificationPlanner {
             }
         }
         return planned.filter { !sent.contains($0.identifier) }
+    }
+
+    /// 醒来后的日志提醒（PRD §6.5）：只针对最近一次醒来；当天已经填写日志，或醒来已超过 12 小时，则不发。
+    /// 触发时间晚于恢复分数通知 30 分钟，保证顺序在恢复分数之后。
+    public static let journalReminderDelay: TimeInterval = 30 * 60
+    public static let journalReminderWindow: TimeInterval = 12 * 3600
+
+    /// - Parameters:
+    ///   - journaledNights: 已经有日志的醒来日（本地零点）
+    public static func journalReminder(
+        latestWake: Date?,
+        journaledNights: Set<Date>,
+        sent: Set<String>,
+        now: Date,
+        calendar: Calendar
+    ) -> [PlannedNotification] {
+        guard let wake = latestWake, now.timeIntervalSince(wake) < journalReminderWindow else { return [] }
+        let night = calendar.startOfDay(for: wake)
+        guard !journaledNights.contains(night) else { return [] }
+        let stamp = String(Int(wake.timeIntervalSince1970))
+        let item = PlannedNotification(
+            kind: .journalReminder,
+            identifier: "journalReminder-\(stamp)",
+            title: "昨天过得怎么样？",
+            body: "花半分钟记录昨天的饮酒、咖啡因和状态，洞察会更准确。",
+            fireDate: wake.addingTimeInterval(journalReminderDelay)
+        )
+        return sent.contains(item.identifier) ? [] : [item]
     }
 
     static func zoneText(_ zone: RecoveryZone) -> String {
