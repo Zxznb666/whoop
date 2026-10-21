@@ -70,18 +70,18 @@ public enum SleepRegularity {
             }
         }
 
-        var coveredDays = 0
-        for day in 0..<days {
-            let range = (day * minutesPerDay)..<((day + 1) * minutesPerDay)
-            if state[range].contains(where: { $0 != 0 }) {
-                coveredDays += 1
-            }
-        }
-        guard coveredDays >= minimumDays else { return nil }
-
         var comparable = 0
         var agreeing = 0
+        var coveredDays = 0
         state.withUnsafeBufferPointer { buffer in
+            for day in 0..<days {
+                var covered = false
+                for index in (day * minutesPerDay)..<((day + 1) * minutesPerDay) where buffer[index] != 0 {
+                    covered = true
+                    break
+                }
+                if covered { coveredDays += 1 }
+            }
             for index in 0..<(total - minutesPerDay) {
                 let a = buffer[index]
                 let b = buffer[index + minutesPerDay]
@@ -90,6 +90,7 @@ public enum SleepRegularity {
                 if a == b { agreeing += 1 }
             }
         }
+        guard coveredDays >= minimumDays else { return nil }
         guard comparable > 0 else { return nil }
         let probability = Double(agreeing) / Double(comparable)
         return -100 + 200 * probability

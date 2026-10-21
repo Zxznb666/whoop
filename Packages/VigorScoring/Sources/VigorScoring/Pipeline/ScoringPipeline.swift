@@ -29,8 +29,8 @@ public struct PipelineInput: Sendable {
     public var manualExcludedNights: Set<DateComponents>
     /// 基础睡眠需求（小时），可由个性化或手动覆盖
     public var baseSleepNeedHours: Double
-    /// 每个日历日（年月日）的负荷，用于负荷追加；阶段 4 之前为空
-    public var strainByDay: [DateComponents: Double]
+    /// 手动设置的最大心率（bpm）；为 nil 时按年龄与运动中的观测值自动确定
+    public var maxHeartRate: Double?
     /// 目标起床时间（一天中的分钟数）；为 nil 时不给出作息建议
     public var targetWakeMinutes: Int?
     public var config: ScoringConfig
@@ -43,7 +43,7 @@ public struct PipelineInput: Sendable {
         sleepOverrides: [DateComponents: SleepOverride] = [:],
         manualExcludedNights: Set<DateComponents> = [],
         baseSleepNeedHours: Double = 7.5,
-        strainByDay: [DateComponents: Double] = [:],
+        maxHeartRate: Double? = nil,
         targetWakeMinutes: Int? = nil,
         config: ScoringConfig = .default,
         now: Date,
@@ -54,7 +54,7 @@ public struct PipelineInput: Sendable {
         self.sleepOverrides = sleepOverrides
         self.manualExcludedNights = manualExcludedNights
         self.baseSleepNeedHours = baseSleepNeedHours
-        self.strainByDay = strainByDay
+        self.maxHeartRate = maxHeartRate
         self.targetWakeMinutes = targetWakeMinutes
         self.config = config
         self.now = now
@@ -89,6 +89,12 @@ public struct CycleResult: Sendable, Hashable, Codable, Identifiable {
     public var exclusion: ExclusionReason?
     public var recovery: RecoveryResult?
     public var recoveryState: ScoreState
+    /// 本周期的负荷（醒来 → 下一次主睡眠入睡）
+    public var load: CycleLoad
+    /// ACWR（昨天及之前的 7 天 ÷ 28 天平均 TRIMP）
+    public var acwr: Double?
+    /// 今日负荷目标（依据恢复分区与 ACWR）；没有恢复分数时为 nil
+    public var loadTarget: LoadTarget?
     public var trend: TrendSummary?
     public var bedtimeAdvice: BedtimeAdvice?
     public var algorithmVersion: Int
@@ -148,6 +154,22 @@ public enum ScoringPipeline {
             }
         }
 
+        // 负荷：分钟网格与运动中的心率峰值（只计算一次）
+        let grid = MinuteGrid.build(
+            origin: snapshot.rangeStart,
+            end: snapshot.rangeEnd,
+            heartRate: snapshot.heartRate,
+            activeEnergy: snapshot.activeEnergy,
+            steps: snapshot.steps
+        )
+        let sources = NightAnalyzer.SortedSources(snapshot)
+        let workoutPeaks: [(end: Date, peak: Double)] = snapshot.workouts.compactMap { workout in
+            let heartRates = Array(NightAnalyzer.inRange(sources.heartRate, from: workout.start, to: workout.end) { $0.date })
+            return MaxHeartRate.observedPeak(workoutHeartRate: heartRates).map { (workout.end, $0) }
+        }
+        var previousStrain: Double?
+        var trimpHistory: [Double] = []
+
         var observations: [BaselineObservation] = []
         var previousDebt = 0.0
         var previousAttention = false
@@ -181,9 +203,6 @@ public enum ScoringPipeline {
             let napHours = naps
                 .filter { $0.start >= previousWake && $0.start < night.session.start }
                 .reduce(0) { $0 + $1.asleepDuration } / 3600
-            let yesterday = calendar.date(byAdding: .day, value: -1, to: wake)
-                .map { SleepSessionBuilder.dayComponents($0, calendar: calendar) }
-            let previousStrain = yesterday.flatMap { input.strainByDay[$0] }
             let need = SleepNeed.components(
                 base: input.baseSleepNeedHours,
                 loadAddition: SleepNeed.loadAdditionHours(previousStrain: previousStrain),
@@ -222,6 +241,33 @@ public enum ScoringPipeline {
                 guard let mu = stats[.wristTemperature]?.mu else { return 0 }
                 return value - mu
             }
+
+            // 负荷（§5.10–5.11）：周期 = 醒来 → 下一次主睡眠入睡
+            let upperDate = features.indices.contains(index + 1) ? features[index + 1].session.start : snapshot.rangeEnd
+            let lowerMinute = grid.index(of: wake)
+            let upperMinute = max(lowerMinute, grid.index(of: upperDate))
+            let restingForLoad = stats[.restingHeartRate]?.mu ?? PopulationPriors.prior(for: .restingHeartRate, profile: profile, year: year).mu ?? 56
+            let observedPeak = workoutPeaks.filter { $0.end <= upperDate }.map(\.peak).max()
+            let maxHeartRate = input.maxHeartRate ?? MaxHeartRate.effective(
+                initial: MaxHeartRate.initial(birthYear: profile.birthYear, year: year),
+                observedPeak: observedPeak
+            )
+            let load = LoadCalculator.cycleLoad(
+                grid: grid,
+                window: lowerMinute,
+                upper: upperMinute,
+                workouts: snapshot.workouts.filter { $0.start >= wake && $0.start < upperDate },
+                recoveries: snapshot.heartRateRecovery,
+                restingHeartRate: restingForLoad,
+                maxHeartRate: maxHeartRate,
+                sex: profile.sex,
+                model: grid.activityModel(endingBefore: upperMinute),
+                zHRV: zHRV,
+                config: config
+            )
+            let acwr = LoadTargets.acwr(recentTRIMP: trimpHistory)
+            trimpHistory.append(load.trimp)
+            previousStrain = load.strain
 
             // 生病预警（§5.12.1）
             let signals = IllnessWarning.signals(
@@ -333,6 +379,9 @@ public enum ScoringPipeline {
                 exclusion: exclusions[index],
                 recovery: recovery,
                 recoveryState: state(recovery: recovery, wake: wake, vitalsComplete: night.vitalsComplete, now: input.now),
+                load: load,
+                acwr: acwr,
+                loadTarget: recovery.map { LoadTargets.target(zone: $0.zone, acwr: acwr) },
                 trend: trend,
                 bedtimeAdvice: advice,
                 algorithmVersion: algorithmVersion,

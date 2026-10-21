@@ -75,13 +75,31 @@ struct PipelineSyntheticTests {
         }
     }
 
-    @Test("流水线性能：120 晚全量计算 < 2 秒")
+    /// 当前线程已消耗的 CPU 时间（秒）。与墙钟时间不同，它不会被同时运行的其他测试拉长。
+    private func threadCPUSeconds() -> Double {
+        var usage = timespec()
+        clock_gettime(CLOCK_THREAD_CPUTIME_ID, &usage)
+        return Double(usage.tv_sec) + Double(usage.tv_nsec) / 1_000_000_000
+    }
+
+    @Test("流水线性能：120 晚全量计算 < 2 秒（计算线程的 CPU 时间）")
     func performance() {
         let result = scenario()
-        let start = Date()
+        let start = threadCPUSeconds()
         _ = run(result)
-        let elapsed = Date().timeIntervalSince(start)
-        #expect(elapsed < 2, "耗时 \(elapsed) 秒")
+        let elapsed = threadCPUSeconds() - start
+        #expect(elapsed < 2, "CPU 耗时 \(elapsed) 秒")
+    }
+
+    @Test("负荷的方向：训练周期的平均负荷高于非训练周期")
+    func workoutCyclesCarryMoreStrain() {
+        let output = run(scenario())
+        let withWorkout = output.cycles.filter { !$0.load.workouts.isEmpty }.map { $0.load.strain }
+        let without = output.cycles.filter { $0.load.workouts.isEmpty }.map { $0.load.strain }
+        #expect(!withWorkout.isEmpty && !without.isEmpty)
+        let meanWith = withWorkout.reduce(0, +) / Double(withWorkout.count)
+        let meanWithout = without.reduce(0, +) / Double(without.count)
+        #expect(meanWith > meanWithout)
     }
 
     @Test("不用未来数据：改变第 N 晚的心率，第 N 晚的基线不变，第 N+1 晚的基线随之变化")
