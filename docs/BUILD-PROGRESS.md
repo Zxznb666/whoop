@@ -144,4 +144,8 @@
 - 构建：不适用（纯 Foundation 包，随 iOS 构建验证）
 - 备注：解析器与编码器按 FIT SDK 规则手写；编码器只在测试 target 中，`Tests/Fixtures/real/` 放入真实 `.fit` 文件后会自动运行解析测试。
 
-## 阶段 11：快照 v3、骑行分组、去重、指标、流水线 —— 🚧 进行中
+## 阶段 11：快照 v3、骑行分组、去重、指标、流水线 —— ✅ 完成
+- 提交：见 `git log --oneline`（提交信息 `feat(cycling): ...`）
+- 测试：VigorScoring 146 个通过（新增：骑行数学 11、分钟去重 5、骑行分析 10 等）；VigorHealth 52 个通过（新增：合成骑行 5、快照 v2/v3 与合并 2 等）；VigorReplay 4 个通过（黄金快照已按 D-117 更新）；VigorStore 20、VigorEngine 17、VigorCoach 11、VigorDesign 2 个通过（不变）
+- 构建：iOS ✅（`xcodebuild` 生成项目后 0 个 error）  watchOS 未在本阶段重新构建（阶段 13 统一做）
+- 备注：决策 D-103 至 D-118。流水线耗时见 D-116（调试构建 1.8 秒，断言 < 2 秒，余量很小）。骑行的 FTP 手动设置目前只能通过流水线输入，界面在阶段 12 接入。导入的骑行目前不会被同步层自动填入快照，阶段 12 接入导入流程时补上。

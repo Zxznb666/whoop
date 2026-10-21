@@ -1,7 +1,7 @@
 import Foundation
 
 /// 解码后的一次 FIT 活动文件。只保留施工文档 §4.1 要求的消息与字段，单位已换算为 SI 单位。
-public struct FITActivity: Sendable, Codable, Equatable {
+public struct FITActivity: Sendable, Codable, Equatable, Hashable {
     public var fileID: FITFileID
     public var sessions: [FITSession]
     public var laps: [FITLap]
@@ -30,20 +30,20 @@ public struct FITFileID: Sendable, Codable, Equatable, Hashable {
     }
 }
 
-public struct FITSession: Sendable, Codable, Equatable {
+public struct FITSession: Sendable, Codable, Equatable, Hashable {
     public var startTime: Date?
     public var sport: Int?
     public var totalElapsedSeconds: Double?
     public var totalDistance: Double?
 }
 
-public struct FITLap: Sendable, Codable, Equatable {
+public struct FITLap: Sendable, Codable, Equatable, Hashable {
     public var startTime: Date?
     public var endTime: Date?
 }
 
 /// `record` 消息（逐秒采样点）。缺失或无效的字段为 nil。
-public struct FITRecord: Sendable, Codable, Equatable {
+public struct FITRecord: Sendable, Codable, Equatable, Hashable {
     public var timestamp: Date
     public var latitude: Double?
     public var longitude: Double?
@@ -56,7 +56,7 @@ public struct FITRecord: Sendable, Codable, Equatable {
 }
 
 /// `event` 消息中的计时器事件：开始或停止（暂停识别用）。
-public struct FITTimerEvent: Sendable, Codable, Equatable {
+public struct FITTimerEvent: Sendable, Codable, Equatable, Hashable {
     public var time: Date
     public var isStart: Bool
 }

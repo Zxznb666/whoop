@@ -2,7 +2,7 @@ import Foundation
 
 /// 1 Hz 对齐的骑行数据（施工文档 §4.1）。数组下标 = 距开始的秒数，缺失为 nil。
 /// 暂停区间内没有采样点，数组同样为 nil；是否按 0 填充由评分层决定。
-public struct RideStream: Sendable, Codable, Equatable {
+public struct RideStream: Sendable, Codable, Equatable, Hashable {
     public var fileID: String
     public var device: FITFileID
     public var sport: Int?
@@ -18,6 +18,51 @@ public struct RideStream: Sendable, Codable, Equatable {
     /// 计时器暂停的秒数区间（与 `heartRate` 的下标一致，左闭右开）。
     public var pauses: [Range<Int>]
     public var laps: [FITLap]
+
+    public init(
+        fileID: String,
+        device: FITFileID,
+        sport: Int?,
+        start: Date,
+        heartRate: [Int?],
+        power: [Int?],
+        cadence: [Int?],
+        speed: [Double?],
+        distance: [Double?],
+        altitude: [Double?],
+        latitude: [Double?],
+        longitude: [Double?],
+        pauses: [Range<Int>],
+        laps: [FITLap]
+    ) {
+        self.fileID = fileID
+        self.device = device
+        self.sport = sport
+        self.start = start
+        self.heartRate = heartRate
+        self.power = power
+        self.cadence = cadence
+        self.speed = speed
+        self.distance = distance
+        self.altitude = altitude
+        self.latitude = latitude
+        self.longitude = longitude
+        self.pauses = pauses
+        self.laps = laps
+    }
+
+    /// 只有功率与心率的骑行（测试与合成数据用）。
+    public static func simple(fileID: String, start: Date, heartRate: [Int?], power: [Int?], pauses: [Range<Int>] = []) -> RideStream {
+        let count = max(heartRate.count, power.count)
+        let blank = [Double?](repeating: nil, count: count)
+        return RideStream(
+            fileID: fileID, device: FITFileID(), sport: 2, start: start,
+            heartRate: heartRate + [Int?](repeating: nil, count: count - heartRate.count),
+            power: power + [Int?](repeating: nil, count: count - power.count),
+            cadence: [Int?](repeating: nil, count: count), speed: blank, distance: blank,
+            altitude: blank, latitude: blank, longitude: blank, pauses: pauses, laps: []
+        )
+    }
 
     /// 时长（秒）= 最后一条记录的秒数 + 1。
     public var durationSeconds: Int { heartRate.count }

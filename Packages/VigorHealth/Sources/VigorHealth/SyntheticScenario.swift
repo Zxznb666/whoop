@@ -1,4 +1,5 @@
 import Foundation
+import VigorFIT
 import VigorScoring
 
 /// 合成场景中注入的事件清单，供测试断言（施工文档 §4.8）。
@@ -17,7 +18,8 @@ public struct SyntheticTruth: Sendable, Equatable {
     public init() {}
 }
 
-/// 合成场景 v2：快照、日志与注入事件清单。同一种子、同一 `endingAt` 的结果完全可复现。
+/// 合成场景 v3：在 v2 的基础上，每周 2–3 次骑行（60–180 分钟，带功率），四类来源情况按序号轮换（M6 §5）。
+/// 快照、日志与注入事件清单。同一种子、同一 `endingAt` 的结果完全可复现。
 public struct SyntheticScenario: Sendable, Equatable {
     public var snapshot: HealthSnapshot
     public var journal: [JournalEntry]
@@ -51,6 +53,14 @@ private struct NightPlan {
     var hrvScale: Double
     var workout: WorkoutPlan?
     var napStart: Date?
+    var ride: RidePlan?
+}
+
+/// 骑行的规划。`category` 决定来源组合（见 `writeRide`）。
+private struct RidePlan {
+    var start: Date
+    var end: Date
+    var category: Int
 }
 
 private struct WorkoutPlan {
@@ -82,12 +92,18 @@ private struct ScenarioBuilder {
     var vo2Max: [ValueSample] = []
     var heartRateRecovery: [ValueSample] = []
     var journal: [JournalEntry] = []
+    var cyclingPower: [ValueSample] = []
+    var importedRides: [RideStream] = []
+    /// 骑行使用独立的随机流，避免改变 v2 的白天与夜间数据
+    var rideRng: SplitMix64
+    var rideCount = 0
 
     init(nights: Int, seed: UInt64, endingAt: Date, calendar: Calendar) {
         self.nights = nights
         self.calendar = calendar
         self.endingAt = endingAt
         self.rng = SplitMix64(seed: seed)
+        self.rideRng = SplitMix64(seed: seed ^ 0x9E37_79B9_7F4A_7C15)
     }
 
     mutating func build() -> SyntheticScenario {
@@ -128,7 +144,9 @@ private struct ScenarioBuilder {
             activeEnergy: activeEnergy.sorted { $0.start < $1.start },
             steps: steps.sorted { $0.start < $1.start },
             vo2Max: vo2Max.sorted { $0.start < $1.start },
-            heartRateRecovery: heartRateRecovery.sorted { $0.start < $1.start }
+            heartRateRecovery: heartRateRecovery.sorted { $0.start < $1.start },
+            cyclingPower: cyclingPower.sorted { $0.start < $1.start },
+            importedRides: importedRides.sorted { $0.start < $1.start }
         )
         return SyntheticScenario(snapshot: snapshot, journal: journal, truth: truth)
     }
@@ -177,6 +195,15 @@ private struct ScenarioBuilder {
                 napStart = whole(wakeDay.addingTimeInterval((14 + rng.uniform(-0.25...0.25)) * 3600))
             }
 
+            // 骑行：每周约 2–3 次（周二、周五必有，周日有一半的概率）
+            var ride: RidePlan?
+            if index % 7 == 1 || index % 7 == 4 || (index % 7 == 6 && rideRng.chance(0.5)) {
+                let minutes = rideRng.uniform(60...180).rounded()
+                let rideStart = whole(wakeDay.addingTimeInterval(rideRng.uniform(9...11) * 3600))
+                ride = RidePlan(start: rideStart, end: rideStart.addingTimeInterval(minutes * 60), category: rideCount % 4)
+                rideCount += 1
+            }
+
             plans.append(NightPlan(
                 index: index,
                 wakeDay: wakeDay,
@@ -190,7 +217,8 @@ private struct ScenarioBuilder {
                 missing: missing,
                 hrvScale: (alcohol ? 0.82 : 1) * (sick ? 0.7 : 1),
                 workout: workout,
-                napStart: napStart
+                napStart: napStart,
+                ride: ride
             ))
         }
         return plans
@@ -210,6 +238,7 @@ private struct ScenarioBuilder {
     mutating func writeDaytime(_ plan: NightPlan, until end: Date) {
         let napInterval = plan.napStart.map { ($0, $0.addingTimeInterval(25 * 60)) }
         let workoutInterval = plan.workout.map { ($0.start, $0.end) }
+        let rideInterval = plan.ride.map { ($0.start, $0.end) }
         let excluded = [napInterval, workoutInterval].compactMap { $0 }
 
         if let nap = napInterval {
@@ -220,9 +249,12 @@ private struct ScenarioBuilder {
         }
 
         for date in times(from: plan.wake, to: end, every: 300) where !excluded.contains(where: { contains(date, $0) }) {
-            heartRate.append(HeartRateSample(date: date, bpm: rng.uniform(65...95)))
+            // 骑行时段内的样本同样消耗随机数（与 v2 的随机序列保持一致），只是不写入
+            let bpm = rng.uniform(65...95)
             let boost = rng.uniform(0...8)
             let stepCount = rng.uniform(0...120).rounded()
+            if let rideInterval, contains(date, rideInterval) { continue }
+            heartRate.append(HeartRateSample(date: date, bpm: bpm))
             activeEnergy.append(ValueSample(start: date, end: date.addingTimeInterval(300), value: boost.rounded()))
             steps.append(ValueSample(start: date, end: date.addingTimeInterval(300), value: stepCount))
         }
@@ -249,9 +281,85 @@ private struct ScenarioBuilder {
             activeEnergy.append(ValueSample(start: workout.start, end: workout.end, value: kilocalories))
         }
 
+        if let ride = plan.ride {
+            writeRide(ride)
+        }
+
         if plan.index % 7 == 6 {
             let date = plan.wake.addingTimeInterval(3600)
             vo2Max.append(ValueSample(start: date, end: date, value: rng.uniform(40...46).rounded(toPlaces: 1)))
+        }
+    }
+
+    // MARK: 骑行（M6）
+
+    /// 四类来源（按序号轮换，保证确定性）：
+    /// 0：手表训练 + Garmin 训练（有心率样本）+ FIT 文件；
+    /// 1：Garmin 训练（无心率样本）+ FIT 文件（FIT 含心率与功率）；
+    /// 2：只有 Garmin 训练（无心率样本），没有 FIT；
+    /// 3：手表训练 + Garmin 训练，其中 10 分钟心率掉线（没有 FIT）。
+    mutating func writeRide(_ ride: RidePlan) {
+        let seconds = Int(ride.end.timeIntervalSince(ride.start))
+        let hasWatch = ride.category == 0 || ride.category == 3
+        let hasFIT = ride.category == 0 || ride.category == 1
+        let hasGarminHeartRate = ride.category == 0
+        let dropout = ride.category == 3 ? (30 * 60)..<(40 * 60) : nil
+
+        // 骑行中心率每 10 秒一条（手表训练的真实采样更密，这里降低密度以控制合成数据的体量）
+        let sampleTimes = times(from: ride.start, to: ride.end, every: 10)
+        var bpmAt: [Double] = []
+        for _ in sampleTimes { bpmAt.append(rideRng.uniform(120...165).rounded()) }
+        let powers = (0..<seconds).map { _ in Int(rideRng.uniform(150...260).rounded()) }
+
+        workouts.append(WorkoutSample(
+            uuid: Self.uuid(from: &rideRng),
+            activityType: "cycling",
+            start: ride.start,
+            end: ride.end,
+            activeEnergyKilocalories: (Double(seconds) / 60 * 10).rounded(),
+            distanceMeters: (Double(seconds) / 60 * 420).rounded(),
+            sourceBundleID: "com.garmin.connect.mobile",
+            productType: "iPhone15,2"
+        ))
+        if hasWatch {
+            workouts.append(WorkoutSample(
+                uuid: Self.uuid(from: &rideRng),
+                activityType: "cycling",
+                start: ride.start,
+                end: ride.end,
+                activeEnergyKilocalories: (Double(seconds) / 60 * 9).rounded(),
+                distanceMeters: nil,
+                sourceBundleID: "com.apple.health",
+                productType: "Watch7,1"
+            ))
+            for (index, date) in sampleTimes.enumerated() {
+                if let dropout, dropout.contains(Int(date.timeIntervalSince(ride.start))) { continue }
+                heartRate.append(HeartRateSample(date: date, bpm: bpmAt[index], sourceBundleID: "com.apple.health", productType: "Watch7,1"))
+            }
+            for second in stride(from: 0, to: seconds, by: 5) {
+                let value = Double(powers[second])
+                cyclingPower.append(ValueSample(
+                    start: ride.start.addingTimeInterval(Double(second)),
+                    end: ride.start.addingTimeInterval(Double(min(seconds, second + 5))),
+                    value: value
+                ))
+            }
+        }
+        if hasGarminHeartRate {
+            for (index, date) in sampleTimes.enumerated() {
+                heartRate.append(HeartRateSample(date: date, bpm: bpmAt[index] + 2, sourceBundleID: "com.garmin.connect.mobile", productType: "iPhone15,2"))
+            }
+        }
+        if hasFIT {
+            let fitHeartRate: [Int?] = (0..<seconds).map { second in
+                Int(bpmAt[min(bpmAt.count - 1, second / 10)])
+            }
+            importedRides.append(RideStream.simple(
+                fileID: "synthetic-ride-\(ride.start.timeIntervalSince1970)",
+                start: ride.start,
+                heartRate: fitHeartRate,
+                power: powers.map { Optional($0) }
+            ))
         }
     }
 
@@ -429,8 +537,13 @@ private struct ScenarioBuilder {
     }
 
     mutating func deterministicUUID() -> UUID {
+        Self.uuid(from: &rng)
+    }
+
+    /// 骑行使用独立的随机流生成 UUID，避免改变 v2 的夜间与白天数据。
+    static func uuid(from generator: inout SplitMix64) -> UUID {
         var bytes: [UInt8] = []
-        for word in [rng.next(), rng.next()] {
+        for word in [generator.next(), generator.next()] {
             for shift in stride(from: 56, through: 0, by: -8) {
                 bytes.append(UInt8(truncatingIfNeeded: word >> UInt64(shift)))
             }

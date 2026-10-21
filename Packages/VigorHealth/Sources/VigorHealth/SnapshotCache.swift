@@ -1,4 +1,5 @@
 import Foundation
+import VigorFIT
 import VigorScoring
 
 /// 本地快照缓存：保存最近一次合并后的健康数据，使每次刷新只需从 HealthKit 读取最近几天（见 DECISIONS D-068）。
@@ -78,6 +79,12 @@ extension HealthSnapshot {
         merged.dietaryCaffeine = values(dietaryCaffeine, fresh.dietaryCaffeine)
         merged.alcoholicBeverages = values(alcoholicBeverages, fresh.alcoholicBeverages)
         merged.stateOfMind = splice(stateOfMind, fresh.stateOfMind, end: \.date, start: \.date)
+        merged.cyclingPower = values(cyclingPower, fresh.cyclingPower)
+        merged.cyclingCadence = values(cyclingCadence, fresh.cyclingCadence)
+        merged.cyclingSpeed = values(cyclingSpeed, fresh.cyclingSpeed)
+        merged.ftp = values(ftp, fresh.ftp)
+        // 导入的骑行不来自 HealthKit：由调用方每次完整提供，这里沿用 `fresh` 的列表，不做窗口拼接。
+        merged.importedRides = fresh.importedRides
         return merged
     }
 }

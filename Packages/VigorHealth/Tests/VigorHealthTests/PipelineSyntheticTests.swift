@@ -3,7 +3,7 @@ import Testing
 import VigorScoring
 @testable import VigorHealth
 
-@Suite("ScoringPipeline on synthetic data")
+@Suite("ScoringPipeline on synthetic data", .serialized)
 struct PipelineSyntheticTests {
     private static let endingAt = shanghaiDate(2026, 10, 1, 0)
 

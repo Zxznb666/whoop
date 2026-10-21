@@ -5,9 +5,9 @@ let package = Package(
     name: "VigorHealth",
     platforms: [.iOS(.v26), .watchOS(.v26), .macOS(.v26)],
     products: [.library(name: "VigorHealth", targets: ["VigorHealth"])],
-    dependencies: [.package(path: "../VigorScoring")],
+    dependencies: [.package(path: "../VigorScoring"), .package(path: "../VigorFIT")],
     targets: [
-        .target(name: "VigorHealth", dependencies: ["VigorScoring"]),
-        .testTarget(name: "VigorHealthTests", dependencies: ["VigorHealth", "VigorScoring"]),
+        .target(name: "VigorHealth", dependencies: ["VigorScoring", "VigorFIT"]),
+        .testTarget(name: "VigorHealthTests", dependencies: ["VigorHealth", "VigorScoring", "VigorFIT"]),
     ]
 )

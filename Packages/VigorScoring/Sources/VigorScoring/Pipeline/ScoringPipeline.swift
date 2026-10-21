@@ -33,6 +33,8 @@ public struct PipelineInput: Sendable {
     public var maxHeartRate: Double?
     /// 目标起床时间（一天中的分钟数）；为 nil 时不给出作息建议
     public var targetWakeMinutes: Int?
+    /// 手动设置的 FTP（瓦）；为 nil 时依次用 HealthKit 与自动估算（M6 §3）
+    public var manualFTP: Double?
     public var config: ScoringConfig
     public var now: Date
     public var calendar: Calendar
@@ -45,6 +47,7 @@ public struct PipelineInput: Sendable {
         baseSleepNeedHours: Double = 7.5,
         maxHeartRate: Double? = nil,
         targetWakeMinutes: Int? = nil,
+        manualFTP: Double? = nil,
         config: ScoringConfig = .default,
         now: Date,
         calendar: Calendar
@@ -56,6 +59,7 @@ public struct PipelineInput: Sendable {
         self.baseSleepNeedHours = baseSleepNeedHours
         self.maxHeartRate = maxHeartRate
         self.targetWakeMinutes = targetWakeMinutes
+        self.manualFTP = manualFTP
         self.config = config
         self.now = now
         self.calendar = calendar
@@ -108,6 +112,8 @@ public struct PipelineOutput: Sendable {
     public var cycles: [CycleResult]
     /// 基础睡眠需求的个性化建议（积累 60 晚以后）
     public var personalizedNeed: PersonalizedNeed?
+    /// 骑行：分组后的每次骑行、FTP、体能管理（PMC）、功率曲线（M6）
+    public var cycling: CyclingOutput
 }
 
 /// 评分流水线：对全部历史的纯函数（施工文档 §4.2）。同样的输入得到同样的输出。
@@ -155,13 +161,30 @@ public enum ScoringPipeline {
         }
 
         // 负荷：分钟网格与运动中的心率峰值（只计算一次）
+        // 心率按来源打标签后再去重（M6 §2.3）：FIT 导入 > 手表训练 > 其他训练 > 手表被动 > 其他
+        let taggedHeartRate = HeartRateOriginClassifier.tag(snapshot.heartRate, workouts: snapshot.workouts)
+            + HeartRateOriginClassifier.fitSamples(snapshot.importedRides)
         let grid = MinuteGrid.build(
             origin: snapshot.rangeStart,
             end: snapshot.rangeEnd,
-            heartRate: snapshot.heartRate,
+            taggedHeartRate: taggedHeartRate,
             activeEnergy: snapshot.activeEnergy,
             steps: snapshot.steps
         )
+        let cyclingYear = calendar.component(.year, from: snapshot.rangeEnd)
+        let cycling = CyclingAnalysis.run(CyclingInput(
+            workouts: snapshot.workouts,
+            importedRides: snapshot.importedRides,
+            cyclingPower: snapshot.cyclingPower,
+            ftpSamples: snapshot.ftp,
+            manualFTP: input.manualFTP,
+            weightKilograms: profile.weightKilograms,
+            restingHeartRate: PopulationPriors.prior(for: .restingHeartRate, profile: profile, year: cyclingYear).mu ?? 56,
+            maxHeartRate: input.maxHeartRate ?? MaxHeartRate.initial(birthYear: profile.birthYear, year: cyclingYear),
+            sex: profile.sex,
+            now: input.now,
+            calendar: calendar
+        ), grid: grid)
         let sources = NightAnalyzer.SortedSources(snapshot)
         let workoutPeaks: [(end: Date, peak: Double)] = snapshot.workouts.compactMap { workout in
             let heartRates = Array(NightAnalyzer.inRange(sources.heartRate, from: workout.start, to: workout.end) { $0.date })
@@ -279,7 +302,8 @@ public enum ScoringPipeline {
                 quietWindowMeans: quietWindowMeans[index],
                 stressBaseline: stressBaseline,
                 zHRV: zHRV,
-                config: config
+                config: config,
+                compensation: cycling.compensation
             )
             // 本周期的日间安静心率只在之后的周期中作为基线使用
             if let daytime = Stress.daytimeQuietHeartRate(windowMeans: quietWindowMeans[index]) {
@@ -422,7 +446,7 @@ public enum ScoringPipeline {
         if cycles.count >= 60 {
             personalized = personalizedNeed(cycles: cycles, base: input.baseSleepNeedHours, calendar: calendar)
         }
-        return PipelineOutput(cycles: cycles, personalizedNeed: personalized)
+        return PipelineOutput(cycles: cycles, personalizedNeed: personalized, cycling: cycling)
     }
 
     // MARK: 工具

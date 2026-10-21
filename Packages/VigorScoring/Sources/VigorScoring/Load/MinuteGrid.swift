@@ -14,11 +14,14 @@ public struct MinuteGrid: Sendable {
     public private(set) var steps: [Double]
     /// 当前或之前最近一个有心率测量的分钟，-1 表示没有
     public private(set) var previousMeasured: [Int]
+    /// 每分钟被采用的心率来源（分钟级去重的结果）；没有测量时为 nil
+    public private(set) var heartRateOrigin: [HeartRateOrigin?]
     /// 当前或之后最近一个有心率测量的分钟，-1 表示没有
     public private(set) var nextMeasured: [Int]
     /// 心率与活动能量同时存在的分钟的前缀和：n、Σx、Σy、Σxy、Σx²、Σy²，用于空窗回归的 O(1) 查询
     private var prefix: [[Double]]
 
+    /// 无来源信息的心率按“其他”处理。
     public static func build(
         origin: Date,
         end: Date,
@@ -26,13 +29,37 @@ public struct MinuteGrid: Sendable {
         activeEnergy: [ValueSample],
         steps stepSamples: [ValueSample]
     ) -> MinuteGrid {
+        build(
+            origin: origin,
+            end: end,
+            taggedHeartRate: samples.map { TaggedHeartRate(date: $0.date, bpm: $0.bpm, origin: .other) },
+            activeEnergy: activeEnergy,
+            steps: stepSamples
+        )
+    }
+
+    /// 分钟级去重（施工文档 §2.3）：同一分钟有多个来源时只取优先级最高的来源的均值，绝不相加或混合平均。
+    public static func build(
+        origin: Date,
+        end: Date,
+        taggedHeartRate samples: [TaggedHeartRate],
+        activeEnergy: [ValueSample],
+        steps stepSamples: [ValueSample]
+    ) -> MinuteGrid {
         let start = Date(timeIntervalSince1970: (origin.timeIntervalSince1970 / 60).rounded(.down) * 60)
         let count = max(0, Int(ceil(end.timeIntervalSince(start) / 60)))
+        var bestOrigin = [HeartRateOrigin?](repeating: nil, count: count)
         var hrSum = [Double](repeating: 0, count: count)
         var hrCount = [Int](repeating: 0, count: count)
         for sample in samples {
             let index = Int(sample.date.timeIntervalSince(start) / 60)
             guard index >= 0, index < count else { continue }
+            if let current = bestOrigin[index], sample.origin < current { continue }
+            if bestOrigin[index] != sample.origin {
+                bestOrigin[index] = sample.origin
+                hrSum[index] = 0
+                hrCount[index] = 0
+            }
             hrSum[index] += sample.bpm
             hrCount[index] += 1
         }
@@ -75,6 +102,7 @@ public struct MinuteGrid: Sendable {
             kilocalories: kilocalories,
             steps: steps,
             previousMeasured: previous,
+            heartRateOrigin: bestOrigin,
             nextMeasured: next,
             prefix: prefix
         )

@@ -1,6 +1,7 @@
 #if os(iOS) || os(watchOS)
 import Foundation
 import HealthKit
+import VigorFIT
 import VigorScoring
 
 /// 从 HealthKit 读取真实数据（schema v2）。真机验证留给用户（模拟器没有 HealthKit 数据）。
@@ -34,7 +35,12 @@ public struct LiveHealthDataSource: HealthDataSource {
             .quantitySample(type: HKQuantityType(.heartRate), predicate: predicate)
         )
         let heartRate = heartRateSamples.map {
-            HeartRateSample(date: $0.startDate, bpm: $0.quantity.doubleValue(for: Self.countPerMinute))
+            HeartRateSample(
+                date: $0.startDate,
+                bpm: $0.quantity.doubleValue(for: Self.countPerMinute),
+                sourceBundleID: $0.sourceRevision.source.bundleIdentifier,
+                productType: $0.sourceRevision.productType
+            )
         }
         let hrvSDNN = try await quantity(.heartRateVariabilitySDNN, unit: .secondUnit(with: .milli), predicate: predicate)
         let restingHeartRate = try await quantity(.restingHeartRate, unit: Self.countPerMinute, predicate: predicate)
@@ -73,7 +79,9 @@ public struct LiveHealthDataSource: HealthDataSource {
                 activeEnergyKilocalories: workout.statistics(for: HKQuantityType(.activeEnergyBurned))?
                     .sumQuantity()?.doubleValue(for: .kilocalorie()),
                 distanceMeters: workout.statistics(for: HKQuantityType(.distanceWalkingRunning))?
-                    .sumQuantity()?.doubleValue(for: .meter())
+                    .sumQuantity()?.doubleValue(for: .meter()),
+                sourceBundleID: workout.sourceRevision.source.bundleIdentifier,
+                productType: workout.sourceRevision.productType
             )
         }
 
@@ -92,6 +100,11 @@ public struct LiveHealthDataSource: HealthDataSource {
                 unit: "count"
             )
         }
+        // M6：骑行功率、踏频、速度与 FTP（HealthKit 标识符见 SDK；真机数据待验证）
+        let cyclingPower = try await quantity(.cyclingPower, unit: .watt(), predicate: predicate)
+        let cyclingCadence = try await quantity(.cyclingCadence, unit: Self.countPerMinute, predicate: predicate)
+        let cyclingSpeed = try await quantity(.cyclingSpeed, unit: Self.metersPerSecond, predicate: predicate)
+        let ftp = try await quantity(.cyclingFunctionalThresholdPower, unit: .watt(), predicate: predicate)
         let timeInDaylight = try await quantity(.timeInDaylight, unit: .minute(), predicate: predicate)
         let dietaryCaffeine = try await quantity(.dietaryCaffeine, unit: .gramUnit(with: .milli), predicate: predicate)
         let alcoholicBeverages = try await quantity(.numberOfAlcoholicBeverages, unit: .count(), predicate: predicate)
@@ -165,7 +178,11 @@ public struct LiveHealthDataSource: HealthDataSource {
             timeInDaylight: timeInDaylight,
             dietaryCaffeine: dietaryCaffeine,
             alcoholicBeverages: alcoholicBeverages,
-            stateOfMind: stateOfMind
+            stateOfMind: stateOfMind,
+            cyclingPower: cyclingPower,
+            cyclingCadence: cyclingCadence,
+            cyclingSpeed: cyclingSpeed,
+            ftp: ftp
         )
     }
 
@@ -197,6 +214,10 @@ public struct LiveHealthDataSource: HealthDataSource {
             .distanceWalkingRunning,
             .height,
             .bodyMass,
+            .cyclingPower,
+            .cyclingCadence,
+            .cyclingSpeed,
+            .cyclingFunctionalThresholdPower,
         ]
         for identifier in quantityIdentifiers {
             types.insert(HKQuantityType(identifier))
@@ -211,6 +232,7 @@ public struct LiveHealthDataSource: HealthDataSource {
 
     private static let countPerMinute = HKUnit.count().unitDivided(by: .minute())
     private static let vo2Unit = HKUnit(from: "ml/kg*min")
+    private static let metersPerSecond = HKUnit.meter().unitDivided(by: .second())
 
     private func fetch<Sample: HKSample>(_ predicate: HKSamplePredicate<Sample>) async throws -> [Sample] {
         try await HKSampleQueryDescriptor(

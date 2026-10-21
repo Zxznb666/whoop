@@ -41,7 +41,9 @@ struct SyntheticScenarioTests {
         #expect(result.truth.napDays.count >= 15)
         #expect(result.truth.missingNights.count == 1)
         #expect(result.truth.workoutDays.count >= 40)
-        #expect(result.snapshot.workouts.count == result.truth.workoutDays.count)
+        // 随机生成的训练没有写入来源；骑行训练（v3）带有来源，单独计数
+        #expect(result.snapshot.workouts.filter { $0.sourceBundleID == nil }.count == result.truth.workoutDays.count)
+        #expect(result.snapshot.importedRides.count > 0)
         #expect(result.snapshot.heartRateRecovery.count == result.truth.workoutDays.count)
     }
 

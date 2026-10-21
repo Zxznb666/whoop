@@ -1,4 +1,5 @@
 import Foundation
+import VigorFIT
 
 public enum SleepStage: String, Codable, Sendable, Hashable {
     case inBed
@@ -59,10 +60,15 @@ public struct SleepStageSample: Codable, Sendable, Hashable {
 public struct HeartRateSample: Codable, Sendable, Hashable {
     public var date: Date
     public var bpm: Double
+    /// 写入来源（Bundle ID 与产品型号），用于分钟级去重（M6 §2.3）。旧快照缺失时为 nil。
+    public var sourceBundleID: String?
+    public var productType: String?
 
-    public init(date: Date, bpm: Double) {
+    public init(date: Date, bpm: Double, sourceBundleID: String? = nil, productType: String? = nil) {
         self.date = date
         self.bpm = bpm
+        self.sourceBundleID = sourceBundleID
+        self.productType = productType
     }
 }
 
@@ -101,6 +107,9 @@ public struct WorkoutSample: Codable, Sendable, Hashable {
     public var end: Date
     public var activeEnergyKilocalories: Double?
     public var distanceMeters: Double?
+    /// 训练的写入来源（M6）：用于判断是否由 Apple Watch 记录
+    public var sourceBundleID: String?
+    public var productType: String?
 
     public init(
         uuid: UUID,
@@ -108,7 +117,9 @@ public struct WorkoutSample: Codable, Sendable, Hashable {
         start: Date,
         end: Date,
         activeEnergyKilocalories: Double? = nil,
-        distanceMeters: Double? = nil
+        distanceMeters: Double? = nil,
+        sourceBundleID: String? = nil,
+        productType: String? = nil
     ) {
         self.uuid = uuid
         self.activityType = activityType
@@ -116,6 +127,8 @@ public struct WorkoutSample: Codable, Sendable, Hashable {
         self.end = end
         self.activeEnergyKilocalories = activeEnergyKilocalories
         self.distanceMeters = distanceMeters
+        self.sourceBundleID = sourceBundleID
+        self.productType = productType
     }
 }
 
@@ -180,7 +193,7 @@ public struct UserProfile: Codable, Sendable, Hashable {
 
 /// 快照 schema v2。v1 的字段保持不变；v2 新增字段在解码 v1 时填空数组（见 `SnapshotCoding`）。
 public struct HealthSnapshot: Codable, Sendable, Hashable {
-    public static let currentSchemaVersion = 2
+    public static let currentSchemaVersion = 3
 
     public var schemaVersion: Int
     public var exportedAt: Date
@@ -220,6 +233,13 @@ public struct HealthSnapshot: Codable, Sendable, Hashable {
     /// 单位 杯（标准饮品）
     public var alcoholicBeverages: [ValueSample]
     public var stateOfMind: [StateOfMindSample]
+    /// v3：骑行功率（W）、踏频（转/分）、速度（m/s）、功能性阈值功率 FTP（W）
+    public var cyclingPower: [ValueSample]
+    public var cyclingCadence: [ValueSample]
+    public var cyclingSpeed: [ValueSample]
+    public var ftp: [ValueSample]
+    /// v3：通过 FIT 文件导入的骑行（逐秒数据）；不写回 HealthKit（M6 §4.3）
+    public var importedRides: [RideStream]
 
     public init(
         schemaVersion: Int = HealthSnapshot.currentSchemaVersion,
@@ -246,7 +266,12 @@ public struct HealthSnapshot: Codable, Sendable, Hashable {
         timeInDaylight: [ValueSample] = [],
         dietaryCaffeine: [ValueSample] = [],
         alcoholicBeverages: [ValueSample] = [],
-        stateOfMind: [StateOfMindSample] = []
+        stateOfMind: [StateOfMindSample] = [],
+        cyclingPower: [ValueSample] = [],
+        cyclingCadence: [ValueSample] = [],
+        cyclingSpeed: [ValueSample] = [],
+        ftp: [ValueSample] = [],
+        importedRides: [RideStream] = []
     ) {
         self.schemaVersion = schemaVersion
         self.exportedAt = exportedAt
@@ -273,6 +298,11 @@ public struct HealthSnapshot: Codable, Sendable, Hashable {
         self.dietaryCaffeine = dietaryCaffeine
         self.alcoholicBeverages = alcoholicBeverages
         self.stateOfMind = stateOfMind
+        self.cyclingPower = cyclingPower
+        self.cyclingCadence = cyclingCadence
+        self.cyclingSpeed = cyclingSpeed
+        self.ftp = ftp
+        self.importedRides = importedRides
     }
 
     enum CodingKeys: String, CodingKey {
@@ -281,6 +311,7 @@ public struct HealthSnapshot: Codable, Sendable, Hashable {
         case heartbeatSeries, mindfulSessions, workouts, activeEnergy, steps, vo2Max
         case heartRateRecovery, breathingDisturbances, timeInDaylight, dietaryCaffeine
         case alcoholicBeverages, stateOfMind
+        case cyclingPower, cyclingCadence, cyclingSpeed, ftp, importedRides
     }
 
     /// v2 新增的数组字段缺失时（例如旧快照）按空数组处理。
@@ -311,5 +342,10 @@ public struct HealthSnapshot: Codable, Sendable, Hashable {
         dietaryCaffeine = try c.decodeIfPresent([ValueSample].self, forKey: .dietaryCaffeine) ?? []
         alcoholicBeverages = try c.decodeIfPresent([ValueSample].self, forKey: .alcoholicBeverages) ?? []
         stateOfMind = try c.decodeIfPresent([StateOfMindSample].self, forKey: .stateOfMind) ?? []
+        cyclingPower = try c.decodeIfPresent([ValueSample].self, forKey: .cyclingPower) ?? []
+        cyclingCadence = try c.decodeIfPresent([ValueSample].self, forKey: .cyclingCadence) ?? []
+        cyclingSpeed = try c.decodeIfPresent([ValueSample].self, forKey: .cyclingSpeed) ?? []
+        ftp = try c.decodeIfPresent([ValueSample].self, forKey: .ftp) ?? []
+        importedRides = try c.decodeIfPresent([RideStream].self, forKey: .importedRides) ?? []
     }
 }

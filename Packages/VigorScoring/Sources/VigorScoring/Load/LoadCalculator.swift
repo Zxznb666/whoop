@@ -165,7 +165,8 @@ public enum LoadCalculator {
         quietWindowMeans: [Double],
         stressBaseline: Double,
         zHRV: Double?,
-        config: ScoringConfig
+        config: ScoringConfig,
+        compensation: [Int: Double] = [:]
     ) -> CycleLoad {
         let samples = timeline(
             grid: grid, from: lower, to: upper,
@@ -176,6 +177,16 @@ public enum LoadCalculator {
         var unworn = 0
         var zones = [0, 0, 0, 0, 0]
         for sample in samples {
+            // 骑行中心率缺失时的功率补偿（M6 §2.4）：替代该分钟的心率负荷；0 表示空窗
+            if let replacement = compensation[sample.index] {
+                if replacement > 0 {
+                    trimp += replacement
+                    counted += 1
+                } else {
+                    unworn += 1
+                }
+                continue
+            }
             guard sample.source != .unworn, let bpm = sample.bpm else {
                 unworn += 1
                 continue

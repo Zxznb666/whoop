@@ -44,6 +44,11 @@ public struct ReplayHealthDataSource: HealthDataSource {
         snapshot.dietaryCaffeine = clip(source.dietaryCaffeine, from, to) { ($0.start, $0.end) }
         snapshot.alcoholicBeverages = clip(source.alcoholicBeverages, from, to) { ($0.start, $0.end) }
         snapshot.stateOfMind = source.stateOfMind.filter { $0.date >= from && $0.date <= to }
+        snapshot.cyclingPower = clip(source.cyclingPower, from, to) { ($0.start, $0.end) }
+        snapshot.cyclingCadence = clip(source.cyclingCadence, from, to) { ($0.start, $0.end) }
+        snapshot.cyclingSpeed = clip(source.cyclingSpeed, from, to) { ($0.start, $0.end) }
+        snapshot.ftp = clip(source.ftp, from, to) { ($0.start, $0.end) }
+        // 导入的骑行不属于 HealthKit 窗口：与实际应用一致，整体提供
         progress(1, "完成")
         return snapshot
     }

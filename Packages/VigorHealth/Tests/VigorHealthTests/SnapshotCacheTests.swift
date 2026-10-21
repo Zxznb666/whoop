@@ -28,6 +28,10 @@ struct SnapshotCacheTests {
         #expect(Set(merged.hrvSDNN) == Set(full.hrvSDNN))
         #expect(Set(merged.workouts) == Set(full.workouts))
         #expect(Set(merged.activeEnergy) == Set(full.activeEnergy))
+        // v3：骑行功率、FTP 按窗口拼接；导入的骑行每次由调用方完整提供
+        #expect(Set(merged.cyclingPower) == Set(full.cyclingPower))
+        #expect(Set(merged.ftp) == Set(full.ftp))
+        #expect(merged.importedRides == full.importedRides)
         #expect(merged.rangeStart == history)
         #expect(merged.rangeEnd == now)
     }
