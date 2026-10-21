@@ -66,6 +66,10 @@ enum Route: Hashable {
         case "lab:night": .labNight
         case "diagnostics": .diagnostics
         case "onboarding": .onboarding
+        case "backup": .backup
+        case "coach:settings": .coachSettings
+        case "exclusions": .exclusions
+        case "cardio": .cardioFitness
         default: nil
         }
     }
