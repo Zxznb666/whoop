@@ -34,10 +34,14 @@ enum Formatters {
         return String(format: "%.\(digits)f", DisplayRounding.value(value, digits: digits)) + unit
     }
 
-    /// 带正负号的数值（如 “+0.4 °C”）。接近零的值显示为 “+0.0”，不会出现 “-0.0”。
+    /// 带正负号的数值（如 “+0.4 °C”）。接近零的值显示为不带符号的 “0”，不会出现 “-0.0” 或 “+0”。
     static func signed(_ value: Double?, digits: Int = 1, unit: String = "") -> String {
         guard let value else { return "—" }
-        return String(format: "%+.\(digits)f", DisplayRounding.value(value, digits: digits)) + unit
+        let rounded = DisplayRounding.value(value, digits: digits)
+        if rounded == 0 {
+            return String(format: "%.\(digits)f", 0.0) + unit
+        }
+        return String(format: "%+.\(digits)f", rounded) + unit
     }
 
     /// 输入为 0–1 的小数。

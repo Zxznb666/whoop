@@ -13,7 +13,7 @@ struct CardioFitnessView: View {
                 vo2Card
                 recoveryCard
                 SectionCard {
-                    Text("心肺适能的趋势只描述变化方向，不做医学判断。同配速心率的比较尚未实现（见 DECISIONS D-090）。")
+                    Text("心肺适能的趋势只描述变化方向，不做医学判断。同配速心率的比较暂未提供。")
                         .font(.caption)
                         .foregroundStyle(.secondary)
                 }

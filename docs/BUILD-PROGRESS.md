@@ -130,3 +130,10 @@
 - 测试：VigorStore 20 个通过（新增 4 个：睡眠修正往返、排除往返、日期键解析、备份键一致）；VigorEngine 17 个通过（新增 2 个：修正与排除经同步链路到达流水线；默认设置不排除）
 - 构建：iOS ✅
 - 备注：睡眠页的“修正睡眠时段”、设置中的“排除指定夜晚”、备份中的修正。决策 D-099 至 D-102。
+
+### F8 截图检查、打包、报告 —— ✅ 完成（部分截图未逐张检查，见 BUILD-REPORT）
+- 提交：见 `git log --oneline`（提交信息 `docs(report): ...`）
+- 测试：全部包通过，合计 220 个（VigorScoring 120、VigorHealth 46、VigorStore 20、VigorEngine 17、VigorCoach 11、VigorDesign 2、VigorReplay 4）
+- 构建：iOS ✅  watchOS ✅（`VigorWatch` scheme，generic watchOS Simulator）
+- 截图：`scripts/screenshots.sh`，22 个路由 × 浅色 / 深色 = 44 张，全部已生成；逐张检查 25 张（结论见 BUILD-REPORT.md），其余 19 张未逐张检查
+- IPA：`dist/Vigor-1.1.0.ipa`（版本 1.1.0 build 4），内含 `Payload/Vigor.app`（com.example.vigor）、`Watch/VigorWatch.app`（com.example.vigor.watchkitapp）、`PlugIns/VigorWidgets.appex`（com.example.vigor.widgets）、`Watch/VigorWatch.app/PlugIns/VigorWatchWidgets.appex`（com.example.vigor.watchkitapp.widgets）；四个 bundle 均为 ad-hoc 签名，entitlements 已逐个核对

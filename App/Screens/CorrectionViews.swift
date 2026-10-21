@@ -113,7 +113,7 @@ struct ExclusionsView: View {
             } header: {
                 Text("已排除")
             } footer: {
-                Text("左滑可以取消排除。被排除的夜晚仍会计算结果，但不进入基线，也不推送。")
+                Text("左滑可以取消排除。被排除的夜晚仍会计算结果，但不进入基线。")
             }
 
             Section {

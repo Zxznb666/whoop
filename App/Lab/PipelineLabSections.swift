@@ -343,7 +343,7 @@ struct PipelineLabSections: View {
                 Text(report.recommended ? "验证集提升达到 0.05，可以考虑采用。" : "提升不足 0.05，不建议采用。")
                     .font(.caption)
                     .foregroundStyle(.secondary)
-                Text("恢复权重的采用需要把权重接入评分器，本版本只显示报告，不写入配置（见 DECISIONS D-088）。")
+                Text("恢复权重的采用需要把权重接入评分器，本版本只显示报告，不写入配置。")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }

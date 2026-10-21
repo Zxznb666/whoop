@@ -36,7 +36,7 @@ struct CoachView: View {
             .padding(.bottom, 24)
         }
         .navigationTitle("教练")
-        .task { await generate() }
+        .task(id: model.today?.wakeTime) { await generate() }
         .sheet(isPresented: $showPreview) {
             PreviewSheet(title: "发送前预览", note: "以下内容将发送到 Anthropic 的 Claude API。确认前请检查。", text: previewText, isSending: isSending) {
                 Task { await sendToClaude() }

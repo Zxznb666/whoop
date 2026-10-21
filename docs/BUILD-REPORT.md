@@ -76,3 +76,57 @@
 4. 阶段 9：Claude 教练的 key 录入与确认弹窗、备份导入导出界面、校准界面与回滚。
 5. 阶段 5：同步路径接入 `HealthSyncReader`（D-048）；通知的作息提醒、晨测提醒、周报。
 6. 真机验证（第 5 节）。
+
+## 补完（M5-completion，版本 1.1.0 build 4）
+
+### 完成清单
+| 项 | 内容 | 状态 |
+|---|---|---|
+| F1 | 日志问卷、题目设置、自动填充（只读）、醒来后提醒 | ✅ |
+| F2 | 压力改用日间安静心率基线 | ✅（黄金快照未变，见 D-077） |
+| F3 | 手表 App（今日页、训练模式）、iOS 与手表小组件、WatchConnectivity、App Intents 修正 | ✅ 构建；运行未验证 |
+| F4 | 实验室：基线曲线、周期明细、HRV 段表、睡眠负债、消融、版本与回滚、校准、导出 | ✅（恢复权重采用未做，D-088） |
+| F5 | 备份导入导出、Claude 教练（预览与确认）、周报 / 月报文字、亮点、心肺适能、周报推送 | ✅（端侧路径未在模拟器验证，D-092） |
+| F6 | 负零显示、标签页根路由不压栈、生病预警 36 小时连续性 | ✅ |
+| F7 | 睡眠时段修正、排除指定夜晚的持久化，传入流水线，备份包含 | ✅ |
+| F8 | 截图、IPA、报告 | ✅（截图逐张检查 25 / 44） |
+
+### 测试
+全部包通过，合计 220 个：VigorScoring 120、VigorHealth 46、VigorStore 20、VigorEngine 17、VigorCoach 11、VigorDesign 2、VigorReplay 4（含黄金快照）。
+
+### 构建
+- iOS 模拟器（含手表与两个小组件）：0 个 error。
+- watchOS 模拟器（`VigorWatch` scheme）：0 个 error，无警告。
+
+### 截图检查（`scripts/screenshots.sh`，22 个路由 × 2 种外观 = 44 张）
+逐张打开检查的 25 张：
+- 浅色：摘要、恢复、日志、日志编辑、日志题目、备份与恢复、教练设置、排除指定夜晚、心肺适能、实验室（基线曲线区）、周报、教练、设置、睡眠、浏览、训练、负荷、HRV 详情、诊断、欢迎；实验室（夜晚路由）。
+- 深色：摘要、教练、日志编辑、心肺适能。
+
+检查结论：
+- 没有空白页、截断或占位文字（除下列两点）。摘要页的第一张截图曾是空白（冷启动时数据尚未加载），重新截图后正常。
+- **已修复**：教练页在数据加载完成前出现，“今日一句”停在“还没有数据”（`.task` 只执行一次）。改为按最新周期的醒来时间触发（`task(id:)`）。深色与浅色均已复查。
+- **已修复**：心肺适能与设置的说明文字中出现了内部决策编号；已删除。排除页的说明曾写“也不推送”，但通知计划并不按排除过滤，已改为只说“不进入基线”。
+- 深色模式下文字可读。
+- 日期选择器显示英文月份（模拟器语言为英文，`DatePicker` 跟随系统语言），在中文设备上不会出现。
+- 模拟器截图中的诊断页显示 HealthKit 授权错误与 App Group 不可用：这是未签名的模拟器构建的预期结果，不是故障。
+- 实验室的版本对比、校准与导出区块位于页面下方，本次截图只覆盖到基线曲线。
+
+未逐张检查的 19 张：浅色的 metric-rhr；深色的 recovery、sleep、strain、journal、journal-questions、backup、coach-settings、exclusions、lab、lab-night、report、settings、browse、workout、metric-hrv、metric-rhr、diagnostics、onboarding。这些页面在浅色模式下已经检查通过，深色模式的文字对比需要在真机上再看一遍。
+
+### IPA
+- 文件：`dist/Vigor-1.1.0.ipa`（版本 1.1.0，build 4）。
+- 结构：`Payload/Vigor.app`（`com.example.vigor`）；`Watch/VigorWatch.app`（`com.example.vigor.watchkitapp`，WKApplication，WKCompanionAppBundleIdentifier = com.example.vigor）；`PlugIns/VigorWidgets.appex`（`com.example.vigor.widgets`）；`Watch/VigorWatch.app/PlugIns/VigorWatchWidgets.appex`（`com.example.vigor.watchkitapp.widgets`）。
+- 签名：四个 bundle 均为 ad-hoc 签名；主 App 含 HealthKit、background-delivery 与 App Group；手表 App 与两个小组件分别含各自的 entitlements（App Group `group.com.example.vigor`）。
+- `scripts/package-ipa.sh` 对手表与小组件的签名步骤使用了 `|| true`，所以签名失败会被吞掉。本次通过解包后逐个检查 entitlements 确认成功，但脚本本身仍应改为失败即退出。
+
+### 仍未验证（需要真机或签名后的 App）
+- 真机 HealthKit 读取、后台任务、通知投递（含日志提醒的延迟触发）。
+- 手表：训练模式的心率、区间、TRIMP 与保存到“健康”；手表模拟器运行时在本机不可用（只有 watchOS 9.1，与当前 macOS 不兼容），因此没有手表截图。
+- WatchConnectivity 的推送与接收；小组件与复杂功能的刷新。
+- 重签名后 App Group 是否可用（代码已容忍不可用：显示“打开元气以更新”）。
+- 端侧模型（FoundationModels）的周报总结。
+- Claude 请求的真实返回（只做了请求构造与解析的测试，没有发出真实请求）。
+- 实验室恢复权重的采用（未实现，D-088）。
+- 排除的夜晚是否应抑制推送：通知计划目前没有按排除状态过滤（与 PRD 的“不推送”不一致，待决定）。
+- 非训练日负荷偏高（D-047）保留，待真实数据校准。
