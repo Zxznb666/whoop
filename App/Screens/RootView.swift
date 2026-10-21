@@ -16,6 +16,7 @@ enum Route: Hashable {
     case journalQuestions
     case coachSettings
     case backup
+    case exclusions
     case cardioFitness
     case report
     case coach
@@ -40,7 +41,7 @@ enum Route: Hashable {
         case .sleep: .sleep
         case .strain, .workout: .strain
         case .journal, .journalEdit: .journal
-        case .journalQuestions, .coachSettings, .backup: .summary
+        case .journalQuestions, .coachSettings, .backup, .exclusions: .summary
         case .cardioFitness: .browse
         case .metric, .browse, .report, .coach: .browse
         }
@@ -181,6 +182,7 @@ struct RouteDestination: View {
         case .coach: CoachView(model: model)
         case .coachSettings: CoachSettingsView()
         case .backup: BackupView(model: model)
+        case .exclusions: ExclusionsView(model: model)
         case .cardioFitness: CardioFitnessView(model: model)
         case .settings: SettingsView()
         case .lab, .labNight: LabRootView(model: LabModel(source: .synthetic), app: model)

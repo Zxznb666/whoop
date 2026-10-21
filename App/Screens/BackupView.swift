@@ -184,12 +184,14 @@ struct BackupView: View {
             throw JournalSaveError.storeUnavailable
         }
         let now = Date()
+        let overrides = try await repository.sleepOverrides()
+        let exclusions = try await repository.manualExclusions()
         return BackupPayload(
             exportedAt: now,
             journal: try await repository.journal(from: .distantPast, to: now),
             config: try await repository.currentConfig() ?? .default,
-            sleepOverrides: [:],
-            manualExcludedNights: [],
+            sleepOverrides: Dictionary(uniqueKeysWithValues: overrides.map { (ScoreRepository.dayString($0.key), $0.value) }),
+            manualExcludedNights: exclusions.map { ScoreRepository.dayString($0) }.sorted(),
             cycles: try await repository.cycles(from: .distantPast, to: now)
         )
     }
@@ -202,6 +204,14 @@ struct BackupView: View {
             try await repository.saveJournal(entry)
         }
         try await repository.saveConfig(payload.config)
+        for (key, override) in payload.sleepOverrides {
+            guard let night = ScoreRepository.parseDay(key) else { continue }
+            try await repository.setSleepOverride(nightKey: night, override)
+        }
+        for key in payload.manualExcludedNights {
+            guard let day = ScoreRepository.parseDay(key) else { continue }
+            try await repository.setManualExclusion(wakeDay: day, excluded: true)
+        }
         try await repository.upsert(payload.cycles, force: true)
     }
 

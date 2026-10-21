@@ -133,24 +133,28 @@ final class AppModel {
         self.source = source
         #if targetEnvironment(simulator)
         if source == .synthetic {
-            loadSynthetic()
+            await loadSynthetic()
             return
         }
         #endif
         if source == .live {
             await loadFromStore()
         } else {
-            loadSynthetic()
+            await loadSynthetic()
         }
     }
 
-    func loadSynthetic() {
+    /// 合成数据也应用用户的手动修正与排除（F7），这样模拟器上能看到效果。
+    func loadSynthetic() async {
+        let corrections = await AppBootstrap.shared.currentSettings()
         let scenario = SyntheticScenario.make(nights: 120, seed: 42, endingAt: Self.syntheticEnd, calendar: calendar)
         var config = ScoringConfig.default
         config.configVersion = 1
         let output = ScoringPipeline.run(PipelineInput(
             snapshot: scenario.snapshot,
             journal: scenario.journal,
+            sleepOverrides: corrections.sleepOverrides,
+            manualExcludedNights: corrections.manualExcludedNights,
             baseSleepNeedHours: AppSettings.baseSleepNeedHours,
             maxHeartRate: AppSettings.maxHeartRateOverride,
             targetWakeMinutes: AppSettings.targetWakeMinutes,

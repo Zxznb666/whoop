@@ -94,11 +94,14 @@ struct RecoveryDetailView: View {
 
 struct SleepView: View {
     let model: AppModel
+    @State private var showCorrection = false
 
     var body: some View {
         ScrollView {
             VStack(spacing: VigorTokens.cardSpacing) {
                 if let today = model.today {
+                    Button("修正睡眠时段…") { showCorrection = true }
+                        .buttonStyle(.bordered)
                     SectionCard {
                         VStack(alignment: .leading, spacing: 8) {
                             HStack {
@@ -157,6 +160,11 @@ struct SleepView: View {
             }
             .padding(.horizontal, VigorTokens.pageMargin)
             .padding(.bottom, 24)
+        }
+        .sheet(isPresented: $showCorrection) {
+            if let today = model.today {
+                SleepCorrectionSheet(model: model, cycle: today)
+            }
         }
         .navigationTitle("睡眠")
     }

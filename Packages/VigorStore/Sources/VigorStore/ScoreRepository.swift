@@ -159,7 +159,66 @@ public actor ScoreRepository {
         return try records.map { try Self.decoder.decode(ScoringConfig.self, from: $0.payload) }
     }
 
-    static func dayString(_ day: DateComponents) -> String {
+    /// 全部手动修正的睡眠时段，键为夜晚（nightKey）。
+    public func sleepOverrides() throws -> [DateComponents: SleepOverride] {
+        var result: [DateComponents: SleepOverride] = [:]
+        for record in try modelContext.fetch(FetchDescriptor<SleepOverrideRecord>()) {
+            guard let key = Self.parseDay(record.nightKey),
+                  let override = try? Self.decoder.decode(SleepOverride.self, from: record.payload)
+            else { continue }
+            result[key] = override
+        }
+        return result
+    }
+
+    /// 设置（或清除，传 nil）某个夜晚的睡眠时段修正。
+    public func setSleepOverride(nightKey: DateComponents, _ override: SleepOverride?, now: Date = Date()) throws {
+        let key = Self.dayString(nightKey)
+        let existing = try modelContext.fetch(
+            FetchDescriptor<SleepOverrideRecord>(predicate: #Predicate { $0.nightKey == key })
+        ).first
+        guard let override else {
+            if let existing { modelContext.delete(existing) }
+            try modelContext.save()
+            return
+        }
+        let payload = try Self.encoder.encode(override)
+        if let existing {
+            existing.payload = payload
+            existing.updatedAt = now
+        } else {
+            modelContext.insert(SleepOverrideRecord(nightKey: key, payload: payload, updatedAt: now))
+        }
+        try modelContext.save()
+    }
+
+    /// 全部手动排除的醒来日。
+    public func manualExclusions() throws -> Set<DateComponents> {
+        Set(try modelContext.fetch(FetchDescriptor<ManualExclusionRecord>()).compactMap { Self.parseDay($0.wakeDay) })
+    }
+
+    public func setManualExclusion(wakeDay: DateComponents, excluded: Bool, now: Date = Date()) throws {
+        let key = Self.dayString(wakeDay)
+        let existing = try modelContext.fetch(
+            FetchDescriptor<ManualExclusionRecord>(predicate: #Predicate { $0.wakeDay == key })
+        ).first
+        if excluded, existing == nil {
+            modelContext.insert(ManualExclusionRecord(wakeDay: key, createdAt: now))
+        } else if !excluded, let existing {
+            modelContext.delete(existing)
+        }
+        try modelContext.save()
+    }
+
+    /// 把 "yyyy-MM-dd" 解析为日期分量（只含年月日）。格式不对时返回 nil。
+    public static func parseDay(_ text: String) -> DateComponents? {
+        let parts = text.split(separator: "-").compactMap { Int($0) }
+        guard parts.count == 3 else { return nil }
+        return DateComponents(year: parts[0], month: parts[1], day: parts[2])
+    }
+
+    /// 日期分量的存储格式（yyyy-MM-dd），备份文件中的键也使用它。
+    public static func dayString(_ day: DateComponents) -> String {
         String(format: "%04d-%02d-%02d", day.year ?? 0, day.month ?? 0, day.day ?? 0)
     }
 }

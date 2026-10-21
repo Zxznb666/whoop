@@ -6,6 +6,7 @@ public enum VigorStoreFactory {
     public static func makeContainer(inMemory: Bool = false) throws -> ModelContainer {
         try ModelContainer(
             for: CycleRecord.self, JournalRecord.self, ConfigRecord.self,
+            SleepOverrideRecord.self, ManualExclusionRecord.self,
             configurations: ModelConfiguration(isStoredInMemoryOnly: inMemory)
         )
     }

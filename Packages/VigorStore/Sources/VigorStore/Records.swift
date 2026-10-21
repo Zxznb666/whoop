@@ -86,3 +86,30 @@ final class ConfigRecord {
         self.createdAt = createdAt
     }
 }
+
+/// 手动修正的睡眠时段（PRD §5.2 第 8 条）。键为睡眠的夜晚（`nightKey`，yyyy-MM-dd），值为 `SleepOverride` 的 JSON。
+/// 只改视图，不改 HealthKit 原始数据。
+@Model
+final class SleepOverrideRecord {
+    @Attribute(.unique) var nightKey: String
+    var payload: Data
+    var updatedAt: Date
+
+    init(nightKey: String, payload: Data, updatedAt: Date) {
+        self.nightKey = nightKey
+        self.payload = payload
+        self.updatedAt = updatedAt
+    }
+}
+
+/// 手动排除的夜晚（PRD §5.2、设置中的“排除指定夜晚”）。键为醒来日（yyyy-MM-dd）。
+@Model
+final class ManualExclusionRecord {
+    @Attribute(.unique) var wakeDay: String
+    var createdAt: Date
+
+    init(wakeDay: String, createdAt: Date) {
+        self.wakeDay = wakeDay
+        self.createdAt = createdAt
+    }
+}

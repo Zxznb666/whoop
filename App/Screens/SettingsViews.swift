@@ -45,6 +45,7 @@ struct SettingsView: View {
                     .foregroundStyle(.secondary)
             }
             Section("数据") {
+                NavigationLink("排除指定夜晚", value: Route.exclusions)
                 NavigationLink("备份与恢复", value: Route.backup)
                 NavigationLink("教练设置", value: Route.coachSettings)
                 NavigationLink("诊断", value: Route.diagnostics)

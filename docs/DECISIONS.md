@@ -102,3 +102,7 @@
 | D-096 | 补完 F6 | 显示的负零：`DisplayRounding` 对绝对值不超过半个显示单位的数返回正零（±0.05 以内显示为 0.0），`Formatters.number` 与新增的 `Formatters.signed` 都经过它。 | 手腕温度偏差 −0.04 °C 会显示为 “-0.0 °C”，与“没有偏差”的含义不符。 |
 | D-097 | 补完 F6 | `-VigorRoute` 打开标签页根页面（睡眠、负荷、日志、浏览）时只切换标签，不压栈；带参数的二级页面仍然压栈。 | 截图与调试需要直接落在标签页上；压栈会在根页面上多出一层返回按钮。 |
 | D-098 | 补完 F6 | 生病预警的“连续两晚”：相邻两次醒来的间隔超过 36 小时，不算连续（`IllnessWarning.maxConsecutiveGap`）。合成数据的夜晚都是逐日的，结果与黄金快照不变。 | 中间缺了一晚数据时，无法判断两晚是否连续不适；36 小时允许晚醒与时区的小幅偏差。 |
+| D-099 | 补完 F7 | 持久化键与流水线保持一致：睡眠时段修正以**夜晚**（`nightKey`，中点减 15 小时的本地日期）为键，手动排除以**醒来日**为键。两者都以 `yyyy-MM-dd` 字符串存储（`SleepOverrideRecord`、`ManualExclusionRecord`）。 | 流水线的 `sleepOverrides` 按 `nightKey`、`manualExcludedNights` 按醒来日匹配（D-029 与 D-020 的现有约定）。 |
+| D-100 | 补完 F7 | `ScoringSettings` 新增 `sleepOverrides` 与 `manualExcludedNights`；`SyncEngine.refresh` 只增加传给 `PipelineInput` 的两行，内部逻辑不变。`AppBootstrap.currentSettings()` 从存储读取两者，与偏好设置合并。 | 施工文档 §1 唯一允许的同步链路改动。 |
+| D-101 | 补完 F7 | 修改修正或排除后调用 `refreshNow(mode: .window(days: 30))`；合成数据（模拟器）也读取同样的设置，使修正在模拟器上可见。 | 施工文档 §5 阶段 9 / F7 的要求；30 天足以覆盖一次修正影响的周期。 |
+| D-102 | 补完 F7 | 备份文件现在包含手动修正与排除（补全 D-094 中的占位）；导入时逐条写回。 | 避免备份往返后修正丢失。 |

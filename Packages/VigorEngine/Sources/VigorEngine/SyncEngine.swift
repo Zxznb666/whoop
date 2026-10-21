@@ -51,11 +51,23 @@ public struct ScoringSettings: Sendable, Hashable {
     public var baseSleepNeedHours: Double
     public var maxHeartRate: Double?
     public var targetWakeMinutes: Int?
+    /// 手动修正的睡眠时段（键为夜晚）；只改视图，不改 HealthKit 原始数据（PRD §5.2 第 8 条）
+    public var sleepOverrides: [DateComponents: SleepOverride]
+    /// 手动排除的醒来日（设置中的“排除指定夜晚”）
+    public var manualExcludedNights: Set<DateComponents>
 
-    public init(baseSleepNeedHours: Double = 7.5, maxHeartRate: Double? = nil, targetWakeMinutes: Int? = nil) {
+    public init(
+        baseSleepNeedHours: Double = 7.5,
+        maxHeartRate: Double? = nil,
+        targetWakeMinutes: Int? = nil,
+        sleepOverrides: [DateComponents: SleepOverride] = [:],
+        manualExcludedNights: Set<DateComponents> = []
+    ) {
         self.baseSleepNeedHours = baseSleepNeedHours
         self.maxHeartRate = maxHeartRate
         self.targetWakeMinutes = targetWakeMinutes
+        self.sleepOverrides = sleepOverrides
+        self.manualExcludedNights = manualExcludedNights
     }
 }
 
@@ -112,6 +124,8 @@ public actor SyncEngine {
             let output = ScoringPipeline.run(PipelineInput(
                 snapshot: snapshot,
                 journal: journal,
+                sleepOverrides: settings.sleepOverrides,
+                manualExcludedNights: settings.manualExcludedNights,
                 baseSleepNeedHours: settings.baseSleepNeedHours,
                 maxHeartRate: settings.maxHeartRate,
                 targetWakeMinutes: settings.targetWakeMinutes,

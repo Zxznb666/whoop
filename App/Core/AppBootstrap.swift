@@ -56,11 +56,7 @@ final class AppBootstrap {
             DiagnosticsLog.record("刷新跳过：存储未就绪")
             return
         }
-        let settings = ScoringSettings(
-            baseSleepNeedHours: AppSettings.baseSleepNeedHours,
-            maxHeartRate: AppSettings.maxHeartRateOverride,
-            targetWakeMinutes: AppSettings.targetWakeMinutes
-        )
+        let settings = await currentSettings()
         do {
             let planned = try await sync.refresh(
                 mode: mode,
@@ -76,6 +72,24 @@ final class AppBootstrap {
         } catch {
             DiagnosticsLog.record("刷新失败：\(error)")
         }
+    }
+
+    /// 评分设置：用户偏好（UserDefaults）加上存储中的手动修正与排除（F7）。
+    /// 存储读取失败时只使用偏好，并记录诊断信息。
+    func currentSettings() async -> ScoringSettings {
+        var settings = ScoringSettings(
+            baseSleepNeedHours: AppSettings.baseSleepNeedHours,
+            maxHeartRate: AppSettings.maxHeartRateOverride,
+            targetWakeMinutes: AppSettings.targetWakeMinutes
+        )
+        guard let repository = environment.repository else { return settings }
+        do {
+            settings.sleepOverrides = try await repository.sleepOverrides()
+            settings.manualExcludedNights = try await repository.manualExclusions()
+        } catch {
+            DiagnosticsLog.record("读取手动修正失败：\(error)")
+        }
+        return settings
     }
 
     /// 刷新成功后：补充手表训练需要的心率参数，写回共享状态，推送给手表并刷新小组件。
