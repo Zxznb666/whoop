@@ -2,6 +2,10 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>BGTaskSchedulerPermittedIdentifiers</key>
+	<array>
+		<string>com.example.vigor.nightly</string>
+	</array>
 	<key>CFBundleDevelopmentRegion</key>
 	<string>$(DEVELOPMENT_LANGUAGE)</string>
 	<key>CFBundleDisplayName</key>
@@ -24,10 +28,6 @@
 	<string>元气需要读取睡眠、心率、心率变异性等健康数据，用于在本机计算恢复与睡眠分析。数据不会离开你的设备。</string>
 	<key>NSHealthUpdateUsageDescription</key>
 	<string>元气会在你进行晨测时写入正念记录。</string>
-	<key>BGTaskSchedulerPermittedIdentifiers</key>
-	<array>
-		<string>com.example.vigor.nightly</string>
-	</array>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>processing</string>

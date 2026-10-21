@@ -18,6 +18,8 @@ packages:
     path: Packages/VigorStore
   VigorEngine:
     path: Packages/VigorEngine
+  VigorDesign:
+    path: Packages/VigorDesign
 targets:
   Vigor:
     type: application
@@ -28,12 +30,18 @@ targets:
       - package: VigorHealth
       - package: VigorStore
       - package: VigorEngine
+      - package: VigorDesign
     info:
       path: App/Info.plist
       properties:
         CFBundleDisplayName: 元气
         CFBundleShortVersionString: "0.1.0"
         CFBundleVersion: "1"
+        BGTaskSchedulerPermittedIdentifiers:
+          - com.example.vigor.nightly
+        UIBackgroundModes:
+          - processing
+          - fetch
         UILaunchScreen: {}
         UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
         NSHealthShareUsageDescription: 元气需要读取睡眠、心率、心率变异性等健康数据，用于在本机计算恢复与睡眠分析。数据不会离开你的设备。
