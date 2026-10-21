@@ -72,3 +72,27 @@ struct JournalReminderTests {
         #expect(planned.isEmpty)
     }
 }
+
+@Suite("周报推送")
+struct WeeklyReportTests {
+    private let calendar = shanghaiCalendar()
+
+    @Test("周日 20:30 发送一次；同一周已发送则不再发")
+    func sundayEveningOnce() {
+        // 2026-10-25 是周日
+        let sunday = shanghaiDate(2026, 10, 25, 20, 30)
+        let planned = NotificationPlanner.weeklyReport(now: sunday, sent: [], calendar: calendar)
+        #expect(planned.count == 1)
+        #expect(planned.first?.kind == .weeklyReport)
+        let identifier = try? #require(planned.first?.identifier)
+        let again = NotificationPlanner.weeklyReport(now: sunday, sent: Set(identifier.map { [$0] } ?? []), calendar: calendar)
+        #expect(again.isEmpty)
+    }
+
+    @Test("非周日、时间不在 20:00–21:59 之间：不发")
+    func outsideWindowSilent() {
+        #expect(NotificationPlanner.weeklyReport(now: shanghaiDate(2026, 10, 25, 19, 59), sent: [], calendar: calendar).isEmpty)
+        #expect(NotificationPlanner.weeklyReport(now: shanghaiDate(2026, 10, 25, 22, 0), sent: [], calendar: calendar).isEmpty)
+        #expect(NotificationPlanner.weeklyReport(now: shanghaiDate(2026, 10, 26, 20, 30), sent: [], calendar: calendar).isEmpty)
+    }
+}

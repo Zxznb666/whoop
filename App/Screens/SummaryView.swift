@@ -212,20 +212,42 @@ struct SummaryView: View {
         }
     }
 
+    /// 亮点：固定规则生成，最多显示 4 条（D-067）。
     private var highlights: some View {
-        let recent = model.cycles.suffix(7).compactMap { $0.recovery?.score }
-        let previous = model.cycles.dropLast(7).suffix(28).compactMap { $0.recovery?.score }
-        return Group {
-            if let recentMean = mean(recent), let previousMean = mean(previous), previousMean > 0 {
-                let change = (recentMean - previousMean) / previousMean * 100
+        Group {
+            if !model.highlights.isEmpty {
                 SectionCard {
-                    Label(
-                        String(format: "近 7 天平均恢复 %.0f 分，较之前 28 天%@ %.0f%%", recentMean, change >= 0 ? "高" : "低", abs(change)),
-                        systemImage: "sparkles"
-                    )
-                    .font(.callout)
+                    VStack(alignment: .leading, spacing: 10) {
+                        Text("亮点").font(.headline)
+                        ForEach(model.highlights.prefix(4)) { item in
+                            VStack(alignment: .leading, spacing: 2) {
+                                Label(item.title, systemImage: symbol(item.tone))
+                                    .font(.callout.weight(.semibold))
+                                    .foregroundStyle(color(item.tone))
+                                Text(item.detail)
+                                    .font(.caption)
+                                    .foregroundStyle(.secondary)
+                            }
+                        }
+                    }
                 }
             }
+        }
+    }
+
+    private func symbol(_ tone: Highlight.Tone) -> String {
+        switch tone {
+        case .positive: "checkmark.seal"
+        case .neutral: "info.circle"
+        case .caution: "exclamationmark.triangle"
+        }
+    }
+
+    private func color(_ tone: Highlight.Tone) -> Color {
+        switch tone {
+        case .positive: .green
+        case .neutral: .secondary
+        case .caution: .orange
         }
     }
 

@@ -51,6 +51,16 @@ final class AppModel {
         JournalInsights.compute(cycles: cycles, journal: journal, calendar: calendar)
     }
 
+    /// 亮点：固定规则生成（D-067）。
+    var highlights: [Highlight] {
+        Highlights.make(cycles: cycles)
+    }
+
+    /// 本月的月报（包含今天）。
+    var monthlyReport: PeriodReport? {
+        ReportBuilder.month(containing: today?.wakeTime ?? Date(), cycles: cycles, journal: journal, calendar: calendar)
+    }
+
     /// 最近一周的周报（包含今天）。
     var weeklyReport: PeriodReport? {
         ReportBuilder.week(containing: today?.wakeTime ?? Date(), cycles: cycles, journal: journal, calendar: calendar)

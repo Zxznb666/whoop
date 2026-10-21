@@ -112,3 +112,9 @@
 - 测试：VigorHealth 40 个通过（新增 6 个：版本对比、消融、消融基准与评分器一致、校准样本、CSV/JSON 导出）；VigorStore 16 个通过（新增 1 个：配置版本历史）
 - 构建：iOS ✅  watchOS —（F4 不改手表代码）
 - 备注：新增 `LabAnalysis`、`DailyExport`（VigorScoring），`PipelineLabModel` 与 `PipelineLabSections`（App）。截图检查见 F8。
+
+### F5 备份、Claude 教练、报告、亮点 —— ✅ 完成（端侧路径未在模拟器验证，见 D-092）
+- 提交：见 `git log --oneline`（提交信息 `feat(coach): ...`）
+- 测试：VigorCoach 11 个通过（新增 5 个：来源顺序、模板周报 / 月报、Claude 文本请求与解析、周报预览）；VigorHealth 46 个通过（新增 6 个：亮点目录、合成覆盖、生病提示、校准期、数据质量与佩戴的副本验证）；VigorEngine 15 个通过（新增 2 个：周报推送）
+- 构建：iOS ✅
+- 备注：备份与恢复页、教练设置页（Keychain）、周报 AI 总结卡片、心肺适能详情、亮点卡片、周报推送。备份中的手动修正在 F7 接入后补全（D-094）。

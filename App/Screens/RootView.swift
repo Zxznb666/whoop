@@ -14,6 +14,9 @@ enum Route: Hashable {
     case journal
     case journalEdit(Date)
     case journalQuestions
+    case coachSettings
+    case backup
+    case cardioFitness
     case report
     case coach
     case settings
@@ -29,7 +32,8 @@ enum Route: Hashable {
         case .sleep: .sleep
         case .strain, .workout: .strain
         case .journal, .journalEdit: .journal
-        case .journalQuestions: .summary
+        case .journalQuestions, .coachSettings, .backup: .summary
+        case .cardioFitness: .browse
         case .metric, .browse, .report, .coach: .browse
         }
     }
@@ -164,6 +168,9 @@ struct RouteDestination: View {
         case .journalQuestions: JournalQuestionsView()
         case .report: ReportView(model: model)
         case .coach: CoachView(model: model)
+        case .coachSettings: CoachSettingsView()
+        case .backup: BackupView(model: model)
+        case .cardioFitness: CardioFitnessView(model: model)
         case .settings: SettingsView()
         case .lab, .labNight: LabRootView(model: LabModel(source: .synthetic), app: model)
         case .diagnostics: DiagnosticsView()

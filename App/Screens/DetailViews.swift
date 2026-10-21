@@ -428,6 +428,7 @@ struct BrowseView: View {
     var body: some View {
         List {
             Section("心脏") {
+                NavigationLink("心肺适能", value: Route.cardioFitness)
                 NavigationLink("HRV", value: Route.metric(.hrv))
                 NavigationLink("夜间静息心率", value: Route.metric(.restingHeartRate))
             }

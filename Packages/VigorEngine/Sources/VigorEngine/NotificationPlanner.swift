@@ -124,6 +124,22 @@ public enum NotificationPlanner {
         return sent.contains(item.identifier) ? [] : [item]
     }
 
+    /// 周报推送（PRD §6.9）：每周日 20:00–21:59 之间发送一次，同一周只发一次。
+    public static func weeklyReport(now: Date, sent: Set<String>, calendar: Calendar) -> [PlannedNotification] {
+        guard calendar.component(.weekday, from: now) == 1 else { return [] }
+        let hour = calendar.component(.hour, from: now)
+        guard (20..<22).contains(hour) else { return [] }
+        let sunday = calendar.startOfDay(for: now)
+        let item = PlannedNotification(
+            kind: .weeklyReport,
+            identifier: "weeklyReport-\(Int(sunday.timeIntervalSince1970))",
+            title: "本周报告已生成",
+            body: "打开元气查看本周的恢复、负荷与睡眠变化。",
+            fireDate: now
+        )
+        return sent.contains(item.identifier) ? [] : [item]
+    }
+
     static func zoneText(_ zone: RecoveryZone) -> String {
         switch zone {
         case .green: "状态良好"

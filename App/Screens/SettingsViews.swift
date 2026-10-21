@@ -45,6 +45,8 @@ struct SettingsView: View {
                     .foregroundStyle(.secondary)
             }
             Section("数据") {
+                NavigationLink("备份与恢复", value: Route.backup)
+                NavigationLink("教练设置", value: Route.coachSettings)
                 NavigationLink("诊断", value: Route.diagnostics)
                 NavigationLink("欢迎与授权", value: Route.onboarding)
             }
@@ -147,6 +149,7 @@ struct ReportView: View {
         ScrollView {
             VStack(spacing: VigorTokens.cardSpacing) {
                 if let report = model.weeklyReport {
+                    ReportNarrativeCard(report: report)
                     SectionCard {
                         VStack(alignment: .leading, spacing: 8) {
                             Text("本周（周一至周日）").font(.headline)
@@ -185,74 +188,5 @@ struct ReportView: View {
             Spacer()
             Text(value).font(.callout).monospacedDigit().foregroundStyle(.secondary)
         }
-    }
-}
-
-struct CoachView: View {
-    let model: AppModel
-    @State private var line: String?
-    @State private var providerName = ""
-
-    var body: some View {
-        ScrollView {
-            VStack(spacing: VigorTokens.cardSpacing) {
-                SectionCard {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text("今日一句").font(.headline)
-                        Text(line ?? "正在生成…").font(.body)
-                        Text("来源：\(providerName)").font(.caption).foregroundStyle(.secondary)
-                    }
-                }
-                SectionCard {
-                    VStack(alignment: .leading, spacing: 6) {
-                        Text("隐私").font(.headline)
-                        Text("教练只使用脱敏的每日汇总（分数、z-score、日志项），不包含原始心率或心跳序列。端侧模型不会把数据发出设备；云端模型需要单独开启，并在发送前预览内容。本版本尚未接入云端模型。")
-                            .font(.caption).foregroundStyle(.secondary)
-                    }
-                }
-            }
-            .padding(.horizontal, VigorTokens.pageMargin)
-            .padding(.bottom, 24)
-        }
-        .navigationTitle("教练")
-        .task { await generate() }
-    }
-
-    private func generate() async {
-        guard let today = model.today else {
-            line = "还没有数据。"
-            providerName = "—"
-            return
-        }
-        let summary = SummaryBuilder.daily(from: today, journal: model.journal.last, calendar: .current)
-        let kind = CoachRouter.choose(onDeviceAvailable: onDeviceAvailable(), claudeKey: nil)
-        do {
-            switch kind {
-            case .onDevice:
-                if #available(iOS 26.0, watchOS 26.0, macOS 26.0, *) {
-                    #if canImport(FoundationModels)
-                    line = try await OnDeviceCoach().dailyLine(for: summary)
-                    providerName = OnDeviceCoach().name
-                    return
-                    #endif
-                }
-                fallthrough
-            case .claude, .template:
-                line = try await TemplateCoach().dailyLine(for: summary)
-                providerName = TemplateCoach().name
-            }
-        } catch {
-            line = "生成失败：\(error.localizedDescription)"
-            providerName = "—"
-        }
-    }
-
-    private func onDeviceAvailable() -> Bool {
-        #if canImport(FoundationModels)
-        if #available(iOS 26.0, watchOS 26.0, macOS 26.0, *) {
-            return OnDeviceCoach.isAvailable
-        }
-        #endif
-        return false
     }
 }

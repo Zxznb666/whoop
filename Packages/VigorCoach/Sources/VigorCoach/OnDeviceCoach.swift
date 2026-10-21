@@ -20,5 +20,12 @@ public struct OnDeviceCoach: CoachProvider {
         let response = try await session.respond(to: prompt)
         return response.content
     }
+
+    /// 报告总结：指令与内容都由调用方给出，本地生成，不发出设备。
+    public func complete(instructions: String, prompt: String) async throws -> String {
+        let session = LanguageModelSession(instructions: instructions)
+        let response = try await session.respond(to: prompt)
+        return response.content
+    }
 }
 #endif

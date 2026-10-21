@@ -70,7 +70,8 @@ final class AppBootstrap {
                 sent: NotificationScheduler.sent
             )
             let reminders = await journalReminders(now: Date())
-            await NotificationScheduler.schedule(planned + reminders)
+            let weekly = NotificationPlanner.weeklyReport(now: Date(), sent: NotificationScheduler.sent, calendar: .current)
+            await NotificationScheduler.schedule(planned + reminders + weekly)
             await publishToWidgetsAndWatch()
         } catch {
             DiagnosticsLog.record("刷新失败：\(error)")
