@@ -137,3 +137,11 @@
 - 构建：iOS ✅  watchOS ✅（`VigorWatch` scheme，generic watchOS Simulator）
 - 截图：`scripts/screenshots.sh`，22 个路由 × 浅色 / 深色 = 44 张，全部已生成；逐张检查 25 张（结论见 BUILD-REPORT.md），其余 19 张未逐张检查
 - IPA：`dist/Vigor-1.1.0.ipa`（版本 1.1.0 build 4），内含 `Payload/Vigor.app`（com.example.vigor）、`Watch/VigorWatch.app`（com.example.vigor.watchkitapp）、`PlugIns/VigorWidgets.appex`（com.example.vigor.widgets）、`Watch/VigorWatch.app/PlugIns/VigorWatchWidgets.appex`（com.example.vigor.watchkitapp.widgets）；四个 bundle 均为 ad-hoc 签名，entitlements 已逐个核对
+
+## 阶段 10：VigorFIT 解析器与测试编码器 —— ✅ 完成
+- 提交：见 `git log --oneline`（提交信息 `feat(fit): ...`）
+- 测试：VigorFIT 14 个通过（CRC 检查值、全部 16 种编码选项组合往返、压缩头确实生效、无效值为 nil、改字节报 CRC 错误、头 CRC、签名、截断、逐秒数组对齐、暂停区间、开放暂停、去重标识；真实文件测试在无 `.fit` 时跳过）
+- 构建：不适用（纯 Foundation 包，随 iOS 构建验证）
+- 备注：解析器与编码器按 FIT SDK 规则手写；编码器只在测试 target 中，`Tests/Fixtures/real/` 放入真实 `.fit` 文件后会自动运行解析测试。
+
+## 阶段 11：快照 v3、骑行分组、去重、指标、流水线 —— 🚧 进行中
