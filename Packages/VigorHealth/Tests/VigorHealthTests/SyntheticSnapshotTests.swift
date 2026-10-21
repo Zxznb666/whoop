@@ -21,7 +21,7 @@ struct SyntheticSnapshotTests {
         let reports = NightAnalyzer.analyze(snapshot, calendar: shanghaiCalendar())
         #expect(reports.count == 30)
 
-        let withoutSeries = reports.filter { $0.hrv.overnightSegments.isEmpty && $0.hrv.morningSegments.isEmpty }
+        let withoutSeries = reports.filter { $0.windows.isEmpty }
         #expect(withoutSeries.count == 3)
         #expect(snapshot.sleep.filter { $0.sourceIsWatch }.count > 0)
     }
@@ -36,7 +36,7 @@ struct SyntheticSnapshotTests {
         #expect(reports.filter { $0.hrv.method == .sdnnFallback }.count == 3)
 
         for report in reports {
-            if let rmssd = report.hrv.rmssd {
+            if let rmssd = report.hrv.nightRMSSD {
                 #expect(rmssd >= 15 && rmssd <= 120)
             }
         }

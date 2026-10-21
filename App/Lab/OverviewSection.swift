@@ -29,7 +29,6 @@ struct OverviewSection: View {
                 }
                 .padding(.vertical, 4)
 
-                qualityRow(summary.qualityCounts)
             } else {
                 Text("暂无数据")
                     .foregroundStyle(.secondary)
@@ -56,19 +55,4 @@ struct OverviewSection: View {
         .frame(maxWidth: .infinity, alignment: .leading)
     }
 
-    private func qualityRow(_ counts: [DataQuality: Int]) -> some View {
-        HStack(spacing: 16) {
-            ForEach([DataQuality.high, .medium, .low, .none], id: \.self) { quality in
-                HStack(spacing: 6) {
-                    Circle()
-                        .fill(Formatters.qualityColor(quality))
-                        .frame(width: 10, height: 10)
-                    Text("\(Formatters.quality(quality)) \(counts[quality, default: 0])")
-                        .font(.subheadline)
-                        .monospacedDigit()
-                }
-            }
-        }
-        .frame(maxWidth: .infinity, alignment: .leading)
-    }
 }

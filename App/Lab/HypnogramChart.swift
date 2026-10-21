@@ -5,7 +5,7 @@ import VigorScoring
 /// 睡眠分期图：纵轴依次为清醒、REM、核心、深睡；竖线标出片段位置（有效为蓝，无效为灰）。
 struct HypnogramChart: View {
     let session: SleepSession
-    let segments: [SegmentResult]
+    let segments: [HRVWindow]
 
     var body: some View {
         Chart {
@@ -65,7 +65,7 @@ struct HypnogramChart: View {
         }
     }
 
-    private static func midpoint(of segment: SegmentResult) -> Date {
+    private static func midpoint(of segment: HRVWindow) -> Date {
         segment.start.addingTimeInterval(segment.end.timeIntervalSince(segment.start) / 2)
     }
 }

@@ -3,7 +3,7 @@ import VigorHealth
 import VigorScoring
 
 struct NightDetailView: View {
-    let report: NightReport
+    let report: NightFeatures
 
     var body: some View {
         List {
@@ -11,35 +11,27 @@ struct NightDetailView: View {
                 LabeledContent("入睡", value: Formatters.clock(report.session.start))
                 LabeledContent("醒来", value: Formatters.clock(report.session.end))
                 LabeledContent("睡眠时长", value: Formatters.duration(report.session.asleepDuration))
-                LabeledContent("RMSSD", value: "\(Formatters.rmssd(report.hrv.rmssd))（\(Formatters.method(report.hrv.method))）")
-                LabeledContent("质量") {
-                    HStack(spacing: 6) {
-                        Circle()
-                            .fill(Formatters.qualityColor(report.hrv.quality))
-                            .frame(width: 10, height: 10)
-                        Text(Formatters.quality(report.hrv.quality))
-                    }
-                }
+                LabeledContent("RMSSD", value: "\(Formatters.rmssd(report.hrv.displayRMSSD))（\(Formatters.method(report.hrv.method))）")
                 if let sdnnMean = report.hrv.sdnnMean {
                     LabeledContent("SDNN 均值", value: Formatters.rmssd(sdnnMean))
                 }
-                LabeledContent("夜间静息心率", value: Formatters.bpm(report.nightRHR))
-                LabeledContent("Apple 静息心率", value: Formatters.bpm(report.appleRHR))
+                LabeledContent("夜间静息心率", value: Formatters.bpm(report.restingHeartRate.value))
+                LabeledContent("Apple 静息心率", value: Formatters.bpm(report.appleRestingHeartRate))
                 LabeledContent("呼吸率", value: Formatters.number(report.respiratoryRate, digits: 1, unit: " 次/分"))
                 LabeledContent("手腕温度", value: Formatters.number(report.wristTemperature, digits: 1, unit: " °C"))
-                LabeledContent("血氧", value: report.spo2Mean.map { Formatters.percent($0) } ?? "—")
+                LabeledContent("血氧", value: report.spo2MedianPercent.map { Formatters.percent($0 / 100) } ?? "—")
                 LabeledContent("心率样本数", value: "\(report.heartRateCount)")
             }
 
             Section("睡眠分期") {
-                HypnogramChart(session: report.session, segments: report.hrv.overnightSegments + report.hrv.morningSegments)
+                HypnogramChart(session: report.session, segments: report.windows)
                     .frame(height: 200)
                     .padding(.vertical, 8)
             }
 
-            segmentSection("夜间片段", segments: report.hrv.overnightSegments)
-            if !report.hrv.morningSegments.isEmpty {
-                segmentSection("晨测片段", segments: report.hrv.morningSegments)
+            segmentSection("夜间片段", segments: report.windows.filter { !$0.isMorning })
+            if report.windows.contains(where: \.isMorning) {
+                segmentSection("晨测片段", segments: report.windows.filter(\.isMorning))
             }
         }
         .listStyle(.insetGrouped)
@@ -47,7 +39,7 @@ struct NightDetailView: View {
         .navigationBarTitleDisplayMode(.inline)
     }
 
-    private func segmentSection(_ title: String, segments: [SegmentResult]) -> some View {
+    private func segmentSection(_ title: String, segments: [HRVWindow]) -> some View {
         Section(title) {
             ForEach(segments, id: \.seriesID) { segment in
                 NavigationLink {
@@ -61,7 +53,7 @@ struct NightDetailView: View {
 }
 
 private struct SegmentRow: View {
-    let segment: SegmentResult
+    let segment: HRVWindow
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
@@ -75,7 +67,7 @@ private struct SegmentRow: View {
                     .monospacedDigit()
             }
             HStack {
-                Text("候选 \(segment.candidateRR) · 接受 \(segment.acceptedRR) · 拒绝 \(segment.rejectedRR)")
+                Text("候选 \(segment.candidateCount) · 接受 \(segment.acceptedCount) · 拒绝 \(segment.rejectedCount)")
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .monospacedDigit()

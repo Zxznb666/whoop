@@ -3,7 +3,7 @@ import SwiftUI
 import VigorScoring
 
 struct SegmentDetailView: View {
-    let segment: SegmentResult
+    let segment: HRVWindow
 
     var body: some View {
         List {
@@ -37,7 +37,7 @@ struct SegmentDetailView: View {
                 LabeledContent("RMSSD", value: Formatters.rmssd(segment.rmssd))
                 LabeledContent("平均 RR", value: Formatters.number(meanRR, digits: 0, unit: " ms"))
                 LabeledContent("平均心率", value: Formatters.bpm(meanHeartRate))
-                LabeledContent("候选 / 接受 / 拒绝", value: "\(segment.candidateRR) / \(segment.acceptedRR) / \(segment.rejectedRR)")
+                LabeledContent("候选 / 接受 / 拒绝", value: "\(segment.candidateCount) / \(segment.acceptedCount) / \(segment.rejectedCount)")
                 LabeledContent("结果", value: segment.isValid ? "有效" : (segment.invalidReason ?? "无效"))
             }
         }
@@ -47,15 +47,15 @@ struct SegmentDetailView: View {
     }
 
     private var tachogramPoints: [RRPoint] {
-        zip(segment.acceptedRRTimes, segment.acceptedRRms).enumerated().map { index, pair in
+        zip(segment.acceptedBeatTimes, segment.acceptedRR).enumerated().map { index, pair in
             RRPoint(id: index, time: pair.0, rr: pair.1)
         }
     }
 
     /// 只连接时间上相邻的两个被接受的 RR：两拍之间的时间差等于后一个 RR，说明中间没有被剔除或打断的拍。
     private var poincarePoints: [PoincarePoint] {
-        let rr = segment.acceptedRRms
-        let times = segment.acceptedRRTimes
+        let rr = segment.acceptedRR
+        let times = segment.acceptedBeatTimes
         return rr.indices.dropFirst().compactMap { index in
             guard index < times.count, abs((times[index] - times[index - 1]) - rr[index] / 1000) < 1e-6 else {
                 return nil
@@ -65,14 +65,14 @@ struct SegmentDetailView: View {
     }
 
     private var rrDomain: ClosedRange<Double> {
-        guard let low = segment.acceptedRRms.min(), let high = segment.acceptedRRms.max() else {
+        guard let low = segment.acceptedRR.min(), let high = segment.acceptedRR.max() else {
             return 0...1
         }
         return (low - 20)...(high + 20)
     }
 
     private var meanRR: Double? {
-        let values = segment.acceptedRRms
+        let values = segment.acceptedRR
         return values.isEmpty ? nil : values.reduce(0, +) / Double(values.count)
     }
 

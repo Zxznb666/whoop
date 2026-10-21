@@ -10,7 +10,7 @@ final class LabModel {
     var isLoading = false
     var progress = 0.0
     var progressText = ""
-    var reports: [NightReport] = []
+    var reports: [NightFeatures] = []
     var summary: AvailabilitySummary?
     var snapshot: HealthSnapshot?
     var errorMessage: String?
@@ -37,7 +37,7 @@ final class LabModel {
         let kind = source
         let imported = importedSnapshot
         let calendar = Calendar.current
-        let config = HRVConfig.default
+        let config = ScoringConfig.default
         let reportProgress: @Sendable (Double, String) -> Void = { [weak self] value, text in
             Task { @MainActor in
                 self?.progress = value
@@ -130,7 +130,7 @@ final class LabModel {
 
 private struct LabResult: Sendable {
     let snapshot: HealthSnapshot
-    let reports: [NightReport]
+    let reports: [NightFeatures]
     let summary: AvailabilitySummary
 }
 

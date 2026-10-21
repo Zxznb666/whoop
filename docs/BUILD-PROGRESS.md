@@ -11,3 +11,12 @@
   - 实时数据源（`LiveHealthDataSource`）的 HealthKit 读取只能编译验证，真机未验证。
   - HealthKit SDK 无创建时间，`creationDate` 留空（见 DECISIONS D-004）。
   - 决策见 `docs/DECISIONS.md` D-001 至 D-009。
+
+## 阶段 2：夜间算法 v2 —— ✅ 完成
+- 提交：见 `git log --oneline`（提交信息 `feat(scoring): ...`）
+- 测试：VigorScoring 40 个通过（含施工文档阶段 2 表格的全部 14 行），VigorHealth 19 个通过
+- 构建：iOS ✅（全 App）  watchOS —
+- 备注：
+  - `HRVConfig` → `ScoringConfig`；`SegmentResult` → `HRVWindow`；`NightReport` → `NightFeatures`。
+  - 实验室页的质量标识暂时移除（D-017），阶段 3 恢复。
+  - 决策 D-010 至 D-020。

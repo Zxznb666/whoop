@@ -2,14 +2,10 @@ import SwiftUI
 import VigorScoring
 
 struct NightRow: View {
-    let report: NightReport
+    let report: NightFeatures
 
     var body: some View {
         HStack(spacing: 12) {
-            Circle()
-                .fill(Formatters.qualityColor(report.hrv.quality))
-                .frame(width: 10, height: 10)
-
             VStack(alignment: .leading, spacing: 4) {
                 Text(Formatters.wakeDay(report.session.end))
                     .font(.headline)
@@ -21,10 +17,10 @@ struct NightRow: View {
             Spacer()
 
             VStack(alignment: .trailing, spacing: 4) {
-                Text(Formatters.rmssd(report.hrv.rmssd))
+                Text(Formatters.rmssd(report.hrv.displayRMSSD))
                     .font(.headline)
                     .monospacedDigit()
-                Text("\(report.hrv.validOvernightCount)/\(report.hrv.overnightSegments.count) 段")
+                Text("\(report.hrv.nightValidCount)/\(report.hrv.nightTotalCount) 段")
                     .font(.caption)
                     .foregroundStyle(.secondary)
                     .monospacedDigit()
@@ -34,6 +30,6 @@ struct NightRow: View {
     }
 
     private var sleepLine: String {
-        "\(Formatters.duration(report.session.asleepDuration)) · 静息 \(Formatters.bpm(report.nightRHR))"
+        "\(Formatters.duration(report.session.asleepDuration)) · 静息 \(Formatters.bpm(report.restingHeartRate.value))"
     }
 }

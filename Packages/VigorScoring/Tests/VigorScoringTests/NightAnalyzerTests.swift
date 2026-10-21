@@ -4,83 +4,77 @@ import Testing
 
 @Suite("NightAnalyzer")
 struct NightAnalyzerTests {
-    private let calendar = shanghaiCalendar()
-
-    private func sample(_ start: Date, _ end: Date) -> SleepStageSample {
-        SleepStageSample(start: start, end: end, stage: .core, sourceIsWatch: true)
+    private func series(start: Date, rr: [Double], id: UUID = UUID()) -> HeartbeatSeries {
+        var beats = [Beat(t: 0, precededByGap: false)]
+        var time: TimeInterval = 0
+        for interval in rr {
+            time += interval / 1000
+            beats.append(Beat(t: time, precededByGap: false))
+        }
+        return HeartbeatSeries(id: id, start: start, end: start.addingTimeInterval(time.rounded(.up)), beats: beats)
     }
 
-    private func snapshot(sleep: [SleepStageSample]) -> HealthSnapshot {
-        HealthSnapshot(
-            schemaVersion: 1,
-            exportedAt: shanghaiDate(2026, 10, 22, 8),
-            rangeStart: shanghaiDate(2026, 10, 20, 0),
-            rangeEnd: shanghaiDate(2026, 10, 22, 8),
+    /// 23:00–07:00 的主睡眠，夜间 HR 每 5 分钟 60 bpm，一段夜间序列，醒后 20 分钟一段晨测（有正念记录）。
+    private func snapshot(morningMindful: Bool = true) -> HealthSnapshot {
+        let bedtime = shanghaiDate(2026, 10, 21, 23)
+        let wake = shanghaiDate(2026, 10, 22, 7)
+        let rr = (0..<61).map { $0 % 2 == 0 ? 1000.0 : 1020.0 }
+        let heartRate = stride(from: bedtime, to: wake, by: 300).map { HeartRateSample(date: $0, bpm: 60) }
+        let mindful = morningMindful
+            ? [ValueSample(start: wake.addingTimeInterval(1200), end: wake.addingTimeInterval(1320), value: 1)]
+            : []
+        return HealthSnapshot(
+            exportedAt: wake,
+            rangeStart: bedtime,
+            rangeEnd: wake,
             profile: UserProfile(birthYear: nil, sex: .unknown),
-            sleep: sleep,
-            heartRate: [],
+            sleep: [SleepStageSample(start: bedtime, end: wake, stage: .core, sourceIsWatch: true)],
+            heartRate: heartRate,
             hrvSDNN: [],
             restingHeartRate: [],
             respiratoryRate: [],
             wristTemperature: [],
             oxygenSaturation: [],
-            heartbeatSeries: []
+            heartbeatSeries: [
+                series(start: bedtime.addingTimeInterval(3600), rr: rr),
+                series(start: wake.addingTimeInterval(1200), rr: rr),
+            ],
+            mindfulSessions: mindful
         )
     }
 
-    @Test("只为主睡眠生成报告，且按时间倒序返回")
-    func onlyMainSessionsAreReported() throws {
-        let night1 = sample(shanghaiDate(2026, 10, 20, 23), shanghaiDate(2026, 10, 21, 7))
-        let nap = sample(shanghaiDate(2026, 10, 21, 14), shanghaiDate(2026, 10, 21, 14, 30))
-        let night2 = sample(shanghaiDate(2026, 10, 21, 23), shanghaiDate(2026, 10, 22, 6))
-        let reports = NightAnalyzer.analyze(snapshot(sleep: [night1, nap, night2]), calendar: calendar)
-        #expect(reports.count == 2)
-        let newest = try #require(reports.first)
-        let oldest = try #require(reports.last)
-        #expect(newest.session.end == shanghaiDate(2026, 10, 22, 6))
-        #expect(oldest.session.end == shanghaiDate(2026, 10, 21, 7))
+    @Test("一晚一段主睡眠：夜间得到 RMSSD，醒后的晨测归入当晚")
+    func oneNight() throws {
+        let nights = NightAnalyzer.analyze(snapshot(), calendar: shanghaiCalendar())
+        let night = try #require(nights.first)
+        #expect(nights.count == 1)
+        #expect(night.hrv.nightValidCount == 1)
+        #expect(night.hrv.morningValidCount == 1)
+        #expect(night.hrv.nightRMSSD != nil)
+        #expect(night.hrv.morningRMSSD != nil)
+        #expect(night.windows.count == 2)
+        #expect(!night.partialWear)
     }
 
-    @Test("汇总：夜数、有 RMSSD 的夜数、平均有效片段数、中位数与质量分布")
-    func summary() {
-        func report(rmssd: Double?, quality: DataQuality, valid: Int) -> NightReport {
-            let session = SleepSession(
-                start: shanghaiDate(2026, 10, 20, 23),
-                end: shanghaiDate(2026, 10, 21, 7),
-                stages: [],
-                asleepDuration: 8 * 3600,
-                wakeDay: DateComponents(year: 2026, month: 10, day: 21),
-                isMain: true
-            )
-            let hrv = NightHRV(
-                rmssd: rmssd,
-                method: rmssd == nil ? .none : .overnight,
-                overnightSegments: [],
-                morningSegments: [],
-                validOvernightCount: valid,
-                sdnnMean: nil,
-                quality: quality
-            )
-            return NightReport(
-                session: session,
-                hrv: hrv,
-                nightRHR: nil,
-                appleRHR: nil,
-                respiratoryRate: nil,
-                wristTemperature: nil,
-                spo2Mean: nil,
-                heartRateCount: 0
-            )
-        }
-        let summary = AvailabilitySummary.make([
-            report(rmssd: 20, quality: .high, valid: 4),
-            report(rmssd: 40, quality: .medium, valid: 2),
-            report(rmssd: nil, quality: .none, valid: 0),
-        ])
-        #expect(summary.nights == 3)
-        #expect(summary.nightsWithRMSSD == 2)
-        #expect(summary.meanValidSegmentsPerNight == 2)
-        #expect(summary.medianRMSSD == 30)
-        #expect(summary.qualityCounts == [.high: 1, .medium: 1, .low: 0, .none: 1])
+    @Test("没有正念记录的醒后序列被忽略")
+    func morningWithoutMindfulIgnored() throws {
+        let night = try #require(NightAnalyzer.analyze(snapshot(morningMindful: false), calendar: shanghaiCalendar()).first)
+        #expect(night.hrv.morningRMSSD == nil)
+        #expect(night.windows.count == 1)
+    }
+
+    @Test("心率点之间超过 60 分钟没有数据 → 部分未佩戴")
+    func partialWear() throws {
+        var snap = snapshot()
+        snap.heartRate = snap.heartRate.filter { $0.date < shanghaiDate(2026, 10, 22, 0, 30) }
+        let night = try #require(NightAnalyzer.analyze(snap, calendar: shanghaiCalendar()).first)
+        #expect(night.partialWear)
+    }
+
+    @Test("夜间静息心率：样本池中的 60 bpm 与序列平均心率一起计算")
+    func restingHeartRateFromNight() throws {
+        let night = try #require(NightAnalyzer.analyze(snapshot(), calendar: shanghaiCalendar()).first)
+        #expect(night.restingHeartRate.source == .sampledP10)
+        #expect(night.restingHeartRate.value == 60)
     }
 }
