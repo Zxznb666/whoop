@@ -34,6 +34,38 @@ final class AppModel {
 
     var today: CycleResult? { cycles.last }
 
+    /// 影响洞察（按效应量排序）。
+    var insights: [JournalInsight] {
+        JournalInsights.compute(cycles: cycles, journal: journal, calendar: calendar)
+    }
+
+    /// 最近一周的周报（包含今天）。
+    var weeklyReport: PeriodReport? {
+        ReportBuilder.week(containing: today?.wakeTime ?? Date(), cycles: cycles, journal: journal, calendar: calendar)
+    }
+
+    /// 身体年龄的输入：取最新的 VO2max、夜间静息心率基线、HRV 基线与先验、SRI、近 30 天日均步数与近 7 天 Z2+ 分钟。
+    var bodyAge: BodyAgeResult? {
+        guard let today, let snapshot else { return nil }
+        let year = calendar.component(.year, from: today.wakeTime)
+        let birthYear = snapshot.profile.birthYear
+        let chronological = birthYear.map { year - $0 } ?? 35
+        let lnPrior = PopulationPriors.prior(for: .lnRMSSDNight, profile: snapshot.profile, year: year).mu
+        let steps = snapshot.steps.filter { $0.start >= today.wakeTime.addingTimeInterval(-30 * 86_400) }
+        let dailySteps = steps.isEmpty ? nil : steps.reduce(0) { $0 + $1.value } / 30
+        let zone2 = cycles.suffix(7).reduce(0.0) { $0 + Double($1.load.zoneMinutes.dropFirst().reduce(0, +)) }
+        let inputs = BodyAgeInputs(
+            vo2Max: snapshot.vo2Max.last?.value,
+            restingHeartRateBaseline: today.baselines[.restingHeartRate]?.mu,
+            lnRMSSDBaseline: today.baselines[.lnRMSSDNight]?.mu,
+            lnRMSSDPrior: lnPrior,
+            sri: today.sri,
+            dailySteps: dailySteps,
+            weeklyZone2PlusMinutes: zone2 > 0 ? zone2 : nil
+        )
+        return BodyAge.compute(chronologicalAge: chronological, sex: snapshot.profile.sex, inputs: inputs)
+    }
+
     func load(source: DataSourceKind) async {
         #if targetEnvironment(simulator)
         if source == .synthetic {

@@ -441,6 +441,15 @@ struct BrowseView: View {
                 NavigationLink("训练", value: Route.workout(UUID()))
                 NavigationLink("报告", value: Route.report)
             }
+            if let age = model.bodyAge {
+                Section("身体年龄（示意，待校准）") {
+                    LabeledContent("估算身体年龄", value: String(format: "%.0f 岁", age.bodyAge))
+                    LabeledContent("偏移", value: String(format: "%+.1f 年", age.offsetYears))
+                    if !age.missing.isEmpty {
+                        Text("缺少：" + age.missing.joined(separator: "、")).font(.caption).foregroundStyle(.secondary)
+                    }
+                }
+            }
         }
         .navigationTitle("浏览")
     }

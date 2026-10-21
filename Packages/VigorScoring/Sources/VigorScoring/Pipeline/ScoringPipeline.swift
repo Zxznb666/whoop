@@ -167,6 +167,8 @@ public enum ScoringPipeline {
             let heartRates = Array(NightAnalyzer.inRange(sources.heartRate, from: workout.start, to: workout.end) { $0.date })
             return MaxHeartRate.observedPeak(workoutHeartRate: heartRates).map { (workout.end, $0) }
         }
+        // SRI 只需要最近 7 天的分期：按结束时间排序后用二分查找取窗口，避免每晚扫描全部分期
+        let sleepByEnd = snapshot.sleep.sorted { $0.end < $1.end }
         var previousStrain: Double?
         var trimpHistory: [Double] = []
 
@@ -196,7 +198,7 @@ public enum ScoringPipeline {
             }
 
             let metrics = SleepMetricsCalculator.make(session: night.session, bedtime: night.session.bedtime, config: config)
-            let sri = SleepRegularity.sri(stages: snapshot.sleep, endingAt: wake, calendar: calendar)
+            let sri = SleepRegularity.sri(stages: Array(sleepWindow(sleepByEnd, endingAt: wake, calendar: calendar)), endingAt: wake, calendar: calendar)
 
             // 睡眠需求与睡眠分（§5.9）
             let previousWake = index > 0 ? features[index - 1].session.end : Date.distantPast
@@ -407,6 +409,14 @@ public enum ScoringPipeline {
     static func zScore(_ value: Double?, _ statistic: BaselineStatistic?) -> Double? {
         guard let value, let statistic, let mu = statistic.mu else { return nil }
         return (value - mu) / statistic.sigma
+    }
+
+    /// 结束时间在 [endingAt − 8 天, endingAt] 内的分期（SRI 的 7 天窗口加上一天余量）。
+    static func sleepWindow(_ sortedByEnd: [SleepStageSample], endingAt: Date, calendar: Calendar) -> ArraySlice<SleepStageSample> {
+        let from = calendar.date(byAdding: .day, value: -8, to: endingAt) ?? endingAt.addingTimeInterval(-8 * 86_400)
+        let lower = NightAnalyzer.partitionPoint(sortedByEnd) { $0.end < from }
+        let upper = NightAnalyzer.partitionPoint(sortedByEnd) { $0.end <= endingAt }
+        return sortedByEnd[lower..<max(lower, upper)]
     }
 
     /// 等待 → 初步 → 最终 → 锁定（§5.13）。`vitalsComplete` 作为“数据到齐”的近似。

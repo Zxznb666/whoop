@@ -138,9 +138,22 @@ struct JournalView: View {
     var body: some View {
         List {
             Section {
-                Text("日志问卷与影响洞察在阶段 7 实现。这里先显示已有的记录。")
+                Text("日志问卷的填写界面在后续版本完成。这里显示最近的记录与影响洞察。")
                     .font(.footnote)
                     .foregroundStyle(.secondary)
+            }
+            Section("影响洞察（按效应量排序）") {
+                if model.insights.isEmpty {
+                    Text("每组至少需要 5 个样本才会显示。").foregroundStyle(.secondary)
+                }
+                ForEach(model.insights.prefix(8)) { insight in
+                    VStack(alignment: .leading, spacing: 4) {
+                        Text(insight.sentence).font(.callout)
+                        Text(String(format: "p = %.3f · 做了 %d 次 / 没做 %d 次", insight.pValue, insight.treatedCount, insight.controlCount))
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
+                }
             }
             Section("最近记录") {
                 if model.journal.isEmpty {
@@ -165,8 +178,47 @@ struct ReportView: View {
     let model: AppModel
 
     var body: some View {
-        ContentUnavailableView("报告", systemImage: "doc.text", description: Text("周报与月报在阶段 7 实现。"))
-            .navigationTitle("报告")
+        ScrollView {
+            VStack(spacing: VigorTokens.cardSpacing) {
+                if let report = model.weeklyReport {
+                    SectionCard {
+                        VStack(alignment: .leading, spacing: 8) {
+                            Text("本周（周一至周日）").font(.headline)
+                            row("周期数", "\(report.cycleCount)")
+                            row("平均恢复", report.meanRecovery.map { String(format: "%.0f", $0) } ?? "—")
+                            row("平均负荷", report.meanStrain.map { String(format: "%.1f", $0) } ?? "—")
+                            row("平均睡眠分", report.meanSleepScore.map { String(format: "%.0f", $0) } ?? "—")
+                            row("训练次数", "\(report.workoutCount)")
+                            row("睡眠负债变化", report.debtChangeHours.map { String(format: "%+.1f 小时", $0) } ?? "—")
+                        }
+                    }
+                    SectionCard {
+                        VStack(alignment: .leading, spacing: 6) {
+                            Text("亮点").font(.headline)
+                            if report.topInsights.isEmpty {
+                                Text("还没有足够的记录生成洞察。").font(.callout).foregroundStyle(.secondary)
+                            }
+                            ForEach(report.topInsights) { insight in
+                                Text(insight.sentence).font(.callout)
+                            }
+                        }
+                    }
+                } else {
+                    ContentUnavailableView("暂无报告", systemImage: "doc.text", description: Text("还没有本周的数据。"))
+                }
+            }
+            .padding(.horizontal, VigorTokens.pageMargin)
+            .padding(.bottom, 24)
+        }
+        .navigationTitle("周报")
+    }
+
+    private func row(_ title: String, _ value: String) -> some View {
+        HStack {
+            Text(title).font(.callout)
+            Spacer()
+            Text(value).font(.callout).monospacedDigit().foregroundStyle(.secondary)
+        }
     }
 }
 
