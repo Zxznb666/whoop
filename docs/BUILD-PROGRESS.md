@@ -42,3 +42,13 @@
   - 分钟时间线、活动能量回归（前缀和）、最大心率的自动上调、压力、ACWR 与目标区间均已接入流水线。
   - 合成数据的负荷与压力偏高（D-047），需要真实数据校准。
   - 决策 D-039 至 D-047；D-038 的状态已更新。
+
+## 阶段 5：持久化、同步引擎、后台、通知、回放工具、黄金快照 —— ✅ 完成（部分项见备注）
+- 提交：见 `git log --oneline`（提交信息 `feat(store): ...` 等）
+- 测试：VigorStore 4 个通过（SwiftData 内存容器）；VigorEngine 4 个通过（通知规则）；`Tools/VigorReplay` 4 个通过（黄金快照、差异报告、CSV 行数、参数解析）；VigorScoring 89、VigorHealth 28（均已通过）
+- 构建：iOS ✅（全 App，含 VigorStore、VigorEngine、后台与通知代码）  watchOS —
+- 备注：
+  - `vigor-replay` 已实际运行：`--synthetic --update-golden` 生成了 `Tools/VigorReplay/Tests/VigorReplayCoreTests/Resources/golden-synthetic-seed42.csv`（120 行）；输出 `nights.csv`、`cycles.csv`、`baselines.csv` 行数正确（119 个周期 + 表头）。
+  - 同步路径未接入锚点增量读取（D-048）；通知类型未全部实现（D-053）。
+  - 后台任务、HealthKit 观察者、通知的真机行为均未验证。
+  - 决策 D-048 至 D-054。

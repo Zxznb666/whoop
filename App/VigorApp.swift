@@ -11,6 +11,10 @@ private let initialSource = DataSourceKind.live
 struct VigorApp: App {
     @State private var model = LabModel(source: initialSource)
 
+    init() {
+        AppBootstrap.shared.start()
+    }
+
     var body: some Scene {
         WindowGroup {
             NavigationStack {
