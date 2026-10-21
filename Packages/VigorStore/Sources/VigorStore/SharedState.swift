@@ -1,5 +1,10 @@
 import Foundation
 
+/// App Group 的标识：主 App、小组件与手表共用。重签名后可能不可用，读写都必须容忍失败。
+public enum VigorConstants {
+    public static let appGroupID = "group.com.example.vigor"
+}
+
 /// 供小组件与手表读取的共享状态（施工文档 §5 阶段 5 第 1 条）。
 public struct SharedState: Codable, Sendable, Hashable {
     public var recovery: Double?
@@ -13,6 +18,9 @@ public struct SharedState: Codable, Sendable, Hashable {
     public var updatedAt: Date
     /// App Group 是否可用；不可用时状态文件保存在 App 自己的目录中
     public var appGroupAvailable: Bool
+    /// 手表训练模式计算实时负荷需要的参数（PRD §6.8）；缺失时手表使用默认值
+    public var restingHeartRate: Double?
+    public var maxHeartRate: Double?
 
     public init(
         recovery: Double?,
@@ -24,7 +32,9 @@ public struct SharedState: Codable, Sendable, Hashable {
         suggestedBedtime: Date?,
         stateRaw: String,
         updatedAt: Date,
-        appGroupAvailable: Bool
+        appGroupAvailable: Bool,
+        restingHeartRate: Double? = nil,
+        maxHeartRate: Double? = nil
     ) {
         self.recovery = recovery
         self.recoveryZone = recoveryZone
@@ -36,11 +46,15 @@ public struct SharedState: Codable, Sendable, Hashable {
         self.stateRaw = stateRaw
         self.updatedAt = updatedAt
         self.appGroupAvailable = appGroupAvailable
+        self.restingHeartRate = restingHeartRate
+        self.maxHeartRate = maxHeartRate
     }
 }
 
 public enum SharedStateStore {
     public static let fileName = "shared-state.json"
+    /// WatchConnectivity 的 applicationContext 中共享状态的键（手机发送、手表接收）
+    public static let watchPayloadKey = "sharedState"
 
     /// App Group 容器中的文件位置；容器不可用时返回 nil。
     public static func appGroupFileURL(groupID: String) -> URL? {
@@ -82,6 +96,32 @@ public enum SharedStateStore {
         let url = try fallbackFileURL()
         try data.write(to: url, options: .atomic)
         return (url, false)
+    }
+
+    /// 读取最近一次写入的状态：先找 App Group，再找 App 自己的备用位置。两者都读不到（例如重签名后 App Group 不可用，
+    /// 且小组件无法访问 App 的目录）时返回 nil。调用方应显示“打开元气以更新”，而不是崩溃。
+    public static func readLatest(groupID: String) -> SharedState? {
+        let candidates = [appGroupFileURL(groupID: groupID), try? fallbackFileURL()].compactMap { $0 }
+        for url in candidates where FileManager.default.fileExists(atPath: url.path) {
+            if let state = try? read(from: url) {
+                return state
+            }
+        }
+        return nil
+    }
+
+    /// 编码为 WatchConnectivity 与其他通道使用的 JSON 数据。
+    public static func encode(_ state: SharedState) throws -> Data {
+        let encoder = JSONEncoder()
+        encoder.dateEncodingStrategy = .secondsSince1970
+        encoder.outputFormatting = [.sortedKeys]
+        return try encoder.encode(state)
+    }
+
+    public static func decode(_ data: Data) throws -> SharedState {
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .secondsSince1970
+        return try decoder.decode(SharedState.self, from: data)
     }
 
     public static func read(from url: URL) throws -> SharedState {

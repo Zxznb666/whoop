@@ -4,9 +4,9 @@ import VigorStore
 
 /// Siri 与快捷指令（PRD §6.9、施工文档 §5 阶段 8 第 5 条）。读取共享状态文件；没有数据时提示打开元气。
 enum CurrentState {
+    /// 先读 App Group，再读备用位置（与小组件、手表相同的顺序）。
     static func load() -> SharedState? {
-        guard let url = try? SharedStateStore.fallbackFileURL() else { return nil }
-        return try? SharedStateStore.read(from: url)
+        SharedStateStore.readLatest(groupID: VigorConstants.appGroupID)
     }
 }
 

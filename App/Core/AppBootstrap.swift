@@ -2,6 +2,8 @@ import Foundation
 import HealthKit
 import VigorEngine
 import VigorScoring
+import VigorStore
+import WidgetKit
 
 /// 启动时的装配：注册后台任务、开启观察者，并提供统一的刷新入口。
 @MainActor
@@ -17,6 +19,7 @@ final class AppBootstrap {
 
     /// 在应用启动时调用一次。注册失败只记录日志，不会崩溃。
     func start() {
+        PhoneWatchLink.shared.activate()
         BackgroundSync.register {
             await AppBootstrap.shared.refreshNow(mode: .window(days: 30))
         }
@@ -68,9 +71,28 @@ final class AppBootstrap {
             )
             let reminders = await journalReminders(now: Date())
             await NotificationScheduler.schedule(planned + reminders)
+            await publishToWidgetsAndWatch()
         } catch {
             DiagnosticsLog.record("刷新失败：\(error)")
         }
+    }
+
+    /// 刷新成功后：补充手表训练需要的心率参数，写回共享状态，推送给手表并刷新小组件。
+    /// App Group 不可用时小组件会显示“打开元气以更新”，这里不报错。
+    private func publishToWidgetsAndWatch() async {
+        guard var state = SharedStateStore.readLatest(groupID: VigorConstants.appGroupID) else { return }
+        if let repository = environment.repository,
+           let latest = try? await repository.cycles(from: Date().addingTimeInterval(-86_400), to: Date()).last {
+            state.restingHeartRate = latest.load.restingHeartRate
+            state.maxHeartRate = latest.load.maxHeartRate
+        }
+        do {
+            try SharedStateStore.write(state, groupID: VigorConstants.appGroupID)
+        } catch {
+            DiagnosticsLog.record("共享状态回写失败：\(error)")
+        }
+        PhoneWatchLink.shared.push(state)
+        WidgetCenter.shared.reloadAllTimelines()
     }
 
     /// 醒来后的日志提醒（PRD §6.5）。读取失败只记录，不影响恢复分数的通知。

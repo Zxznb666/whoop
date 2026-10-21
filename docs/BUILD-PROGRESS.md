@@ -100,3 +100,9 @@
 - 测试：VigorScoring 118 个通过（新增 7 个：锚点 0/1/3、P20、回退、中位数、最近 14 周期、饱和回归、z_hrv 修正）；VigorHealth 34 个通过（新增 2 个：非训练周期平均压力 < 1.5、不用未来数据）；VigorReplay 4 个通过（黄金快照未变，见 D-077）
 - 构建：iOS —（F2 仅改动评分包，随 F1 的 App 构建一并验证；F3 后重新构建）
 - 备注：决策 D-075 至 D-077。非训练日负荷偏高（D-047）按施工文档保留，未改。
+
+### F3 手表、小组件、WatchConnectivity —— ✅ 完成（运行未验证，见 D-084）
+- 提交：见 `git log --oneline`（提交信息 `feat(watch): ...`）
+- 测试：VigorStore 15 个通过（新增 3 个：共享状态往返、旧载荷解码、约定的键与 App Group 标识）；其他包不变
+- 构建：iOS ✅（含手表与两个小组件，`Vigor.app/Watch/VigorWatch.app`、`Vigor.app/PlugIns/VigorWidgets.appex`、`VigorWatch.app/PlugIns/VigorWatchWidgets.appex` 已确认）  watchOS ✅（`VigorWatch` scheme，generic watchOS Simulator）
+- 备注：手表模拟器运行时不可用（D-084），训练模式与小组件的真实刷新只能在真机上验证。App Intents 读取顺序已修正（D-081）。
