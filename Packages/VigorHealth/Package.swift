@@ -8,6 +8,6 @@ let package = Package(
     dependencies: [.package(path: "../VigorScoring")],
     targets: [
         .target(name: "VigorHealth", dependencies: ["VigorScoring"]),
-        .testTarget(name: "VigorHealthTests", dependencies: ["VigorHealth"]),
+        .testTarget(name: "VigorHealthTests", dependencies: ["VigorHealth", "VigorScoring"]),
     ]
 )
