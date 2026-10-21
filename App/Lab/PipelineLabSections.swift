@@ -325,10 +325,16 @@ struct PipelineLabSections: View {
 
     private var calibrationSection: some View {
         Section {
+            let available = LabAnalysis.calibrationSamples(cycles: app.cycles, journal: app.journal, calendar: app.calendar).count
             Button("用主观精力拟合（岭回归）") {
                 lab.runCalibration(app: app)
             }
-            .disabled(app.journal.isEmpty)
+            .disabled(available < Calibration.minimumDays)
+            if available < Calibration.minimumDays {
+                Text("有主观精力的天数为 \(available)，校准至少需要 \(Calibration.minimumDays) 天，目前已禁用。")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+            }
             if let report = lab.calibrationReport {
                 LabeledContent("训练 / 验证", value: "\(report.trainCount) / \(report.validationCount) 晚")
                 LabeledContent("默认 Spearman", value: Formatters.number(report.defaultSpearman, digits: 3))
@@ -338,10 +344,6 @@ struct PipelineLabSections: View {
                     .font(.caption)
                     .foregroundStyle(.secondary)
                 Text("恢复权重的采用需要把权重接入评分器，本版本只显示报告，不写入配置（见 DECISIONS D-088）。")
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
-            } else if lab.calibrationSampleCount > 0 || !app.journal.isEmpty {
-                Text("有主观精力的天数为 \(lab.calibrationSampleCount)。校准至少需要 \(Calibration.minimumDays) 天，目前样本不足，已禁用拟合结果。")
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }

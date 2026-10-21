@@ -13,7 +13,6 @@ final class PipelineLabModel {
     private(set) var candidateOutput: PipelineOutput?
     private(set) var comparison: LabAnalysis.Comparison?
     private(set) var history: [ScoringConfig] = []
-    private(set) var calibrationSampleCount = 0
     private(set) var calibrationReport: CalibrationReport?
     private(set) var isWorking = false
     var message: String?
@@ -85,7 +84,6 @@ final class PipelineLabModel {
 
     func runCalibration(app: AppModel) {
         let samples = LabAnalysis.calibrationSamples(cycles: app.cycles, journal: app.journal, calendar: app.calendar)
-        calibrationSampleCount = samples.count
         calibrationReport = Calibration.evaluate(
             samples: samples,
             defaultWeights: LabAnalysis.calibrationWeights,
