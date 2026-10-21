@@ -43,6 +43,14 @@ public enum IllnessWarning {
         )
     }
 
+    /// 最长允许的相邻醒来间隔（秒）。超过 36 小时的两晚不算“连续”（F6）：中间缺了数据，无法判断是否连续不适。
+    public static let maxConsecutiveGap: TimeInterval = 36 * 3600
+
+    /// 两次醒来是否连续：间隔不超过 `maxConsecutiveGap`。
+    public static func isConsecutive(previousWake: Date, wake: Date) -> Bool {
+        wake.timeIntervalSince(previousWake) <= maxConsecutiveGap
+    }
+
     /// 注意的条件：T 成立且 R、H、C 中至少一个成立；或者 T 不成立但 R、H、C 同时成立。
     public static func meetsAttentionCondition(_ signals: IllnessSignals) -> Bool {
         let any = signals.respiratory || signals.hrv || signals.restingHeartRate

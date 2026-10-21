@@ -29,4 +29,15 @@ struct StatisticsTests {
         let iqr = try #require(Statistics.weightedIQR(values, weights: [Double](repeating: 1, count: 8)))
         #expect(iqr == 4)
     }
+
+    @Test("显示四舍五入：±0.05 以内显示为正零，不出现负零（F6）")
+    func displayRoundingRemovesNegativeZero() {
+        #expect(DisplayRounding.value(-0.04, digits: 1) == 0)
+        #expect(DisplayRounding.value(-0.05, digits: 1).sign == .plus)
+        #expect(DisplayRounding.value(0.05, digits: 1) == 0)
+        #expect(DisplayRounding.value(-0.049, digits: 1).sign == .plus)
+        #expect(DisplayRounding.value(-0.06, digits: 1) == -0.1)
+        #expect(DisplayRounding.value(0.26, digits: 1) == 0.3)
+        #expect(DisplayRounding.value(-0.001, digits: 2).sign == .plus)
+    }
 }

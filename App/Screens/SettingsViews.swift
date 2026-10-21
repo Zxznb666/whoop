@@ -158,7 +158,7 @@ struct ReportView: View {
                             row("平均负荷", report.meanStrain.map { String(format: "%.1f", $0) } ?? "—")
                             row("平均睡眠分", report.meanSleepScore.map { String(format: "%.0f", $0) } ?? "—")
                             row("训练次数", "\(report.workoutCount)")
-                            row("睡眠负债变化", report.debtChangeHours.map { String(format: "%+.1f 小时", $0) } ?? "—")
+                            row("睡眠负债变化", report.debtChangeHours.map { Formatters.signed($0, digits: 1, unit: " 小时") } ?? "—")
                         }
                     }
                     SectionCard {

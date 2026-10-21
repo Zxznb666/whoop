@@ -234,7 +234,7 @@ struct PipelineLabSections: View {
                 VStack(alignment: .leading, spacing: 2) {
                     Text(component.title).font(.callout.weight(.semibold))
                     if let shift = result.meanShift, let actual = result.actualMean, let ablated = result.ablatedMean {
-                        Text(String(format: "平均 %.1f → %.1f（%+.1f），%d 晚", actual, ablated, shift, result.count))
+                        Text("平均 \(Formatters.number(actual, digits: 1)) → \(Formatters.number(ablated, digits: 1))（\(Formatters.signed(shift, digits: 1))），\(result.count) 晚")
                             .font(.caption)
                             .foregroundStyle(.secondary)
                             .monospacedDigit()

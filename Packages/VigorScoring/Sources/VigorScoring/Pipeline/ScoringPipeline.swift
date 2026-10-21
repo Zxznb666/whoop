@@ -185,6 +185,7 @@ public enum ScoringPipeline {
         var observations: [BaselineObservation] = []
         var previousDebt = 0.0
         var previousAttention = false
+        var previousIllnessWake: Date?
         var cycles: [CycleResult] = []
         var validLnRMSSD: [Double] = []
         var validBedtimes: [Date] = []
@@ -297,7 +298,9 @@ public enum ScoringPipeline {
                 restingBaseline: stats[.restingHeartRate] ?? BaselineStatistic(mu: nil, sigma: 1, count: 0)
             )
             let attention = IllnessWarning.meetsAttentionCondition(signals)
-            let level: IllnessLevel = attention ? (previousAttention ? .possiblyUnwell : .attention) : .none
+            // 连续两晚：上一晚醒来与本晚醒来的间隔不超过 36 小时（F6）
+            let consecutive = previousIllnessWake.map { IllnessWarning.isConsecutive(previousWake: $0, wake: wake) } ?? false
+            let level: IllnessLevel = attention ? ((previousAttention && consecutive) ? .possiblyUnwell : .attention) : .none
             let day = wakeDay
             let journal = journalByDay[day]
             let confounded = journal?.behaviors["alcohol"] == true || journal?.behaviors["sauna"] == true
@@ -313,6 +316,7 @@ public enum ScoringPipeline {
                 }
             }
             previousAttention = attention
+            previousIllnessWake = wake
 
             // 恢复分数（§5.8）
             let penalties = RecoveryPenalties.make(

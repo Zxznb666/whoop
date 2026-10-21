@@ -25,6 +25,14 @@ enum Route: Hashable {
     case diagnostics
     case onboarding
 
+    /// 标签页本身的根页面：通过 `-VigorRoute` 打开时直接切换标签，不压栈。
+    var isTabRoot: Bool {
+        switch self {
+        case .sleep, .strain, .journal, .browse: true
+        default: false
+        }
+    }
+
     /// 路由所属的标签页。
     var tab: AppTab {
         switch self {
@@ -125,7 +133,10 @@ struct RootView: View {
         .task {
             if let launchRoute {
                 selection = launchRoute.tab
-                paths[launchRoute.tab] = [launchRoute]
+                // 标签页的根页面只切换标签，不压入导航栈（F6）
+                if !launchRoute.isTabRoot {
+                    paths[launchRoute.tab] = [launchRoute]
+                }
             }
             await model.load(source: source)
         }

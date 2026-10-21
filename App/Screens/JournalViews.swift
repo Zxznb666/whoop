@@ -209,7 +209,7 @@ struct JournalEditView: View {
         LabeledContent("含酒精饮品", value: fill.alcoholicDrinks.map { "\(Int($0.rounded())) 杯" } ?? "无记录")
         LabeledContent("正念", value: fill.mindfulMinutes.map { "\(Int($0.rounded())) 分钟" } ?? "无记录")
         LabeledContent("日照", value: fill.daylightMinutes.map { "\(Int($0.rounded())) 分钟" } ?? "无记录")
-        LabeledContent("情绪", value: fill.meanMoodValence.map { String(format: "%+.2f（%d 条）", $0, fill.moodCount) } ?? "无记录")
+        LabeledContent("情绪", value: fill.meanMoodValence.map { "\(Formatters.signed($0, digits: 2))（\(fill.moodCount) 条）" } ?? "无记录")
     }
 
     @ViewBuilder

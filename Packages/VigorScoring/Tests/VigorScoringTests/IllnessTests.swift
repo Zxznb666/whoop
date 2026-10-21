@@ -26,4 +26,13 @@ struct IllnessTests {
         let off = IllnessWarning.signals(temperatureDelta: 0.49, zResp: 1.49, zHRV: -1.49, restingHeartRate: 58.9, restingBaseline: baseline)
         #expect(off == IllnessSignals(temperature: false, respiratory: false, hrv: false, restingHeartRate: false))
     }
+
+    @Test("连续两晚：醒来间隔不超过 36 小时才算连续；超过则不连续（F6）")
+    func consecutiveNeedsShortGap() {
+        let wake = Date(timeIntervalSince1970: 1_800_000_000)
+        #expect(IllnessWarning.isConsecutive(previousWake: wake, wake: wake.addingTimeInterval(24 * 3600)))
+        #expect(IllnessWarning.isConsecutive(previousWake: wake, wake: wake.addingTimeInterval(36 * 3600)))
+        #expect(!IllnessWarning.isConsecutive(previousWake: wake, wake: wake.addingTimeInterval(36 * 3600 + 1)))
+        #expect(!IllnessWarning.isConsecutive(previousWake: wake, wake: wake.addingTimeInterval(72 * 3600)))
+    }
 }

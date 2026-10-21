@@ -52,7 +52,7 @@ struct CardioFitnessView: View {
                         .font(.system(.title2, design: .rounded, weight: .bold))
                         .monospacedDigit()
                     if let slope = CardioFitness.slopePerDay(vo2Points.map { (date: $0.start, value: $0.value) }) {
-                        Text(String(format: "90 天趋势约 %+.1f ml/kg/min", slope * 90))
+                        Text("90 天趋势约 \(Formatters.signed(slope * 90, digits: 1, unit: " ml/kg/min"))")
                             .font(.callout)
                             .foregroundStyle(.secondary)
                     }
@@ -79,7 +79,7 @@ struct CardioFitnessView: View {
             VStack(alignment: .leading, spacing: 8) {
                 Text("1 分钟心率恢复（近 90 天）").font(.headline)
                 if let change = CardioFitness.recoveryChange(recoveryValues) {
-                    Text(String(format: "后半段比前半段的中位数 %+.0f bpm", change))
+                    Text("后半段比前半段的中位数 \(Formatters.signed(change, digits: 0, unit: " bpm"))")
                         .font(.callout)
                     Text("\(recoveryValues.count) 次测量")
                         .font(.caption)

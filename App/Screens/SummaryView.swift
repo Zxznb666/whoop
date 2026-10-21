@@ -176,7 +176,7 @@ struct SummaryView: View {
                     title: "手腕温度偏差",
                     systemImage: "thermometer.medium",
                     color: VigorTokens.temperature,
-                    value: today.temperatureDelta.map { String(format: "%+.1f", $0) } ?? "—",
+                    value: today.temperatureDelta.map { Formatters.signed($0, digits: 1) } ?? "—",
                     unit: "°C"
                 )
             }

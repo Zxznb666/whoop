@@ -445,7 +445,7 @@ struct BrowseView: View {
             if let age = model.bodyAge {
                 Section("身体年龄（示意，待校准）") {
                     LabeledContent("估算身体年龄", value: String(format: "%.0f 岁", age.bodyAge))
-                    LabeledContent("偏移", value: String(format: "%+.1f 年", age.offsetYears))
+                    LabeledContent("偏移", value: Formatters.signed(age.offsetYears, digits: 1, unit: " 年"))
                     if !age.missing.isEmpty {
                         Text("缺少：" + age.missing.joined(separator: "、")).font(.caption).foregroundStyle(.secondary)
                     }
