@@ -1,0 +1,46 @@
+name: Vigor
+options:
+  bundleIdPrefix: com.example.vigor
+  deploymentTarget:
+    iOS: "26.0"
+  createIntermediateGroups: true
+settings:
+  base:
+    SWIFT_VERSION: "6.0"
+    SWIFT_STRICT_CONCURRENCY: complete
+    DEVELOPMENT_TEAM: ""          # 用户之后填入企业团队 ID
+packages:
+  VigorScoring:
+    path: Packages/VigorScoring
+  VigorHealth:
+    path: Packages/VigorHealth
+targets:
+  Vigor:
+    type: application
+    platform: iOS
+    sources: [App]
+    dependencies:
+      - package: VigorScoring
+      - package: VigorHealth
+    info:
+      path: App/Info.plist
+      properties:
+        CFBundleDisplayName: 元气
+        CFBundleShortVersionString: "0.1.0"
+        CFBundleVersion: "1"
+        UILaunchScreen: {}
+        UISupportedInterfaceOrientations: [UIInterfaceOrientationPortrait]
+        NSHealthShareUsageDescription: 元气需要读取睡眠、心率、心率变异性等健康数据，用于在本机计算恢复与睡眠分析。数据不会离开你的设备。
+        NSHealthUpdateUsageDescription: 元气会在你进行晨测时写入正念记录。
+    entitlements:
+      path: App/Vigor.entitlements
+      properties:
+        com.apple.developer.healthkit: true
+        com.apple.developer.healthkit.access: []
+        com.apple.developer.healthkit.background-delivery: true
+        com.apple.security.application-groups: [group.com.example.vigor]
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.example.vigor
+        TARGETED_DEVICE_FAMILY: "1"
+        CODE_SIGN_STYLE: Automatic
