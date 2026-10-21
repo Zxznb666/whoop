@@ -52,3 +52,14 @@
   - 同步路径未接入锚点增量读取（D-048）；通知类型未全部实现（D-053）。
   - 后台任务、HealthKit 观察者、通知的真机行为均未验证。
   - 决策 D-048 至 D-054。
+
+## 阶段 6：设计系统 + 主界面 —— 🚧 部分完成
+- 提交：`0e2b628`（UI）；`Packages/VigorDesign` 的提交见 `git log`
+- 测试：VigorDesign 2 个通过；其余包未变化（VigorScoring 89、VigorHealth 28、VigorStore 4、VigorEngine 4、VigorReplay 4）
+- 构建：iOS ✅  watchOS —
+- 已完成：`VigorDesign`（令牌与 ScoreRing、MetricCard、RangeChart、ContributionWaterfall、Hypnogram、HRTimeline、QualityBadge、StateBanner、SectionCard，各有 `#Preview`）；五个标签页（摘要、睡眠、负荷、日志、浏览）；恢复、睡眠、负荷、训练列表、指标详情、浏览、设置、诊断、欢迎页；路由表与 `-VigorRoute`；`scripts/screenshots.sh`（16 个路由 × 浅色/深色，共 32 张）。
+- 未完成：
+  - 实验室升级（HRV 段表、基线曲线、Shapley 与负债递推、参数面板、全量重算与版本对比、消融）。目前 `lab` 与 `lab:night` 仍是 M0 的实验室页。
+  - 截图人工检查：只检查了摘要、恢复、睡眠、负荷四张。其余 28 张未逐张检查。
+  - 日志页、报告页、教练页仍是占位。
+- 备注：`Info.plist` 由 XcodeGen 从 `project.yml` 生成，后台相关键已移入 `project.yml`（见提交 `0e2b628`）。
