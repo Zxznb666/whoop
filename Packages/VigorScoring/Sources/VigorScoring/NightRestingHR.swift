@@ -89,13 +89,17 @@ public enum NightRestingHR {
     static func lowestTimePosition(_ points: [HeartRateSample], session: SleepSession, config: ScoringConfig) -> Double? {
         let half = config.restingWindowSeconds / 2
         let duration = session.end.timeIntervalSince(session.start)
-        guard duration > 0 else { return nil }
+        guard duration > 0, !points.isEmpty else { return nil }
 
+        // points 已按时间升序；窗口 [t − half, t + half] 对应的下标区间用双指针推进
+        var lower = 0
+        var upper = 0
         var lowest: (value: Double, time: Date)?
-        for point in points {
-            let window = points
-                .filter { abs($0.date.timeIntervalSince(point.date)) <= half }
-                .map(\.bpm)
+        for (index, point) in points.enumerated() {
+            while lower < index, point.date.timeIntervalSince(points[lower].date) > half { lower += 1 }
+            if upper < index { upper = index }
+            while upper + 1 < points.count, points[upper + 1].date.timeIntervalSince(point.date) <= half { upper += 1 }
+            let window = points[lower...upper].map(\.bpm)
             guard window.count >= 3, let median = Statistics.median(window) else { continue }
             if lowest == nil || median < lowest!.value {
                 lowest = (median, point.date)

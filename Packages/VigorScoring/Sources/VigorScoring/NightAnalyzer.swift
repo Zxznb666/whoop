@@ -14,6 +14,8 @@ public struct NightFeatures: Sendable, Hashable, Codable, Identifiable {
     /// 主睡眠内是否有超过 60 分钟没有心率点的时段（部分未佩戴，§5.2 第 6 条）
     public var partialWear: Bool
     public var longestHeartRateGapMinutes: Double?
+    /// 睡眠时段内没有超过阈值空白的时长占比（0–1），用于质量分的 Q_sleep
+    public var heartRateCoverage: Double
     public var awakenings: Int
     /// 呼吸率的夜间中位数（次/分）
     public var respiratoryRate: Double?
@@ -38,6 +40,7 @@ public struct NightFeatures: Sendable, Hashable, Codable, Identifiable {
         heartRateCount: Int,
         partialWear: Bool,
         longestHeartRateGapMinutes: Double?,
+        heartRateCoverage: Double,
         awakenings: Int,
         respiratoryRate: Double?,
         wristTemperature: Double?,
@@ -55,6 +58,7 @@ public struct NightFeatures: Sendable, Hashable, Codable, Identifiable {
         self.heartRateCount = heartRateCount
         self.partialWear = partialWear
         self.longestHeartRateGapMinutes = longestHeartRateGapMinutes
+        self.heartRateCoverage = heartRateCoverage
         self.awakenings = awakenings
         self.respiratoryRate = respiratoryRate
         self.wristTemperature = wristTemperature
@@ -64,6 +68,18 @@ public struct NightFeatures: Sendable, Hashable, Codable, Identifiable {
         self.breathingDisturbanceUnit = breathingDisturbanceUnit
         self.appleRestingHeartRate = appleRestingHeartRate
     }
+}
+
+/// HealthKit 返回的样本通常已经按时间排序，此时跳过排序。
+private func sortedIfNeeded<T>(_ array: [T], by areInIncreasingOrder: (T, T) -> Bool) -> [T] {
+    var previous: T?
+    for element in array {
+        if let previous, areInIncreasingOrder(element, previous) {
+            return array.sorted(by: areInIncreasingOrder)
+        }
+        previous = element
+    }
+    return array
 }
 
 public enum NightAnalyzer {
@@ -82,16 +98,62 @@ public enum NightAnalyzer {
             overrides: overrides
         )
         let analyzed = snapshot.heartbeatSeries.map { RRProcessor.analyze($0, config: config) }
+        let sources = SortedSources(snapshot)
 
         return sessions
             .filter(\.isMain)
-            .map { makeFeatures(session: $0, snapshot: snapshot, analyzed: analyzed, calendar: calendar, config: config) }
+            .map { makeFeatures(session: $0, snapshot: snapshot, sources: sources, analyzed: analyzed, calendar: calendar, config: config) }
             .sorted { $0.session.end > $1.session.end }
+    }
+
+    /// 按时间排序的样本数组，用于在每晚的时段内做二分查找（避免对全量数据反复过滤）。
+    struct SortedSources {
+        var heartRate: [HeartRateSample]
+        var respiratory: [ValueSample]
+        var oxygen: [ValueSample]
+        var sdnn: [ValueSample]
+        var wrist: [ValueSample]
+        var resting: [ValueSample]
+        var breathing: [BreathingDisturbanceSample]
+
+        init(_ snapshot: HealthSnapshot) {
+            heartRate = sortedIfNeeded(snapshot.heartRate) { $0.date < $1.date }
+            respiratory = sortedIfNeeded(snapshot.respiratoryRate) { $0.start < $1.start }
+            oxygen = sortedIfNeeded(snapshot.oxygenSaturation) { $0.start < $1.start }
+            sdnn = sortedIfNeeded(snapshot.hrvSDNN) { $0.start < $1.start }
+            wrist = sortedIfNeeded(snapshot.wristTemperature) { $0.start < $1.start }
+            resting = sortedIfNeeded(snapshot.restingHeartRate) { $0.start < $1.start }
+            breathing = sortedIfNeeded(snapshot.breathingDisturbances) { $0.end < $1.end }
+        }
+
+    }
+
+    /// 排序数组中落在 [from, to] 内的元素（端点包含），用二分查找定位。
+    static func inRange<T>(_ sorted: [T], from: Date, to: Date, date: (T) -> Date) -> ArraySlice<T> {
+        let lower = partitionPoint(sorted) { date($0) < from }
+        let upper = partitionPoint(sorted) { date($0) <= to }
+        return sorted[lower..<max(lower, upper)]
+    }
+
+    /// 第一个使 predicate 为假的下标（predicate 对前缀为真）。
+    static func partitionPoint<T>(_ array: [T], _ predicate: (T) -> Bool) -> Int {
+        var low = 0
+        var high = array.count
+        while low < high {
+            let middle = (low + high) / 2
+            if predicate(array[middle]) {
+                low = middle + 1
+            } else {
+                high = middle
+            }
+        }
+        return low
     }
 
     private static func makeFeatures(
         session: SleepSession,
         snapshot: HealthSnapshot,
+        sources: SortedSources,
         analyzed: [HRVWindow],
         calendar: Calendar,
         config: ScoringConfig
@@ -106,8 +168,9 @@ public enum NightAnalyzer {
         // 顺序：有效序列的平均心率 → 静息心率 → 扰动检测 → 合成（§5.4、§5.3.3 的依赖关系）
         let validSeriesMeans = overnight.filter(\.isValid).compactMap(\.meanHeartRate)
         let appleRHR = appleRestingHeartRate(snapshot, session: session, calendar: calendar)
+        let heartRates = Array(inRange(sources.heartRate, from: session.start, to: session.end) { $0.date })
         let restingHR = NightRestingHR.compute(
-            heartRate: snapshot.heartRate,
+            heartRate: heartRates,
             session: session,
             seriesMeanHeartRates: validSeriesMeans,
             appleRestingHeartRate: appleRHR,
@@ -121,13 +184,12 @@ public enum NightAnalyzer {
             session: session,
             overnight: &overnight,
             morning: &morning,
-            sdnn: snapshot.hrvSDNN,
+            sdnn: sources.sdnn,
             config: config
         )
 
-        let heartRates = snapshot.heartRate.filter { $0.date >= session.start && $0.date <= session.end }
         let gapMinutes = longestHeartRateGapMinutes(heartRates, session: session)
-        let breathing = snapshot.breathingDisturbances.first { day(of: $0.end, calendar: calendar) == session.wakeDay }
+        let breathing = sources.breathing.first { day(of: $0.end, calendar: calendar) == session.wakeDay }
 
         return NightFeatures(
             session: session,
@@ -139,11 +201,12 @@ public enum NightAnalyzer {
             // 没有任何心率点同样算作超过阈值的空白（§5.2 第 6 条）
             partialWear: (gapMinutes ?? .infinity) > config.wearGapMinutes,
             longestHeartRateGapMinutes: gapMinutes,
+            heartRateCoverage: heartRateCoverage(heartRates, session: session, config: config),
             awakenings: SleepEvents.awakeningCount(in: session, config: config),
-            respiratoryRate: median(snapshot.respiratoryRate, in: session, minimum: config.respiratoryMinSamples),
-            wristTemperature: snapshot.wristTemperature.first { day(of: $0.end, calendar: calendar) == session.wakeDay }?.value,
-            spo2MedianPercent: median(snapshot.oxygenSaturation, in: session, minimum: config.oxygenMinSamples, scale: 100),
-            spo2BelowFraction: belowFraction(snapshot.oxygenSaturation, in: session, threshold: config.oxygenLowThresholdPercent, minimum: config.oxygenMinSamples),
+            respiratoryRate: median(sources.respiratory, in: session, minimum: config.respiratoryMinSamples),
+            wristTemperature: sources.wrist.first { day(of: $0.end, calendar: calendar) == session.wakeDay }?.value,
+            spo2MedianPercent: median(sources.oxygen, in: session, minimum: config.oxygenMinSamples, scale: 100),
+            spo2BelowFraction: belowFraction(sources.oxygen, in: session, threshold: config.oxygenLowThresholdPercent, minimum: config.oxygenMinSamples),
             breathingDisturbance: breathing?.value,
             breathingDisturbanceUnit: breathing?.unit,
             appleRestingHeartRate: appleRHR
@@ -158,6 +221,19 @@ public enum NightAnalyzer {
         return gap / 60
     }
 
+    /// 超过阈值的空白不计入覆盖：覆盖 = 1 − (超过阈值的空白总时长 ÷ 睡眠时段时长)。
+    static func heartRateCoverage(_ points: [HeartRateSample], session: SleepSession, config: ScoringConfig) -> Double {
+        let duration = session.end.timeIntervalSince(session.start)
+        guard duration > 0 else { return 0 }
+        guard !points.isEmpty else { return 0 }
+        let dates = [session.start] + points.map(\.date).sorted() + [session.end]
+        let longGaps = zip(dates, dates.dropFirst())
+            .map { $1.timeIntervalSince($0) }
+            .filter { $0 > config.wearGapMinutes * 60 }
+            .reduce(0, +)
+        return min(max(1 - longGaps / duration, 0), 1)
+    }
+
     private static func appleRestingHeartRate(_ snapshot: HealthSnapshot, session: SleepSession, calendar: Calendar) -> Double? {
         snapshot.restingHeartRate.first { day(of: $0.start, calendar: calendar) == session.wakeDay }?.value
     }
@@ -168,7 +244,7 @@ public enum NightAnalyzer {
         minimum: Int,
         scale: Double = 1
     ) -> Double? {
-        let values = samples.filter { $0.start >= session.start && $0.start <= session.end }.map { $0.value * scale }
+        let values = inRange(samples, from: session.start, to: session.end) { $0.start }.map { $0.value * scale }
         guard values.count >= minimum else { return nil }
         return Statistics.median(values)
     }
@@ -179,7 +255,7 @@ public enum NightAnalyzer {
         threshold: Double,
         minimum: Int
     ) -> Double? {
-        let values = samples.filter { $0.start >= session.start && $0.start <= session.end }.map { $0.value * 100 }
+        let values = inRange(samples, from: session.start, to: session.end) { $0.start }.map { $0.value * 100 }
         guard values.count >= minimum else { return nil }
         return Double(values.filter { $0 < threshold }.count) / Double(values.count)
     }

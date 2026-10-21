@@ -101,26 +101,45 @@ public enum SleepSessionBuilder {
 
     /// 分期样本只保留时间上没有更高优先级来源覆盖的那一条。
     static func applySourcePriority(_ samples: [SleepStageSample]) -> [SleepStageSample] {
-        samples.filter { sample in
-            !samples.contains { other in
-                sourceRank(other) < sourceRank(sample) && overlaps(other, sample)
+        let sorted = samples.sorted { $0.start < $1.start }
+        var dropped = [Bool](repeating: false, count: sorted.count)
+        // 按开始时间排序后，只需向后扫描开始时间早于当前结束时间的样本
+        for i in sorted.indices {
+            var j = i + 1
+            while j < sorted.count, sorted[j].start < sorted[i].end {
+                if overlaps(sorted[i], sorted[j]) {
+                    let (rankI, rankJ) = (sourceRank(sorted[i]), sourceRank(sorted[j]))
+                    if rankI < rankJ {
+                        dropped[j] = true
+                    } else if rankJ < rankI {
+                        dropped[i] = true
+                    }
+                }
+                j += 1
             }
         }
+        return sorted.indices.filter { !dropped[$0] }.map { sorted[$0] }
     }
 
     /// 同一来源内重叠时保留较晚的一条：优先比较创建时间，缺失时比较结束时间（见 DECISIONS D-004）。
     static func removeSameSourceOverlaps(_ samples: [SleepStageSample]) -> [SleepStageSample] {
-        var kept: [SleepStageSample] = []
-        for sample in samples.sorted(by: { $0.start < $1.start }) {
-            if let index = kept.firstIndex(where: { sameSource($0, sample) && overlaps($0, sample) }) {
-                if recency(sample) > recency(kept[index]) {
-                    kept[index] = sample
+        let sorted = samples.sorted { $0.start < $1.start }
+        var dropped = [Bool](repeating: false, count: sorted.count)
+        for i in sorted.indices where !dropped[i] {
+            var j = i + 1
+            while j < sorted.count, sorted[j].start < sorted[i].end {
+                if !dropped[j], sameSource(sorted[i], sorted[j]), overlaps(sorted[i], sorted[j]) {
+                    // 保留较晚的一条
+                    if recency(sorted[j]) > recency(sorted[i]) {
+                        dropped[i] = true
+                        break
+                    }
+                    dropped[j] = true
                 }
-            } else {
-                kept.append(sample)
+                j += 1
             }
         }
-        return kept
+        return sorted.indices.filter { !dropped[$0] }.map { sorted[$0] }
     }
 
     private static func sameSource(_ a: SleepStageSample, _ b: SleepStageSample) -> Bool {

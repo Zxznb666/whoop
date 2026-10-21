@@ -99,7 +99,8 @@ private struct ScenarioBuilder {
                 night: plan.wakeDay,
                 behaviors: ["alcohol": plan.alcohol, "lateDinner": plan.lateDinner],
                 energy: plan.energy,
-                feltUnwell: plan.sick
+                // 用户没有在日志中确认“不适”，自动排除路径由生病信号触发
+                feltUnwell: false
             ))
             recordTruth(plan)
             if plan.missing { continue }
@@ -156,10 +157,11 @@ private struct ScenarioBuilder {
             let bedtime = whole(previousDay.addingTimeInterval(23 * 3600 + rng.uniform(0...5400)))
             let duration = (rng.uniform(6.5...8.5) * 3600).rounded()
             let wake = bedtime.addingTimeInterval(duration)
-            let alcohol = rng.chance(0.15)
+            let sick = index == nights - 20 || index == nights - 19
+            // 生病夜不饮酒：让生病的注入事件不与饮酒混杂（混杂的情形由测试单独覆盖）
+            let alcohol = rng.chance(0.15) && !sick
             let lateDinner = rng.chance(0.10)
             let energy = rng.int(1...5)
-            let sick = index == nights - 20 || index == nights - 19
             let missing = index == nights - 50
 
             var workout: WorkoutPlan?

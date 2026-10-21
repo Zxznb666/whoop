@@ -199,12 +199,18 @@ public enum RRProcessor {
 
         // 局部中位数：同一 run 内、前后各 5 拍（只统计仍然通过生理范围的拍）
         var localMedian = [Double](repeating: 0, count: candidates.count)
+        var window: [Double] = []
+        window.reserveCapacity(2 * config.localWindowHalfSize + 1)
         for index in candidates.indices where !rejected[index] {
             let lower = max(candidates.startIndex, index - config.localWindowHalfSize)
             let upper = min(candidates.endIndex - 1, index + config.localWindowHalfSize)
-            let window = (lower...upper)
-                .filter { candidates[$0].run == candidates[index].run && !(candidates[$0].rr < config.minRRms || candidates[$0].rr > config.maxRRms) }
-                .map { candidates[$0].rr }
+            window.removeAll(keepingCapacity: true)
+            for other in lower...upper where candidates[other].run == candidates[index].run {
+                let rr = candidates[other].rr
+                if rr >= config.minRRms, rr <= config.maxRRms {
+                    window.append(rr)
+                }
+            }
             localMedian[index] = Statistics.median(window) ?? candidates[index].rr
             if abs(candidates[index].rr - localMedian[index]) / localMedian[index] > config.localMedianTolerance {
                 rejected[index] = true
