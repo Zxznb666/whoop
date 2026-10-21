@@ -167,6 +167,16 @@ public enum ScoringPipeline {
             let heartRates = Array(NightAnalyzer.inRange(sources.heartRate, from: workout.start, to: workout.end) { $0.date })
             return MaxHeartRate.observedPeak(workoutHeartRate: heartRates).map { (workout.end, $0) }
         }
+        // 压力的候选窗口（§5.12.2）：每个周期醒着的时间段内符合条件的安静窗口；日间基线只能用之前的周期，因此先整体计算
+        let quietWindowMeans: [[Double]] = features.indices.map { index in
+            let wake = features[index].session.end
+            let upperDate = features.indices.contains(index + 1) ? features[index + 1].session.start : snapshot.rangeEnd
+            let lower = grid.index(of: wake)
+            let upper = max(lower, grid.index(of: upperDate))
+            let workouts = snapshot.workouts.filter { $0.start >= wake && $0.start < upperDate }
+            return LoadCalculator.quietWindowMeans(grid: grid, window: lower..<upper, workouts: workouts)
+        }
+        var daytimeHistory: [Double] = []
         // SRI 只需要最近 7 天的分期：按结束时间排序后用二分查找取窗口，避免每晚扫描全部分期
         let sleepByEnd = snapshot.sleep.sorted { $0.end < $1.end }
         var previousStrain: Double?
@@ -249,6 +259,7 @@ public enum ScoringPipeline {
             let lowerMinute = grid.index(of: wake)
             let upperMinute = max(lowerMinute, grid.index(of: upperDate))
             let restingForLoad = stats[.restingHeartRate]?.mu ?? PopulationPriors.prior(for: .restingHeartRate, profile: profile, year: year).mu ?? 56
+            let stressBaseline = Stress.daytimeBaseline(priorDaytime: daytimeHistory, restingHeartRate: restingForLoad)
             let observedPeak = workoutPeaks.filter { $0.end <= upperDate }.map(\.peak).max()
             let maxHeartRate = input.maxHeartRate ?? MaxHeartRate.effective(
                 initial: MaxHeartRate.initial(birthYear: profile.birthYear, year: year),
@@ -264,9 +275,15 @@ public enum ScoringPipeline {
                 maxHeartRate: maxHeartRate,
                 sex: profile.sex,
                 model: grid.activityModel(endingBefore: upperMinute),
+                quietWindowMeans: quietWindowMeans[index],
+                stressBaseline: stressBaseline,
                 zHRV: zHRV,
                 config: config
             )
+            // 本周期的日间安静心率只在之后的周期中作为基线使用
+            if let daytime = Stress.daytimeQuietHeartRate(windowMeans: quietWindowMeans[index]) {
+                daytimeHistory.append(daytime)
+            }
             let acwr = LoadTargets.acwr(recentTRIMP: trimpHistory)
             trimpHistory.append(load.trimp)
             previousStrain = load.strain

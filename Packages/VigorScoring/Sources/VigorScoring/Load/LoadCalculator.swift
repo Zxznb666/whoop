@@ -149,6 +149,8 @@ public enum LoadCalculator {
     ///   - window: 分钟索引区间 [lower, upper)
     ///   - workouts: 与该周期相关的训练（起点在周期内）
     ///   - recoveries: 心率恢复样本，用于取 1 分钟心率恢复
+    ///   - quietWindowMeans: 周期内符合条件的安静窗口平均心率（见 `quietWindowMeans`）
+    ///   - stressBaseline: 日间安静心率基线 μ_day（见 `Stress.daytimeBaseline`）
     ///   - zHRV: 当日 z_hrv，用于压力的 +0.5 修正
     public static func cycleLoad(
         grid: MinuteGrid,
@@ -160,6 +162,8 @@ public enum LoadCalculator {
         maxHeartRate: Double,
         sex: BiologicalSex,
         model: ActivityModel?,
+        quietWindowMeans: [Double],
+        stressBaseline: Double,
         zHRV: Double?,
         config: ScoringConfig
     ) -> CycleLoad {
@@ -196,11 +200,8 @@ public enum LoadCalculator {
             )
         }
 
-        let stress = stressValue(
-            grid: grid,
-            window: lower..<upper,
-            workouts: workouts,
-            restingHeartRate: restingHeartRate,
+        let stress = Stress.daily(
+            windowStresses: quietWindowMeans.map { Stress.windowStress(meanHeartRate: $0, daytimeBaseline: stressBaseline) },
             zHRV: zHRV
         )
 
@@ -262,16 +263,11 @@ public enum LoadCalculator {
         )
     }
 
-    /// 每 15 分钟一个窗口：不含训练、步数 < 100、至少有 2 个心率测量点时计算压力。
-    static func stressValue(
-        grid: MinuteGrid,
-        window: Range<Int>,
-        workouts: [WorkoutSample],
-        restingHeartRate: Double,
-        zHRV: Double?
-    ) -> Double? {
+    /// 压力的候选窗口（PRD §5.12.2）：醒着的周期内每 15 分钟一个窗口，不含训练、步数 < 100、至少有 2 个心率测量点。
+    /// 返回符合条件窗口的平均心率；日间安静心率与压力都由它推出。
+    public static func quietWindowMeans(grid: MinuteGrid, window: Range<Int>, workouts: [WorkoutSample]) -> [Double] {
         let workoutRanges = workouts.map { (grid.index(of: $0.start), max(grid.index(of: $0.start) + 1, grid.index(of: $0.end))) }
-        var windowStresses: [Double] = []
+        var means: [Double] = []
         var start = max(0, window.lowerBound)
         let end = min(grid.count, window.upperBound)
         while start + 15 <= end {
@@ -285,8 +281,8 @@ public enum LoadCalculator {
             guard steps < 100 else { continue }
             let measured = range.compactMap { grid.heartRate[$0].isNaN ? nil : grid.heartRate[$0] }
             guard measured.count >= 2, let mean = Statistics.mean(measured) else { continue }
-            windowStresses.append(Stress.windowStress(meanHeartRate: mean, restingHeartRate: restingHeartRate))
+            means.append(mean)
         }
-        return Stress.daily(windowStresses: windowStresses, zHRV: zHRV)
+        return means
     }
 }

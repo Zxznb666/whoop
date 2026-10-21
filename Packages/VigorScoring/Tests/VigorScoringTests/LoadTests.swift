@@ -122,8 +122,8 @@ struct LoadTests {
 
     @Test("压力：elev = 0.10 → 1；elev ≥ 0.30 封顶为 3；z_hrv < −1 时加 0.5")
     func stressRules() {
-        #expect(abs(Stress.windowStress(meanHeartRate: 66, restingHeartRate: 60) - 1) < 1e-9)
-        #expect(Stress.windowStress(meanHeartRate: 90, restingHeartRate: 60) == 3)
+        #expect(abs(Stress.windowStress(meanHeartRate: 66, daytimeBaseline: 60) - 1) < 1e-9)
+        #expect(Stress.windowStress(meanHeartRate: 90, daytimeBaseline: 60) == 3)
         #expect(Stress.daily(windowStresses: [1, 1], zHRV: -1.5) == 1.5)
         #expect(Stress.daily(windowStresses: [], zHRV: 0) == nil)
     }

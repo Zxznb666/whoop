@@ -125,6 +125,35 @@ struct PipelineSyntheticTests {
         #expect(rerun.cycles[index + 1].baselines[.restingHeartRate] != original.cycles[index + 1].baselines[.restingHeartRate])
     }
 
+    @Test("压力（F2）：非训练周期的平均压力 < 1.5（日间基线取代夜间静息心率后不再几乎满格）")
+    func stressNotSaturatedOnRestDays() {
+        let output = run(scenario())
+        let rest = output.cycles.filter { $0.load.workouts.isEmpty }.compactMap { $0.load.stress }
+        #expect(!rest.isEmpty)
+        let mean = rest.reduce(0, +) / Double(rest.count)
+        #expect(mean < 1.5)
+    }
+
+    @Test("压力不用未来数据：改变第 N 周期醒着时的心率，之前周期的压力不变（第 N 周期自身的压力会变，因为它的窗口就在这段时间内）")
+    func stressHasNoFutureData() {
+        let result = scenario()
+        let original = run(result)
+        let index = 60
+        let wake = original.cycles[index].wakeTime
+
+        var changed = result
+        for sample in changed.snapshot.heartRate.indices where changed.snapshot.heartRate[sample].date >= wake {
+            changed.snapshot.heartRate[sample].bpm += 40
+        }
+        let rerun = run(changed)
+
+        for position in 0..<index {
+            #expect(rerun.cycles[position].load.stress == original.cycles[position].load.stress)
+        }
+        #expect(rerun.cycles[index].load.stress != original.cycles[index].load.stress)
+        #expect(rerun.cycles[index + 1].load.stress != original.cycles[index + 1].load.stress)
+    }
+
     @Test("同样的输入得到同样的输出，输入哈希稳定；改变配置版本哈希变化")
     func determinismAndHash() {
         let result = scenario()
