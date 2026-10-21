@@ -21,9 +21,9 @@
 	<key>CFBundlePackageType</key>
 	<string>APPL</string>
 	<key>CFBundleShortVersionString</key>
-	<string>0.1.0</string>
+	<string>1.0.0</string>
 	<key>CFBundleVersion</key>
-	<string>1</string>
+	<string>2</string>
 	<key>NSHealthShareUsageDescription</key>
 	<string>元气需要读取睡眠、心率、心率变异性等健康数据，用于在本机计算恢复与睡眠分析。数据不会离开你的设备。</string>
 	<key>NSHealthUpdateUsageDescription</key>

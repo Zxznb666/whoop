@@ -20,6 +20,8 @@ packages:
     path: Packages/VigorEngine
   VigorDesign:
     path: Packages/VigorDesign
+  VigorCoach:
+    path: Packages/VigorCoach
 targets:
   Vigor:
     type: application
@@ -31,12 +33,13 @@ targets:
       - package: VigorStore
       - package: VigorEngine
       - package: VigorDesign
+      - package: VigorCoach
     info:
       path: App/Info.plist
       properties:
         CFBundleDisplayName: 元气
-        CFBundleShortVersionString: "0.1.0"
-        CFBundleVersion: "1"
+        CFBundleShortVersionString: "1.0.0"
+        CFBundleVersion: "2"
         BGTaskSchedulerPermittedIdentifiers:
           - com.example.vigor.nightly
         UIBackgroundModes:
