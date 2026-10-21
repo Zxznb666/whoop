@@ -150,6 +150,16 @@ struct PipelineSyntheticTests {
         #expect(run(result, now: lastWake.addingTimeInterval(49 * 3600)).cycles.last?.recoveryState == .locked)
     }
 
+    @Test("影响洞察：合成场景中“饮酒”排在第一位（按效应量）")
+    func alcoholRanksFirst() throws {
+        let result = scenario()
+        let output = run(result)
+        let insights = JournalInsights.compute(cycles: output.cycles, journal: result.journal, calendar: shanghaiCalendar())
+        let first = try #require(insights.first)
+        #expect(first.behavior == "alcohol")
+        #expect(first.difference < 0)
+    }
+
     @Test("个性化基础需求：积累 60 晚以后给出建议，并说明是否更新")
     func personalizedNeedAfterSixtyNights() throws {
         let output = run(scenario())
