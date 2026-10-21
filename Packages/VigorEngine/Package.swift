@@ -16,6 +16,6 @@ let package = Package(
             "VigorHealth",
             "VigorStore",
         ]),
-        .testTarget(name: "VigorEngineTests", dependencies: ["VigorEngine", "VigorScoring", "VigorHealth"]),
+        .testTarget(name: "VigorEngineTests", dependencies: ["VigorEngine", "VigorScoring", "VigorHealth", "VigorStore"]),
     ]
 )

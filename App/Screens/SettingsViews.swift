@@ -124,7 +124,11 @@ struct OnboardingView: View {
         #else
         do {
             try await LiveHealthDataSource().requestAuthorization()
-            status = "已请求授权。"
+            _ = await NotificationScheduler.requestAuthorization()
+            status = "已授权，正在导入历史数据……"
+            // 授权前的刷新读不到数据，这里必须全量导入，否则缓存里只有空数据
+            await AppBootstrap.shared.refreshNow(mode: .full)
+            status = "导入完成。"
         } catch {
             status = "授权失败：\(error.localizedDescription)"
             DiagnosticsLog.record("授权失败：\(error)")

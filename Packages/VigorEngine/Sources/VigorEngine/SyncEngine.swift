@@ -26,46 +26,95 @@ public struct SyncStatus: Sendable, Hashable {
     }
 }
 
-/// 编排：读取健康数据 → 评分流水线 → 持久化 → 共享状态 → 通知计划。
+/// 一次刷新从 HealthKit 读取多少数据。
+public enum RefreshMode: Sendable, Hashable {
+    /// 只读取最近 `days` 天，与本地快照缓存合并；没有缓存时自动改为全量读取
+    case window(days: Int)
+    /// 读取全部历史窗口并重建缓存（首次导入、手动重新导入）
+    case full
+
+    /// 日常增量刷新：最近 3 天，足以覆盖晚到的温度、呼吸率和跨夜睡眠
+    public static let incremental = RefreshMode.window(days: 3)
+
+    /// 两个请求合并时取读取范围更大的那个。
+    public static func stronger(_ lhs: RefreshMode?, _ rhs: RefreshMode) -> RefreshMode {
+        switch (lhs, rhs) {
+        case (nil, _): rhs
+        case (.full?, _), (_, .full): .full
+        case let (.window(a)?, .window(b)): .window(days: max(a, b))
+        }
+    }
+}
+
+/// 评分用到的用户设置（PRD §6.12）。
+public struct ScoringSettings: Sendable, Hashable {
+    public var baseSleepNeedHours: Double
+    public var maxHeartRate: Double?
+    public var targetWakeMinutes: Int?
+
+    public init(baseSleepNeedHours: Double = 7.5, maxHeartRate: Double? = nil, targetWakeMinutes: Int? = nil) {
+        self.baseSleepNeedHours = baseSleepNeedHours
+        self.maxHeartRate = maxHeartRate
+        self.targetWakeMinutes = targetWakeMinutes
+    }
+}
+
+/// 编排：读取健康数据 → 合并本地快照缓存 → 评分流水线 → 持久化 → 共享状态 → 通知计划。
 /// 数据源是 `HealthDataSource` 协议，实时、合成与导入快照走同一条路径（施工文档 §5 阶段 5 第 2 条）。
 public actor SyncEngine {
     private let source: any HealthDataSource
     private let repository: ScoreRepository
+    private let cache: SnapshotCache?
     private let calendar: Calendar
     private let appGroupID: String
+    /// 评分与缓存保留的历史天数
+    private let historyDays: Int
     public private(set) var status = SyncStatus()
+    /// 本次刷新中不致命的问题（缓存写入失败等），刷新结束时写入 `status.lastError`
+    private var warnings: [String] = []
 
     public init(
         source: any HealthDataSource,
         repository: ScoreRepository,
+        cache: SnapshotCache? = nil,
         calendar: Calendar,
+        historyDays: Int = 180,
         appGroupID: String = "group.com.example.vigor"
     ) {
         self.source = source
         self.repository = repository
+        self.cache = cache
         self.calendar = calendar
+        self.historyDays = historyDays
         self.appGroupID = appGroupID
     }
 
-    /// 一次完整的刷新。失败时记录错误并抛出，不会崩溃（施工文档 §5 阶段 5 第 2 条）。
+    /// 本地缓存中的快照（界面用来计算身体年龄等需要原始数据的指标）。
+    public func cachedSnapshot() async -> HealthSnapshot? {
+        await cache?.load()
+    }
+
+    /// 一次刷新。失败时记录错误并抛出，不会崩溃（施工文档 §5 阶段 5 第 2 条）。
     @discardableResult
     public func refresh(
-        from start: Date,
-        to end: Date,
+        mode: RefreshMode = .incremental,
+        settings: ScoringSettings = ScoringSettings(),
         now: Date = Date(),
         announcedRecovery: [Date: Double] = [:],
         sent: Set<String> = []
     ) async throws -> [PlannedNotification] {
+        warnings = []
         do {
-            status.progressText = "读取健康数据"
-            let snapshot = try await source.snapshot(from: start, to: end) { [weak self] fraction, text in
-                Task { await self?.report(progress: fraction, text: text) }
-            }
-            let journal = try await repository.journal(from: start, to: end)
+            let snapshot = try await readSnapshot(mode: mode, now: now)
+            let journal = try await repository.journal(from: snapshot.rangeStart, to: now)
             let config = try await repository.currentConfig() ?? .default
+            status.progressText = "计算分数"
             let output = ScoringPipeline.run(PipelineInput(
                 snapshot: snapshot,
                 journal: journal,
+                baseSleepNeedHours: settings.baseSleepNeedHours,
+                maxHeartRate: settings.maxHeartRate,
+                targetWakeMinutes: settings.targetWakeMinutes,
                 config: config,
                 now: now,
                 calendar: calendar
@@ -77,16 +126,54 @@ public actor SyncEngine {
                 sent: sent,
                 calendar: calendar
             )
+            // 共享状态只服务小组件和手表，写失败不应让整次刷新失败
             if let last = output.cycles.last {
-                try writeSharedState(from: last, now: now)
+                do {
+                    try writeSharedState(from: last, now: now)
+                } catch {
+                    warnings.append("共享状态写入失败：\(error)")
+                }
             }
-            status = SyncStatus(lastSuccessAt: now, lastError: nil, lastCycleCount: output.cycles.count, progress: 1, progressText: "完成")
+            status = SyncStatus(
+                lastSuccessAt: now,
+                lastError: warnings.isEmpty ? nil : warnings.joined(separator: "\n"),
+                lastCycleCount: output.cycles.count,
+                progress: 1,
+                progressText: "完成"
+            )
             return notifications
         } catch {
             status.lastError = String(describing: error)
             status.progressText = "失败"
             throw error
         }
+    }
+
+    /// 按模式读取 HealthKit，并与缓存合并后写回。没有缓存时一律全量读取。
+    private func readSnapshot(mode: RefreshMode, now: Date) async throws -> HealthSnapshot {
+        let historyStart = calendar.date(byAdding: .day, value: -historyDays, to: now) ?? now
+        // 空缓存（例如授权之前那次刷新留下的）视同没有缓存，避免历史数据永远导入不进来
+        let cached: HealthSnapshot? = mode == .full ? nil : await cache?.load().flatMap {
+            $0.sleep.isEmpty && $0.heartRate.isEmpty ? nil : $0
+        }
+        var readStart = historyStart
+        if let cached, case let .window(days) = mode {
+            let windowStart = calendar.date(byAdding: .day, value: -days, to: now) ?? now
+            // 缓存过旧（覆盖不到窗口起点）时，从缓存末尾开始补读
+            readStart = max(historyStart, min(windowStart, cached.rangeEnd))
+        }
+        status.progressText = cached == nil ? "导入历史数据" : "读取最近数据"
+        let fresh = try await source.snapshot(from: readStart, to: now) { [weak self] fraction, text in
+            Task { await self?.report(progress: fraction, text: text) }
+        }
+        let snapshot = cached?.merging(fresh, cut: readStart, keepFrom: historyStart) ?? fresh
+        do {
+            try await cache?.save(snapshot)
+        } catch {
+            // 缓存写失败不影响本次评分，下次刷新会退回全量读取
+            warnings.append("快照缓存写入失败：\(error)")
+        }
+        return snapshot
     }
 
     func report(progress: Double, text: String) {

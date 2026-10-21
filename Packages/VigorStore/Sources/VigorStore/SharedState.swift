@@ -68,8 +68,16 @@ public enum SharedStateStore {
         encoder.outputFormatting = [.sortedKeys]
         let data = try encoder.encode(state)
         if let url = appGroupFileURL(groupID: groupID) {
-            try data.write(to: url, options: .atomic)
-            return (url, true)
+            do {
+                try FileManager.default.createDirectory(
+                    at: url.deletingLastPathComponent(),
+                    withIntermediateDirectories: true
+                )
+                try data.write(to: url, options: .atomic)
+                return (url, true)
+            } catch {
+                // 容器路径存在但不可写（例如重签名后 App Group 权限不完整），改写备用位置
+            }
         }
         let url = try fallbackFileURL()
         try data.write(to: url, options: .atomic)

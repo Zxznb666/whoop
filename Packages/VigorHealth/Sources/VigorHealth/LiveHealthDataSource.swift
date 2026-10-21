@@ -7,9 +7,12 @@ import VigorScoring
 public struct LiveHealthDataSource: HealthDataSource {
     public let kind = DataSourceKind.live
     private let store: HKHealthStore
+    /// 心跳序列的本地缓存；为 nil 时每次都从 HealthKit 读取
+    private let heartbeatCache: HeartbeatCache?
 
-    public init(store: HKHealthStore = HKHealthStore()) {
+    public init(store: HKHealthStore = HKHealthStore(), heartbeatCache: HeartbeatCache? = nil) {
         self.store = store
+        self.heartbeatCache = heartbeatCache
     }
 
     public func requestAuthorization() async throws {
@@ -104,18 +107,24 @@ public struct LiveHealthDataSource: HealthDataSource {
         )
         let heartbeatSamples = seriesSamples.compactMap { $0 as? HKHeartbeatSeriesSample }
         var heartbeatSeries: [HeartbeatSeries] = []
-        // 心跳序列读取开销大，逐个顺序执行。
+        // 心跳序列读取开销大：先查本地缓存，未命中再逐个顺序读取并写回缓存。
         for (index, sample) in heartbeatSamples.enumerated() {
-            var beats: [Beat] = []
-            for try await heartbeat in HKHeartbeatSeriesQueryDescriptor(sample).results(for: store) {
-                beats.append(Beat(t: heartbeat.timeIntervalSinceStart, precededByGap: heartbeat.precededByGap))
+            if let cached = try? await heartbeatCache?.load(sample.uuid) {
+                heartbeatSeries.append(cached)
+            } else {
+                var beats: [Beat] = []
+                for try await heartbeat in HKHeartbeatSeriesQueryDescriptor(sample).results(for: store) {
+                    beats.append(Beat(t: heartbeat.timeIntervalSinceStart, precededByGap: heartbeat.precededByGap))
+                }
+                let series = HeartbeatSeries(
+                    id: sample.uuid,
+                    start: sample.startDate,
+                    end: sample.endDate,
+                    beats: beats
+                )
+                try? await heartbeatCache?.store(series)
+                heartbeatSeries.append(series)
             }
-            heartbeatSeries.append(HeartbeatSeries(
-                id: sample.uuid,
-                start: sample.startDate,
-                end: sample.endDate,
-                beats: beats
-            ))
             progress(
                 0.2 + 0.75 * Double(index + 1) / Double(heartbeatSamples.count),
                 "读取心跳序列 \(index + 1)/\(heartbeatSamples.count)"

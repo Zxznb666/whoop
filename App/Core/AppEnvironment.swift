@@ -16,7 +16,12 @@ final class AppEnvironment {
             let container = try VigorStoreFactory.makeContainer()
             let repository = ScoreRepository(modelContainer: container)
             self.repository = repository
-            self.sync = SyncEngine(source: Self.defaultSource(), repository: repository, calendar: calendar)
+            self.sync = SyncEngine(
+                source: Self.defaultSource(),
+                repository: repository,
+                cache: (try? SnapshotCache.defaultURL()).map(SnapshotCache.init(url:)),
+                calendar: calendar
+            )
         } catch {
             setupError = error.localizedDescription
             DiagnosticsLog.record("存储初始化失败：\(error)")
@@ -28,7 +33,7 @@ final class AppEnvironment {
         let snapshot = SyntheticScenario.make(nights: 120, endingAt: Date(), calendar: .current).snapshot
         return ReplayHealthDataSource(snapshot: snapshot, kind: .synthetic)
         #else
-        return LiveHealthDataSource()
+        return LiveHealthDataSource(heartbeatCache: (try? HeartbeatCache.defaultDirectory()).map(HeartbeatCache.init(directory:)))
         #endif
     }
 }

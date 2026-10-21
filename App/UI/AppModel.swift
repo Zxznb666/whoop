@@ -3,6 +3,7 @@ import Observation
 import VigorDesign
 import VigorHealth
 import VigorScoring
+import VigorStore
 
 /// 界面的数据来源：模拟器使用固定日期的合成数据（截图可复现），真机使用 SwiftData 中的周期记录。
 @MainActor
@@ -108,11 +109,19 @@ final class AppModel {
             message = environment.setupError ?? "存储未就绪"
             return
         }
+        // 先显示上次保存的结果，再在后台刷新，避免打开 App 时等待 HealthKit 读取
+        await reloadFromStore(repository: repository)
         await AppBootstrap.shared.refreshNow()
+        await reloadFromStore(repository: repository)
+    }
+
+    private func reloadFromStore(repository: ScoreRepository) async {
         let now = Date()
         let start = calendar.date(byAdding: .day, value: -180, to: now) ?? now
         do {
             cycles = try await repository.cycles(from: start, to: now)
+            journal = try await repository.journal(from: start, to: now)
+            snapshot = await AppBootstrap.shared.environment.sync?.cachedSnapshot()
             lastUpdated = now
             message = cycles.isEmpty ? "还没有数据，请先完成授权与同步" : nil
         } catch {

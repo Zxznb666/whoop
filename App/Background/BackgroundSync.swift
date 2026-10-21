@@ -45,7 +45,8 @@ enum BackgroundSync {
     }
 
     /// 对睡眠、HRV、心率、心跳序列、训练、手腕温度、呼吸率开启观察者与后台推送（睡眠与训练为 immediate，其余 hourly）。
-    static func observe(store: HKHealthStore, onChange: @escaping @Sendable () -> Void) {
+    /// `onChange` 返回后才通知 HealthKit 处理完成：后台唤醒时，系统给的执行时间以这次调用为界。
+    static func observe(store: HKHealthStore, onChange: @escaping @Sendable () async -> Void) {
         let immediate: [HKSampleType] = [HKCategoryType(.sleepAnalysis), HKObjectType.workoutType()]
         let hourly: [HKSampleType] = [
             HKQuantityType(.heartRate),
@@ -66,15 +67,20 @@ enum BackgroundSync {
         _ type: HKSampleType,
         frequency: HKUpdateFrequency,
         store: HKHealthStore,
-        onChange: @escaping @Sendable () -> Void
+        onChange: @escaping @Sendable () async -> Void
     ) {
         let query = HKObserverQuery(sampleType: type, predicate: nil) { _, completion, error in
-            if let error {
-                DiagnosticsLog.record("观察者错误（\(type.identifier)）：\(error.localizedDescription)")
-            } else {
-                onChange()
+            guard error == nil else {
+                DiagnosticsLog.record("观察者错误（\(type.identifier)）：\(error?.localizedDescription ?? "")")
+                completion()
+                return
             }
-            completion()
+            // 完成回调没有标注 Sendable。它只在刷新结束后调用一次，不存在并发访问（同 D-050）。
+            nonisolated(unsafe) let done = completion
+            Task {
+                await onChange()
+                done()
+            }
         }
         store.execute(query)
         store.enableBackgroundDelivery(for: type, frequency: frequency) { success, error in

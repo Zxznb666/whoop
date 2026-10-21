@@ -38,8 +38,8 @@ targets:
       path: App/Info.plist
       properties:
         CFBundleDisplayName: 元气
-        CFBundleShortVersionString: "1.0.0"
-        CFBundleVersion: "2"
+        CFBundleShortVersionString: "1.0.1"
+        CFBundleVersion: "3"
         BGTaskSchedulerPermittedIdentifiers:
           - com.example.vigor.nightly
         UIBackgroundModes:
