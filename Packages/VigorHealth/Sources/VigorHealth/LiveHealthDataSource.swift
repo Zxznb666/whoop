@@ -3,7 +3,7 @@ import Foundation
 import HealthKit
 import VigorScoring
 
-/// 从 HealthKit 读取真实数据。真机验证留给用户（模拟器没有 HealthKit 数据）。
+/// 从 HealthKit 读取真实数据（schema v2）。真机验证留给用户（模拟器没有 HealthKit 数据）。
 public struct LiveHealthDataSource: HealthDataSource {
     public let kind = DataSourceKind.live
     private let store: HKHealthStore
@@ -42,16 +42,60 @@ public struct LiveHealthDataSource: HealthDataSource {
         let sleepSamples: [HKCategorySample] = try await fetch(
             .categorySample(type: HKCategoryType(.sleepAnalysis), predicate: predicate)
         )
-        let sleep = sleepSamples.compactMap { sample -> SleepStageSample? in
-            guard let value = HKCategoryValueSleepAnalysis(rawValue: sample.value),
-                  let stage = Self.stage(for: value)
-            else { return nil }
-            return SleepStageSample(
-                start: sample.startDate,
-                end: sample.endDate,
-                stage: stage,
-                sourceIsWatch: Self.isWatch(sample)
+        var sleep: [SleepStageSample] = []
+        var inBed: [SleepStageSample] = []
+        for sample in sleepSamples {
+            guard let value = HKCategoryValueSleepAnalysis(rawValue: sample.value) else { continue }
+            if value == .inBed {
+                inBed.append(Self.sleepSample(.inBed, from: sample))
+            } else if let stage = Self.stage(for: value) {
+                sleep.append(Self.sleepSample(stage, from: sample))
+            }
+        }
+
+        let mindfulSamples: [HKCategorySample] = try await fetch(
+            .categorySample(type: HKCategoryType(.mindfulSession), predicate: predicate)
+        )
+        let mindfulSessions = mindfulSamples.map {
+            ValueSample(start: $0.startDate, end: $0.endDate, value: $0.endDate.timeIntervalSince($0.startDate))
+        }
+
+        let workoutSamples: [HKWorkout] = try await fetch(.workout(predicate))
+        let workouts = workoutSamples.map { workout in
+            WorkoutSample(
+                uuid: workout.uuid,
+                activityType: Self.workoutName(workout.workoutActivityType),
+                start: workout.startDate,
+                end: workout.endDate,
+                activeEnergyKilocalories: workout.statistics(for: HKQuantityType(.activeEnergyBurned))?
+                    .sumQuantity()?.doubleValue(for: .kilocalorie()),
+                distanceMeters: workout.statistics(for: HKQuantityType(.distanceWalkingRunning))?
+                    .sumQuantity()?.doubleValue(for: .meter())
             )
+        }
+
+        let activeEnergy = try await quantity(.activeEnergyBurned, unit: .kilocalorie(), predicate: predicate)
+        let steps = try await quantity(.stepCount, unit: .count(), predicate: predicate)
+        let vo2Max = try await quantity(.vo2Max, unit: Self.vo2Unit, predicate: predicate)
+        let heartRateRecovery = try await quantity(.heartRateRecoveryOneMinute, unit: Self.countPerMinute, predicate: predicate)
+        let breathingSamples: [HKQuantitySample] = try await fetch(
+            .quantitySample(type: HKQuantityType(.appleSleepingBreathingDisturbances), predicate: predicate)
+        )
+        let breathingDisturbances = breathingSamples.map {
+            BreathingDisturbanceSample(
+                start: $0.startDate,
+                end: $0.endDate,
+                value: $0.quantity.doubleValue(for: .count()),
+                unit: "count"
+            )
+        }
+        let timeInDaylight = try await quantity(.timeInDaylight, unit: .minute(), predicate: predicate)
+        let dietaryCaffeine = try await quantity(.dietaryCaffeine, unit: .gramUnit(with: .milli), predicate: predicate)
+        let alcoholicBeverages = try await quantity(.numberOfAlcoholicBeverages, unit: .count(), predicate: predicate)
+
+        let stateOfMindSamples: [HKStateOfMind] = try await fetch(.stateOfMind(predicate))
+        let stateOfMind = stateOfMindSamples.map {
+            StateOfMindSample(date: $0.startDate, valence: $0.valence, labels: $0.labels.map { String(describing: $0) })
         }
 
         progress(0.2, "读取心跳序列")
@@ -78,30 +122,51 @@ public struct LiveHealthDataSource: HealthDataSource {
             )
         }
 
+        let height = try await latestQuantity(.height, unit: .meter())
+        let weight = try await latestQuantity(.bodyMass, unit: .gramUnit(with: .kilo))
+
         progress(1, "完成")
         return HealthSnapshot(
-            schemaVersion: 1,
+            schemaVersion: HealthSnapshot.currentSchemaVersion,
             exportedAt: Date(),
             rangeStart: from,
             rangeEnd: to,
-            profile: UserProfile(birthYear: birthYear(), sex: biologicalSex()),
+            profile: UserProfile(
+                birthYear: birthYear(),
+                sex: biologicalSex(),
+                heightMeters: height,
+                weightKilograms: weight
+            ),
             sleep: sleep,
+            inBed: inBed,
             heartRate: heartRate,
             hrvSDNN: hrvSDNN,
             restingHeartRate: restingHeartRate,
             respiratoryRate: respiratoryRate,
             wristTemperature: wristTemperature,
             oxygenSaturation: oxygenSaturation,
-            heartbeatSeries: heartbeatSeries
+            heartbeatSeries: heartbeatSeries,
+            mindfulSessions: mindfulSessions,
+            workouts: workouts,
+            activeEnergy: activeEnergy,
+            steps: steps,
+            vo2Max: vo2Max,
+            heartRateRecovery: heartRateRecovery,
+            breathingDisturbances: breathingDisturbances,
+            timeInDaylight: timeInDaylight,
+            dietaryCaffeine: dietaryCaffeine,
+            alcoholicBeverages: alcoholicBeverages,
+            stateOfMind: stateOfMind
         )
     }
 
-    private static var readTypes: Set<HKObjectType> {
+    static var readTypes: Set<HKObjectType> {
         var types: Set<HKObjectType> = [
             HKCategoryType(.sleepAnalysis),
             HKCategoryType(.mindfulSession),
             HKSeriesType.heartbeat(),
             HKObjectType.workoutType(),
+            HKObjectType.stateOfMindType(),
             HKCharacteristicType(.dateOfBirth),
             HKCharacteristicType(.biologicalSex),
             HKQuantityType(.heartRate),
@@ -114,6 +179,15 @@ public struct LiveHealthDataSource: HealthDataSource {
             .appleSleepingWristTemperature,
             .appleSleepingBreathingDisturbances,
             .heartRateRecoveryOneMinute,
+            .activeEnergyBurned,
+            .stepCount,
+            .vo2Max,
+            .timeInDaylight,
+            .dietaryCaffeine,
+            .numberOfAlcoholicBeverages,
+            .distanceWalkingRunning,
+            .height,
+            .bodyMass,
         ]
         for identifier in quantityIdentifiers {
             types.insert(HKQuantityType(identifier))
@@ -121,11 +195,13 @@ public struct LiveHealthDataSource: HealthDataSource {
         return types
     }
 
-    private static var writeTypes: Set<HKSampleType> {
-        [HKCategoryType(.mindfulSession)]
+    /// 写入权限只包括正念记录（晨测）与训练记录（手表训练模式）。
+    static var writeTypes: Set<HKSampleType> {
+        [HKCategoryType(.mindfulSession), HKObjectType.workoutType()]
     }
 
     private static let countPerMinute = HKUnit.count().unitDivided(by: .minute())
+    private static let vo2Unit = HKUnit(from: "ml/kg*min")
 
     private func fetch<Sample: HKSample>(_ predicate: HKSamplePredicate<Sample>) async throws -> [Sample] {
         try await HKSampleQueryDescriptor(
@@ -148,6 +224,16 @@ public struct LiveHealthDataSource: HealthDataSource {
         }
     }
 
+    private func latestQuantity(_ identifier: HKQuantityTypeIdentifier, unit: HKUnit) async throws -> Double? {
+        let samples: [HKQuantitySample] = try await HKSampleQueryDescriptor(
+            predicates: [.quantitySample(type: HKQuantityType(identifier))],
+            sortDescriptors: [SortDescriptor(\.startDate, order: .reverse)],
+            limit: 1
+        )
+        .result(for: store)
+        return samples.first?.quantity.doubleValue(for: unit)
+    }
+
     private func birthYear() -> Int? {
         try? store.dateOfBirthComponents().year
     }
@@ -162,7 +248,7 @@ public struct LiveHealthDataSource: HealthDataSource {
         }
     }
 
-    private static func stage(for value: HKCategoryValueSleepAnalysis) -> SleepStage? {
+    static func stage(for value: HKCategoryValueSleepAnalysis) -> SleepStage? {
         switch value {
         case .inBed: .inBed
         case .awake: .awake
@@ -174,8 +260,31 @@ public struct LiveHealthDataSource: HealthDataSource {
         }
     }
 
-    private static func isWatch(_ sample: HKSample) -> Bool {
-        sample.sourceRevision.productType?.hasPrefix("Watch") == true
+    static func sleepSample(_ stage: SleepStage, from sample: HKCategorySample) -> SleepStageSample {
+        SleepStageSample(
+            start: sample.startDate,
+            end: sample.endDate,
+            stage: stage,
+            sourceBundleID: sample.sourceRevision.source.bundleIdentifier,
+            sourceName: sample.sourceRevision.source.name,
+            productType: sample.sourceRevision.productType,
+            // HealthKit SDK 未暴露创建时间，留空（见 DECISIONS）
+            creationDate: nil,
+            timeZoneID: sample.metadata?[HKMetadataKeyTimeZone] as? String
+        )
+    }
+
+    static func workoutName(_ type: HKWorkoutActivityType) -> String {
+        switch type {
+        case .running: "running"
+        case .cycling: "cycling"
+        case .walking: "walking"
+        case .hiking: "hiking"
+        case .traditionalStrengthTraining: "traditionalStrengthTraining"
+        case .functionalStrengthTraining: "functionalStrengthTraining"
+        case .highIntensityIntervalTraining: "highIntensityIntervalTraining"
+        default: "activity\(type.rawValue)"
+        }
     }
 }
 #endif
