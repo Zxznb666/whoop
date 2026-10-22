@@ -134,9 +134,19 @@ struct OnboardingView: View {
             try await LiveHealthDataSource().requestAuthorization()
             _ = await NotificationScheduler.requestAuthorization()
             status = "已授权，正在导入历史数据……"
+            await AppBootstrap.shared.startObserversIfAuthorized()
             // 授权前的刷新读不到数据，这里必须全量导入，否则缓存里只有空数据
             await AppBootstrap.shared.refreshNow(mode: .full)
-            status = "导入完成。"
+            switch AppBootstrap.shared.lastOutcome {
+            case .success(let count) where count > 0:
+                status = "导入完成：共 \(count) 天的数据。"
+            case .success:
+                status = "导入完成，但没有找到可用的睡眠数据。请确认手表开启了睡眠追踪，并在“健康 → 共享 → App”中允许元气读取睡眠与心率。"
+            case .failure(let message):
+                status = "导入失败：\(message)。详情见诊断页。"
+            case .notAuthorized, nil:
+                status = "尚未完成健康数据授权。"
+            }
         } catch {
             status = "授权失败：\(error.localizedDescription)"
             DiagnosticsLog.record("授权失败：\(error)")

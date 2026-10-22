@@ -20,6 +20,12 @@ public struct LiveHealthDataSource: HealthDataSource {
         try await store.requestAuthorization(toShare: Self.writeTypes, read: Self.readTypes)
     }
 
+    /// 是否已经弹出过健康数据授权（无论用户允许了哪些项）。查询失败时按“已请求”处理，让后续读取自己报错。
+    public func authorizationRequested() async -> Bool {
+        let status = try? await store.statusForAuthorizationRequest(toShare: Self.writeTypes, read: Self.readTypes)
+        return status != .shouldRequest
+    }
+
     public func snapshot(
         from: Date,
         to: Date,

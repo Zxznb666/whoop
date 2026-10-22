@@ -1,6 +1,7 @@
 import Foundation
 import HealthKit
 import VigorEngine
+import VigorHealth
 import VigorScoring
 import VigorStore
 import WidgetKit
@@ -16,6 +17,16 @@ final class AppBootstrap {
     private var running: Task<Void, Never>?
     /// 刷新进行中到达的请求，合并成一次（取读取范围更大的模式）
     private var queuedMode: RefreshMode?
+    /// HealthKit 观察者是否已开启；授权之前开启会失败且不会自动重试，所以要等授权后再开
+    private var observersStarted = false
+
+    /// 最近一次刷新的结果，供欢迎页显示导入是否成功
+    enum RefreshOutcome {
+        case success(cycleCount: Int)
+        case failure(String)
+        case notAuthorized
+    }
+    private(set) var lastOutcome: RefreshOutcome?
 
     /// 在应用启动时调用一次。注册失败只记录日志，不会崩溃。
     func start() {
@@ -24,10 +35,18 @@ final class AppBootstrap {
             await AppBootstrap.shared.refreshNow(mode: .window(days: 30))
         }
         BackgroundSync.scheduleNext()
+        Task { await startObserversIfAuthorized() }
+    }
+
+    /// 授权之后才开启观察者：启动时已授权就立即开启；否则由欢迎页在授权成功后调用。
+    func startObserversIfAuthorized() async {
+        guard !observersStarted else { return }
         guard HKHealthStore.isHealthDataAvailable() else {
             DiagnosticsLog.record("当前设备不支持 HealthKit，跳过后台观察者")
             return
         }
+        guard await LiveHealthDataSource().authorizationRequested() else { return }
+        observersStarted = true
         BackgroundSync.observe(store: HKHealthStore()) {
             await AppBootstrap.shared.refreshNow()
         }
@@ -56,6 +75,13 @@ final class AppBootstrap {
             DiagnosticsLog.record("刷新跳过：存储未就绪")
             return
         }
+        #if !targetEnvironment(simulator)
+        // 还没弹出过授权时，读取一定失败；直接跳过，不往诊断日志里写一串“未授权”的错误
+        guard await LiveHealthDataSource().authorizationRequested() else {
+            lastOutcome = .notAuthorized
+            return
+        }
+        #endif
         let settings = await currentSettings()
         do {
             let planned = try await sync.refresh(
@@ -69,7 +95,11 @@ final class AppBootstrap {
             let weekly = NotificationPlanner.weeklyReport(now: Date(), sent: NotificationScheduler.sent, calendar: .current)
             await NotificationScheduler.schedule(planned + reminders + weekly)
             await publishToWidgetsAndWatch()
+            lastOutcome = .success(cycleCount: await sync.status.lastCycleCount)
+            // 让已经显示的界面（摘要等）重新读取存储；否则授权导入后仍显示授权前的空状态
+            NotificationCenter.default.post(name: .vigorDataChanged, object: nil)
         } catch {
+            lastOutcome = .failure(error.localizedDescription)
             DiagnosticsLog.record("刷新失败：\(error)")
         }
     }
