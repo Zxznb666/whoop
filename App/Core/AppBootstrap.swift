@@ -81,7 +81,8 @@ final class AppBootstrap {
             baseSleepNeedHours: AppSettings.baseSleepNeedHours,
             maxHeartRate: AppSettings.maxHeartRateOverride,
             targetWakeMinutes: AppSettings.targetWakeMinutes,
-            manualFTP: AppSettings.manualFTP
+            manualFTP: AppSettings.manualFTP,
+            heartRateSourcePreferences: AppSettings.heartRateSourcePreferences
         )
         guard let repository = environment.repository else { return settings }
         do {

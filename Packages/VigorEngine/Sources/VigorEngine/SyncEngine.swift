@@ -60,6 +60,8 @@ public struct ScoringSettings: Sendable, Hashable {
     public var importedRides: [RideStream]
     /// 手动设置的 FTP（瓦）；为 nil 时使用 HealthKit 或自动估算
     public var manualFTP: Double?
+    /// 心率来源的手动指定（M6 补完 C5，键为 Bundle ID）；每次刷新时由调用方提供
+    public var heartRateSourcePreferences: [String: SourcePreference]
 
     public init(
         baseSleepNeedHours: Double = 7.5,
@@ -68,7 +70,8 @@ public struct ScoringSettings: Sendable, Hashable {
         sleepOverrides: [DateComponents: SleepOverride] = [:],
         manualExcludedNights: Set<DateComponents> = [],
         importedRides: [RideStream] = [],
-        manualFTP: Double? = nil
+        manualFTP: Double? = nil,
+        heartRateSourcePreferences: [String: SourcePreference] = [:]
     ) {
         self.baseSleepNeedHours = baseSleepNeedHours
         self.maxHeartRate = maxHeartRate
@@ -77,6 +80,7 @@ public struct ScoringSettings: Sendable, Hashable {
         self.manualExcludedNights = manualExcludedNights
         self.importedRides = importedRides
         self.manualFTP = manualFTP
+        self.heartRateSourcePreferences = heartRateSourcePreferences
     }
 }
 
@@ -141,6 +145,7 @@ public actor SyncEngine {
                 maxHeartRate: settings.maxHeartRate,
                 targetWakeMinutes: settings.targetWakeMinutes,
                 manualFTP: settings.manualFTP,
+                heartRateSourcePreferences: settings.heartRateSourcePreferences,
                 config: config,
                 now: now,
                 calendar: calendar

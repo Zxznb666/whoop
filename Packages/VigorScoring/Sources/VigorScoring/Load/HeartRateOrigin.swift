@@ -1,18 +1,43 @@
 import Foundation
 import VigorFIT
 
-/// 心率样本的来源优先级（施工文档 §2.3）。数值越大优先级越高。
-/// 全局顺序：FIT 导入 > Apple Watch 训练期间 > 其他 App 训练期间（含 Garmin）> Apple Watch 被动采样 > 其他。
+/// 心率样本的来源优先级（施工文档 §2.3；M6 补完 C5 增加手动指定的一档）。
+/// 排序由 `rank` 决定，**不要**依赖 rawValue：rawValue 已写入存储，只能新增、不能改动。
+/// 全局顺序：FIT 导入 > 手动优先的来源训练期间 > Apple Watch 训练期间 > 其他 App 训练期间（含 Garmin）> Apple Watch 被动采样 > 其他。
 public enum HeartRateOrigin: Int, Sendable, Hashable, Codable, Comparable {
     case other = 0
     case watchPassive = 1
     case otherWorkout = 2
     case watchWorkout = 3
     case fitImport = 4
+    /// 用户在设置中把某个来源标为“优先”，且样本位于该来源自己的训练时段内（C5）
+    case preferredWorkout = 5
+
+    /// 比较用的显式排名（与 rawValue 无关）。
+    public var rank: Int {
+        switch self {
+        case .other: 0
+        case .watchPassive: 1
+        case .otherWorkout: 2
+        case .watchWorkout: 3
+        case .preferredWorkout: 4
+        case .fitImport: 5
+        }
+    }
 
     public static func < (lhs: HeartRateOrigin, rhs: HeartRateOrigin) -> Bool {
-        lhs.rawValue < rhs.rawValue
+        lhs.rank < rhs.rank
     }
+}
+
+/// 用户为某个心率来源（按 Bundle ID）指定的处理方式（M6 补完 C5）。
+/// - `automatic`：按 D-130 的规则；
+/// - `preferred`：该来源在自己的训练时段内的心率优先级高于 Apple Watch 训练期间，低于 FIT 导入；
+/// - `ignored`：该来源的心率样本不参与分钟去重，也不作为骑行的心率；它的训练记录仍然参与骑行分组。
+public enum SourcePreference: String, Sendable, Hashable, Codable, CaseIterable {
+    case automatic
+    case preferred
+    case ignored
 }
 
 /// 带来源标签的心率测量。
@@ -35,10 +60,30 @@ public enum HeartRateOriginClassifier {
     /// - 手表样本落在其他 App 的训练时段内，或不在任何训练中 → `watchPassive`；
     /// - 其余 → `other`。
     /// 训练区间按来源分别合并为不相交区间后二分查找，避免对长历史做 样本数 × 训练数 的扫描。
-    public static func tag(_ samples: [HeartRateSample], workouts: [WorkoutSample]) -> [TaggedHeartRate] {
+    ///
+    /// `preferences`（C5）：按来源 Bundle ID 的手动设置。`ignored` 的样本直接丢弃；`preferred` 的样本只有落在
+    /// **该来源自己的训练**内才升为 `preferredWorkout`，其余情况按上面的规则处理。
+    public static func tag(
+        _ samples: [HeartRateSample],
+        workouts: [WorkoutSample],
+        preferences: [String: SourcePreference] = [:]
+    ) -> [TaggedHeartRate] {
         let watchWindows = mergedWindows(workouts.filter { $0.productType?.hasPrefix("Watch") == true })
         let otherWindows = mergedWindows(workouts.filter { $0.productType?.hasPrefix("Watch") != true })
-        return samples.map { sample in
+        var preferredWindows: [String: [ClosedRange<Date>]] = [:]
+        for (bundle, preference) in preferences where preference == .preferred {
+            preferredWindows[bundle] = mergedWindows(workouts.filter { $0.sourceBundleID == bundle })
+        }
+        var result: [TaggedHeartRate] = []
+        result.reserveCapacity(samples.count)
+        for sample in samples {
+            let preference = sample.sourceBundleID.flatMap { preferences[$0] } ?? .automatic
+            if preference == .ignored { continue }
+            if preference == .preferred, let bundle = sample.sourceBundleID,
+               contains(preferredWindows[bundle] ?? [], sample.date) {
+                result.append(TaggedHeartRate(date: sample.date, bpm: sample.bpm, origin: .preferredWorkout))
+                continue
+            }
             let isWatch = sample.productType?.hasPrefix("Watch") == true
             let origin: HeartRateOrigin
             if isWatch {
@@ -47,8 +92,9 @@ public enum HeartRateOriginClassifier {
                 let inAnyWorkout = contains(watchWindows, sample.date) || contains(otherWindows, sample.date)
                 origin = inAnyWorkout ? .otherWorkout : .other
             }
-            return TaggedHeartRate(date: sample.date, bpm: sample.bpm, origin: origin)
+            result.append(TaggedHeartRate(date: sample.date, bpm: sample.bpm, origin: origin))
         }
+        return result
     }
 
     static func mergedWindows(_ workouts: [WorkoutSample]) -> [ClosedRange<Date>] {

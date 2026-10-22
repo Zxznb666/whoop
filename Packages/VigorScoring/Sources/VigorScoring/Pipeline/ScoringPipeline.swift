@@ -35,6 +35,8 @@ public struct PipelineInput: Sendable {
     public var targetWakeMinutes: Int?
     /// 手动设置的 FTP（瓦）；为 nil 时依次用 HealthKit 与自动估算（M6 §3）
     public var manualFTP: Double?
+    /// 心率来源的手动指定（键为 Bundle ID，M6 补完 C5）；空字典表示全部按自动规则
+    public var heartRateSourcePreferences: [String: SourcePreference]
     public var config: ScoringConfig
     public var now: Date
     public var calendar: Calendar
@@ -48,6 +50,7 @@ public struct PipelineInput: Sendable {
         maxHeartRate: Double? = nil,
         targetWakeMinutes: Int? = nil,
         manualFTP: Double? = nil,
+        heartRateSourcePreferences: [String: SourcePreference] = [:],
         config: ScoringConfig = .default,
         now: Date,
         calendar: Calendar
@@ -60,6 +63,7 @@ public struct PipelineInput: Sendable {
         self.maxHeartRate = maxHeartRate
         self.targetWakeMinutes = targetWakeMinutes
         self.manualFTP = manualFTP
+        self.heartRateSourcePreferences = heartRateSourcePreferences
         self.config = config
         self.now = now
         self.calendar = calendar
@@ -162,7 +166,7 @@ public enum ScoringPipeline {
 
         // 负荷：分钟网格与运动中的心率峰值（只计算一次）
         // 心率按来源打标签后再去重（M6 §2.3）：FIT 导入 > 手表训练 > 其他训练 > 手表被动 > 其他
-        let taggedHeartRate = HeartRateOriginClassifier.tag(snapshot.heartRate, workouts: snapshot.workouts)
+        let taggedHeartRate = HeartRateOriginClassifier.tag(snapshot.heartRate, workouts: snapshot.workouts, preferences: input.heartRateSourcePreferences)
             + HeartRateOriginClassifier.fitSamples(snapshot.importedRides)
         let grid = MinuteGrid.build(
             origin: snapshot.rangeStart,

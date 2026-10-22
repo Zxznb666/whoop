@@ -189,3 +189,9 @@
 - 测试：VigorScoring 172 个通过（新增 11 个：FTPHistoryTests，含 FTP 优先级、清除手动值、周一网格、EF 斜率 0.001/天、20 分钟功率对比）
 - 构建：iOS ✅  watchOS —
 - 备注：FTP 历史不放进 `CyclingOutput`，由界面用 `FTPHistory.make` 计算（手动修改历史不在流水线输入中，见 D-134）。`CyclingOutput` 新增可选的 `efficiencySlopePerDay`。浏览页“骑行”分组新增“FTP 历史”“有氧效率 EF 趋势”；心肺适能新增 EF 趋势与 90 天最佳 20 分钟功率对比。
+
+### C5 手动指定心率来源的偏好 —— ✅ 完成（同步链路的唯一扩展，见 D-135）
+- 提交：见 `git log --oneline`（提交信息 `feat(cycling): heart rate source preferences`）
+- 测试：全部包合计 307 个通过（VigorScoring 178，新增 7 个：SourcePreferenceTests；VigorEngine 20，新增 3 个：SourcePreferenceSyncTests；VigorReplay 黄金快照未变）
+- 构建：iOS ✅  watchOS —（watchOS 构建在 C6 统一验证）
+- 备注：`HeartRateOrigin` 新增 `preferredWorkout`（rawValue 5），排序改为显式 `rank`。`ScoringSettings` 增加 `heartRateSourcePreferences`，只在 `SyncEngine.refresh` 中传入 `PipelineInput`。设置中列出最近 180 天的非 Apple Watch 来源，修改后 `refreshNow(mode: .window(days: 30))`。

@@ -16,6 +16,7 @@ enum CyclingText {
         case .fitImport?: "心率带（FIT）"
         case .watchWorkout?: "Apple Watch 训练"
         case .otherWorkout?: "其他 App 训练"
+        case .preferredWorkout?: "手动优先的来源训练"
         case .watchPassive?: "手表被动采样"
         case .other?: "其他来源"
         case nil: "无心率"
@@ -421,8 +422,60 @@ struct CyclingSettingsSection: View {
     @State private var message: String?
     @State private var showFiles = false
     @State private var showFolder = false
+    @State private var sourcePreferences = AppSettings.heartRateSourcePreferences
 
     private static let fitType = UTType(filenameExtension: "fit") ?? .data
+
+    /// 设置中一行心率来源（M6 补完 C5）。
+    private struct HeartRateSourceRow: Identifiable {
+        var id: String { bundleID }
+        let bundleID: String
+        let name: String
+        let heartRateSamples: Int
+        let workouts: Int
+    }
+
+    /// 最近 180 天出现过的非 Apple Watch 骑行训练来源与心率来源（Apple Watch 的规则固定，不列出）。
+    private var heartRateSourceRows: [HeartRateSourceRow] {
+        guard let snapshot = model.snapshot else { return [] }
+        let end = model.lastUpdated ?? Date()
+        let windowStart = model.calendar.date(byAdding: .day, value: -180, to: end) ?? end
+        func isWatch(_ productType: String?) -> Bool { productType?.hasPrefix("Watch") == true }
+        func isApple(_ bundle: String) -> Bool { bundle.hasPrefix("com.apple.") }
+        let workouts = snapshot.workouts
+            .filter { $0.activityType == "cycling" && $0.start >= windowStart && !isWatch($0.productType) }
+            .compactMap(\.sourceBundleID)
+            .filter { !isApple($0) }
+        let samples = snapshot.heartRate
+            .filter { $0.date >= windowStart && !isWatch($0.productType) }
+            .compactMap(\.sourceBundleID)
+            .filter { !isApple($0) }
+        let workoutCounts = Dictionary(grouping: workouts, by: { $0 }).mapValues(\.count)
+        let sampleCounts = Dictionary(grouping: samples, by: { $0 }).mapValues(\.count)
+        return Set(workoutCounts.keys).union(sampleCounts.keys).sorted().map { bundle in
+            HeartRateSourceRow(
+                bundleID: bundle,
+                name: bundle.lowercased().contains("garmin") ? "Garmin" : bundle,
+                heartRateSamples: sampleCounts[bundle] ?? 0,
+                workouts: workoutCounts[bundle] ?? 0
+            )
+        }
+    }
+
+    /// 修改来源偏好：保存后重新计算最近 30 天（与 F7 的修正相同的路径）。
+    private func preferenceBinding(_ bundle: String) -> Binding<SourcePreference> {
+        Binding(
+            get: { sourcePreferences[bundle] ?? .automatic },
+            set: { value in
+                sourcePreferences[bundle] = value == .automatic ? nil : value
+                AppSettings.heartRateSourcePreferences = sourcePreferences
+                Task {
+                    await AppBootstrap.shared.refreshNow(mode: .window(days: 30))
+                    await model.load(source: model.source)
+                }
+            }
+        )
+    }
 
     var body: some View {
         Section("骑行") {
@@ -434,6 +487,26 @@ struct CyclingSettingsSection: View {
                 LabeledContent("当前使用", value: "\(Int(ftp.watts.rounded())) W · \(CyclingText.ftpSource(ftp.source))")
             }
             LabeledContent("检测到的 Garmin 写入", value: garminSourceText)
+            if heartRateSourceRows.isEmpty {
+                Text("最近 180 天没有检测到非 Apple Watch 的心率或骑行来源。").font(.footnote).foregroundStyle(.secondary)
+            } else {
+                Text("心率来源").font(.subheadline.weight(.semibold))
+                ForEach(heartRateSourceRows) { row in
+                    Picker(selection: preferenceBinding(row.bundleID)) {
+                        Text("自动").tag(SourcePreference.automatic)
+                        Text("优先").tag(SourcePreference.preferred)
+                        Text("忽略").tag(SourcePreference.ignored)
+                    } label: {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(row.name)
+                            Text("\(row.bundleID) · 心率 \(row.heartRateSamples) 个样本 · 骑行 \(row.workouts) 次")
+                                .font(.caption2).foregroundStyle(.secondary)
+                        }
+                    }
+                }
+                Text("“优先”只在该来源自己的训练时段内生效，优先级高于 Apple Watch 训练期间、低于 FIT 导入。“忽略”会让该来源的心率不再参与计算，但它的训练仍然参与骑行分组。Apple Watch 的规则固定，不在此列出。修改后会重新计算最近 30 天。")
+                    .font(.caption2).foregroundStyle(.secondary)
+            }
             Button("导入 FIT 文件") { showFiles = true }
             Button("导入文件夹（如 Garmin/Activity）") { showFolder = true }
             if let message {

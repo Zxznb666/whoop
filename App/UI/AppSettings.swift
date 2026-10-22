@@ -44,6 +44,19 @@ enum AppSettings {
         set { UserDefaults.standard.set(newValue ?? 0, forKey: manualFTPKey) }
     }
 
+    private static let heartRateSourcePreferencesKey = "vigor.settings.heartRateSourcePreferences"
+
+    /// 心率来源的手动指定（M6 补完 C5），键为来源的 Bundle ID。自动（默认）不保存。
+    static var heartRateSourcePreferences: [String: SourcePreference] {
+        get {
+            guard let data = UserDefaults.standard.data(forKey: heartRateSourcePreferencesKey) else { return [:] }
+            return (try? JSONDecoder().decode([String: SourcePreference].self, from: data)) ?? [:]
+        }
+        set {
+            UserDefaults.standard.set(try? JSONEncoder().encode(newValue), forKey: heartRateSourcePreferencesKey)
+        }
+    }
+
     /// 手动 FTP 的修改记录（M6 补完 C4）。只从本版本开始记录，之前的日期没有手动值的历史。
     static var manualFTPHistory: [ManualFTPEntry] {
         get {
