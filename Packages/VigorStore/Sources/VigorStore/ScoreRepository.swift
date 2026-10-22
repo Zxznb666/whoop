@@ -1,5 +1,6 @@
 import Foundation
 import SwiftData
+import VigorFIT
 import VigorScoring
 
 public enum ScoreRepositoryError: LocalizedError {
@@ -207,6 +208,71 @@ public actor ScoreRepository {
         } else if !excluded, let existing {
             modelContext.delete(existing)
         }
+        try modelContext.save()
+    }
+
+    /// 保存骑行汇总（每次刷新后覆盖）。
+    public func saveCycling(_ output: CyclingOutput, now: Date = Date()) throws {
+        let payload = try Self.encoder.encode(output)
+        let existing = try modelContext.fetch(FetchDescriptor<CyclingSummaryRecord>(predicate: #Predicate { $0.key == "current" })).first
+        if let existing {
+            existing.payload = payload
+            existing.updatedAt = now
+        } else {
+            modelContext.insert(CyclingSummaryRecord(key: "current", updatedAt: now, payload: payload))
+        }
+        try modelContext.save()
+    }
+
+    /// 最近一次保存的骑行汇总；从未保存或解码失败时为 nil。
+    public func cyclingOutput() throws -> CyclingOutput? {
+        guard let record = try modelContext.fetch(FetchDescriptor<CyclingSummaryRecord>(predicate: #Predicate { $0.key == "current" })).first else {
+            return nil
+        }
+        return try? Self.decoder.decode(CyclingOutput.self, from: record.payload)
+    }
+
+    /// 是否已经导入过某个 FIT 文件（去重键）。
+    public func hasImportedRide(fileID: String) throws -> Bool {
+        var descriptor = FetchDescriptor<ImportedRideRecord>(predicate: #Predicate { $0.fileID == fileID })
+        descriptor.fetchLimit = 1
+        return try !modelContext.fetch(descriptor).isEmpty
+    }
+
+    /// 保存解码后的骑行。已存在时不做任何改动，返回 false。
+    @discardableResult
+    public func saveImportedRide(_ ride: RideStream, rawFileName: String, now: Date = Date()) throws -> Bool {
+        if try hasImportedRide(fileID: ride.fileID) { return false }
+        let payload = try Self.encoder.encode(ride)
+        modelContext.insert(ImportedRideRecord(
+            fileID: ride.fileID,
+            start: ride.start,
+            importedAt: now,
+            rawFileName: rawFileName,
+            payload: payload
+        ))
+        try modelContext.save()
+        return true
+    }
+
+    /// 全部导入的骑行（按开始时间升序）。读取失败的记录被跳过。
+    public func importedRides() throws -> [RideStream] {
+        try modelContext.fetch(FetchDescriptor<ImportedRideRecord>(sortBy: [SortDescriptor(\.start)])).compactMap {
+            try? Self.decoder.decode(RideStream.self, from: $0.payload)
+        }
+    }
+
+    /// 导入记录的元数据（用于备份与设置页的列表）。
+    public func importedRideRecords() throws -> [(fileID: String, importedAt: Date, rawFileName: String)] {
+        try modelContext.fetch(FetchDescriptor<ImportedRideRecord>(sortBy: [SortDescriptor(\.start)])).map {
+            ($0.fileID, $0.importedAt, $0.rawFileName)
+        }
+    }
+
+    /// 删除一次导入（不删除原始文件，由调用方处理）。
+    public func deleteImportedRide(fileID: String) throws {
+        let found = try modelContext.fetch(FetchDescriptor<ImportedRideRecord>(predicate: #Predicate { $0.fileID == fileID }))
+        for record in found { modelContext.delete(record) }
         try modelContext.save()
     }
 

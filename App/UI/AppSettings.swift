@@ -5,6 +5,7 @@ enum AppSettings {
     private static let baseNeedKey = "vigor.settings.baseSleepNeed"
     private static let maxHeartRateKey = "vigor.settings.maxHeartRate"
     private static let targetWakeKey = "vigor.settings.targetWakeMinutes"
+    private static let manualFTPKey = "vigor.settings.manualFTP"
 
     static var baseSleepNeedHours: Double {
         get {
@@ -30,5 +31,14 @@ enum AppSettings {
             return stored ?? 450
         }
         set { UserDefaults.standard.set(newValue, forKey: targetWakeKey) }
+    }
+
+    /// 手动设置的 FTP（瓦）；为 0 或未设置时使用 HealthKit 或自动估算（M6 §3）。
+    static var manualFTP: Double? {
+        get {
+            let value = UserDefaults.standard.double(forKey: manualFTPKey)
+            return value > 0 ? value : nil
+        }
+        set { UserDefaults.standard.set(newValue ?? 0, forKey: manualFTPKey) }
     }
 }

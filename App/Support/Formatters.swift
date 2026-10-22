@@ -8,6 +8,16 @@ enum Formatters {
         format(date, "M月d日 EEE")
     }
 
+    /// 骑行列表：例如 “9月29日 17:36”。
+    static func rideStart(_ date: Date) -> String {
+        format(date, "M月d日 HH:mm")
+    }
+
+    /// 骑行详情：例如 “2026年9月29日 17:36”。
+    static func rideStartFull(_ date: Date) -> String {
+        format(date, "yyyy年M月d日 HH:mm")
+    }
+
     static func clock(_ date: Date) -> String {
         format(date, "HH:mm")
     }

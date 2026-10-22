@@ -159,6 +159,60 @@ struct CyclingAnalysisTests {
         #expect((20..<30).allSatisfy { (output.compensation[$0] ?? 0) > 0 })
     }
 
+    @Test("稀疏功率样本（每 60 秒一条）不会被当作 0 W：覆盖不足 50%，不计算 NP、TSS 与功率区间")
+    func sparsePowerSamplesAreNotZeroWatts() throws {
+        let minutes = 60
+        let grid = MinuteGrid.build(origin: origin, end: origin.addingTimeInterval(Double(minutes * 60)), heartRate: [], activeEnergy: [], steps: [])
+        let samples = (0..<minutes).map { minute in
+            ValueSample(start: origin.addingTimeInterval(Double(minute * 60)), end: origin.addingTimeInterval(Double(minute * 60 + 5)), value: 200)
+        }
+        let workout = WorkoutSample(uuid: UUID(), activityType: "cycling", start: origin, end: origin.addingTimeInterval(Double(minutes * 60)), productType: "Watch7,1")
+        var input = hkRideInput(manualFTP: 250, minutes: minutes)
+        input.workouts = [workout]
+        input.cyclingPower = samples
+        let output = CyclingAnalysis.run(input, grid: grid)
+        let ride = try #require(output.rides.first)
+        #expect((ride.powerCoverage ?? 1) < 0.5)
+        #expect(ride.normalizedPower == nil)
+        #expect(ride.tss == nil)
+        #expect(ride.zoneSeconds == nil)
+        #expect(ride.powerCurve.isEmpty)
+        #expect(output.powerModel == nil)
+    }
+
+    @Test("覆盖率 80% 的功率（样本各覆盖 8 秒、每 10 秒一条）：空档不计为 0 W，NP 仍为 200")
+    func gapsAreNotZeroWatts() throws {
+        let minutes = 60
+        let grid = MinuteGrid.build(origin: origin, end: origin.addingTimeInterval(Double(minutes * 60)), heartRate: [], activeEnergy: [], steps: [])
+        let samples = stride(from: 0, to: minutes * 60, by: 10).map { second in
+            ValueSample(start: origin.addingTimeInterval(Double(second)), end: origin.addingTimeInterval(Double(second + 8)), value: 200)
+        }
+        var input = hkRideInput(manualFTP: 250, minutes: minutes)
+        input.cyclingPower = samples
+        let output = CyclingAnalysis.run(input, grid: grid)
+        let ride = try #require(output.rides.first)
+        #expect(abs((ride.powerCoverage ?? 0) - 0.8) < 0.01)
+        let np = try #require(ride.normalizedPower)
+        #expect(abs(np - 200) < 1)
+        #expect(ride.zoneSeconds.map { $0.reduce(0, +) } == 3600)
+    }
+
+    @Test("骑行开始之前结束的功率样本不会写入骑行（不能落在第 0 秒）")
+    func staleSampleBeforeRideIsIgnored() throws {
+        let grid = MinuteGrid.build(origin: origin, end: origin.addingTimeInterval(1800), heartRate: [], activeEnergy: [], steps: [])
+        let stale = ValueSample(start: origin.addingTimeInterval(-200), end: origin.addingTimeInterval(-195), value: 300)
+        let workout = WorkoutSample(uuid: UUID(), activityType: "cycling", start: origin, end: origin.addingTimeInterval(1800), productType: "iPhone15,2")
+        let output = CyclingAnalysis.run(CyclingInput(
+            workouts: [workout], cyclingPower: [stale],
+            restingHeartRate: 55, maxHeartRate: 185, sex: .male,
+            now: origin.addingTimeInterval(Self.day), calendar: calendar
+        ), grid: grid)
+        let ride = try #require(output.rides.first)
+        #expect(ride.powerSource == .none)
+        #expect(ride.normalizedPower == nil)
+        #expect(ride.powerCoverage == nil)
+    }
+
     // MARK: 构造数据
 
     /// 分钟 `gapMinutes` 之外有心率（每分钟一条测量）。

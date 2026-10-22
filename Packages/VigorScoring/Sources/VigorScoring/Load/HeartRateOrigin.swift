@@ -29,19 +29,23 @@ public struct TaggedHeartRate: Sendable, Hashable {
 }
 
 public enum HeartRateOriginClassifier {
-    /// 给 HealthKit 心率样本打标签：落在训练区间内的按“训练期间”区分 Apple Watch 与其他来源，其余按是否来自 Apple Watch 区分被动采样。
-    /// 训练区间按来源分别合并为不相交的区间，再用二分查找，避免对长历史做 样本数 × 训练数 的扫描。
+    /// 给 HealthKit 心率样本打标签（M6 §2.3）：
+    /// - 手表样本落在**手表自己的训练**时段内 → `watchWorkout`；
+    /// - 其他来源（如 Garmin 写入）落在任何训练时段内 → `otherWorkout`；
+    /// - 手表样本落在其他 App 的训练时段内，或不在任何训练中 → `watchPassive`；
+    /// - 其余 → `other`。
+    /// 训练区间按来源分别合并为不相交区间后二分查找，避免对长历史做 样本数 × 训练数 的扫描。
     public static func tag(_ samples: [HeartRateSample], workouts: [WorkoutSample]) -> [TaggedHeartRate] {
         let watchWindows = mergedWindows(workouts.filter { $0.productType?.hasPrefix("Watch") == true })
         let otherWindows = mergedWindows(workouts.filter { $0.productType?.hasPrefix("Watch") != true })
         return samples.map { sample in
             let isWatch = sample.productType?.hasPrefix("Watch") == true
-            let inWorkout = contains(watchWindows, sample.date) || contains(otherWindows, sample.date)
             let origin: HeartRateOrigin
-            if inWorkout {
-                origin = isWatch ? .watchWorkout : .otherWorkout
+            if isWatch {
+                origin = contains(watchWindows, sample.date) ? .watchWorkout : .watchPassive
             } else {
-                origin = isWatch ? .watchPassive : .other
+                let inAnyWorkout = contains(watchWindows, sample.date) || contains(otherWindows, sample.date)
+                origin = inAnyWorkout ? .otherWorkout : .other
             }
             return TaggedHeartRate(date: sample.date, bpm: sample.bpm, origin: origin)
         }

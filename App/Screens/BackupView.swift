@@ -186,13 +186,20 @@ struct BackupView: View {
         let now = Date()
         let overrides = try await repository.sleepOverrides()
         let exclusions = try await repository.manualExclusions()
+        // 导入的 FIT 原始文件（HealthKit 无法重建，M6 §4.3）
+        let files = RideFileStore(directory: RideImportCoordinator.rideDirectory)
+        let rides = try await repository.importedRideRecords().compactMap { record -> BackupImportedRide? in
+            guard let raw = files.read(fileID: record.fileID) else { return nil }
+            return BackupImportedRide(fileID: record.fileID, importedAt: record.importedAt, rawFileName: record.rawFileName, rawFIT: raw)
+        }
         return BackupPayload(
             exportedAt: now,
             journal: try await repository.journal(from: .distantPast, to: now),
             config: try await repository.currentConfig() ?? .default,
             sleepOverrides: Dictionary(uniqueKeysWithValues: overrides.map { (ScoreRepository.dayString($0.key), $0.value) }),
             manualExcludedNights: exclusions.map { ScoreRepository.dayString($0) }.sorted(),
-            cycles: try await repository.cycles(from: .distantPast, to: now)
+            cycles: try await repository.cycles(from: .distantPast, to: now),
+            importedRides: rides
         )
     }
 
@@ -213,6 +220,16 @@ struct BackupView: View {
             try await repository.setManualExclusion(wakeDay: day, excluded: true)
         }
         try await repository.upsert(payload.cycles, force: true)
+        // 导入的骑行：与普通导入相同的解析与去重，已存在的不会重复
+        let files = RideFileStore(directory: RideImportCoordinator.rideDirectory)
+        var restored = 0
+        for ride in payload.importedRides ?? [] {
+            let outcome = try await RideImport.ingest(data: ride.rawFIT, fileName: ride.rawFileName, repository: repository, files: files)
+            if case .imported = outcome { restored += 1 }
+        }
+        if restored > 0 {
+            await AppBootstrap.shared.refreshNow()
+        }
     }
 
     private static func stamp() -> String {

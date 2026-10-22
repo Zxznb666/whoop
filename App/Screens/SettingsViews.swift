@@ -6,6 +6,7 @@ import VigorStore
 import VigorScoring
 
 struct SettingsView: View {
+    let model: AppModel
     @State private var baseNeed = AppSettings.baseSleepNeedHours
     @State private var useMaxHeartRate = AppSettings.maxHeartRateOverride != nil
     @State private var maxHeartRate = AppSettings.maxHeartRateOverride ?? 190
@@ -39,6 +40,7 @@ struct SettingsView: View {
             Section("日志") {
                 NavigationLink("日志题目", value: Route.journalQuestions)
             }
+            CyclingSettingsSection(model: model)
             Section("说明") {
                 Text("设置保存在本机。修改后，下一次刷新时生效。")
                     .font(.footnote)

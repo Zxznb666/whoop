@@ -9,7 +9,7 @@ cd "$ROOT"
 BUNDLE_ID="com.example.vigor"
 DERIVED="build/screenshots"
 OUT="docs/screenshots"
-ROUTES=(summary recovery sleep strain workout journal journal:edit journal:questions browse metric:hrv metric:rhr settings exclusions backup coach:settings cardio lab lab:night report coach diagnostics onboarding)
+ROUTES=(summary recovery sleep strain workout journal journal:edit journal:questions browse metric:hrv metric:rhr settings exclusions backup coach:settings cardio ride ride:garminOnly pmc metric:ftp lab lab:night report coach diagnostics onboarding)
 
 UDID="$(xcrun simctl list devices available | grep "iPhone 17 Pro (" | head -1 | sed -E 's/.*\(([0-9A-F-]{36})\).*/\1/')"
 if [[ -z "$UDID" ]]; then

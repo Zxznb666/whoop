@@ -149,3 +149,10 @@
 - 测试：VigorScoring 146 个通过（新增：骑行数学 11、分钟去重 5、骑行分析 10 等）；VigorHealth 52 个通过（新增：合成骑行 5、快照 v2/v3 与合并 2 等）；VigorReplay 4 个通过（黄金快照已按 D-117 更新）；VigorStore 20、VigorEngine 17、VigorCoach 11、VigorDesign 2 个通过（不变）
 - 构建：iOS ✅（`xcodebuild` 生成项目后 0 个 error）  watchOS 未在本阶段重新构建（阶段 13 统一做）
 - 备注：决策 D-103 至 D-118。流水线耗时见 D-116（调试构建 1.8 秒，断言 < 2 秒，余量很小）。骑行的 FTP 手动设置目前只能通过流水线输入，界面在阶段 12 接入。导入的骑行目前不会被同步层自动填入快照，阶段 12 接入导入流程时补上。
+
+## 阶段 12：导入、备份与骑行界面 —— ✅ 完成（真机验证待做，见 BUILD-REPORT）
+- 提交：见 `git log --oneline`（提交信息 `feat(cycling-ui): ...`）
+- 测试：VigorScoring 151 个通过（新增：稀疏功率不是 0 W、覆盖不足 50% 不出 NP、窗口前的样本不写入骑行、只有 Garmin 训练时 Garmin 心率优先于手表被动心率）；VigorHealth 52 个通过；VigorFIT 14 个通过；VigorStore 26 个通过（新增：导入去重、删除、原始文件往返、无效文件拒绝、骑行汇总往返、备份中的导入骑行往返与 v1 兼容）；VigorEngine 17、VigorCoach 11、VigorDesign 2 个通过；VigorReplay 4 个通过（黄金快照已更新，见 D-132）。合计 277 个。
+- 构建：iOS ✅（`Vigor` scheme，0 个 error）  watchOS ✅（`VigorWatch` scheme，0 个 error）
+- 截图：`ride`、`ride:garminOnly`、`pmc`、`metric:ftp` 共 8 张，已逐张检查（结论见 BUILD-REPORT 的 M6 一节）。`pmc` 与 `metric:ftp` 在 iPhone 17 Pro Max 上重拍（同一台 iPhone 17 Pro 模拟器被另一个会话占用，见 BUILD-REPORT）；其余 `ride` 系列在 iPhone 17 Pro 上拍摄。
+- 备注：决策 D-119 至 D-133。审查修正（D-128 至 D-133）：稀疏功率、覆盖率门槛、手表被动心率分类、中文日期。界面未做的项见 D-125。

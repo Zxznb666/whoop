@@ -42,8 +42,23 @@ targets:
       path: App/Info.plist
       properties:
         CFBundleDisplayName: 元气
-        CFBundleShortVersionString: "1.1.0"
-        CFBundleVersion: "4"
+        CFBundleShortVersionString: "1.2.0"
+        CFBundleVersion: "5"
+        LSSupportsOpeningDocumentsInPlace: false
+        CFBundleDocumentTypes:
+          - CFBundleTypeName: FIT 运动文件
+            CFBundleTypeRole: Viewer
+            LSHandlerRank: Alternate
+            LSItemContentTypes:
+              - com.garmin.fit
+        UTImportedTypeDeclarations:
+          - UTTypeIdentifier: com.garmin.fit
+            UTTypeDescription: FIT 运动文件
+            UTTypeConformsTo:
+              - public.data
+            UTTypeTagSpecification:
+              public.filename-extension:
+                - fit
         BGTaskSchedulerPermittedIdentifiers:
           - com.example.vigor.nightly
         UIBackgroundModes:
@@ -81,8 +96,8 @@ targets:
       path: Watch/Info.plist
       properties:
         CFBundleDisplayName: 元气
-        CFBundleShortVersionString: "1.1.0"
-        CFBundleVersion: "4"
+        CFBundleShortVersionString: "1.2.0"
+        CFBundleVersion: "5"
         WKApplication: true
         WKCompanionAppBundleIdentifier: com.example.vigor
         UIBackgroundModes:
@@ -114,8 +129,8 @@ targets:
       path: WatchWidgets/Info.plist
       properties:
         CFBundleDisplayName: 元气
-        CFBundleShortVersionString: "1.1.0"
-        CFBundleVersion: "4"
+        CFBundleShortVersionString: "1.2.0"
+        CFBundleVersion: "5"
         NSExtension:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
     entitlements:
@@ -141,8 +156,8 @@ targets:
       path: Widgets/Info.plist
       properties:
         CFBundleDisplayName: 元气
-        CFBundleShortVersionString: "1.1.0"
-        CFBundleVersion: "4"
+        CFBundleShortVersionString: "1.2.0"
+        CFBundleVersion: "5"
         NSExtension:
           NSExtensionPointIdentifier: com.apple.widgetkit-extension
     entitlements:

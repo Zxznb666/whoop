@@ -18,6 +18,9 @@ enum Route: Hashable {
     case backup
     case exclusions
     case cardioFitness
+    case rideDetail(String)
+    case pmc
+    case ftp
     case report
     case coach
     case settings
@@ -39,10 +42,10 @@ enum Route: Hashable {
         switch self {
         case .recovery, .settings, .lab, .labNight, .diagnostics, .onboarding: .summary
         case .sleep: .sleep
-        case .strain, .workout: .strain
+        case .strain, .workout, .rideDetail, .pmc: .strain
         case .journal, .journalEdit: .journal
         case .journalQuestions, .coachSettings, .backup, .exclusions: .summary
-        case .cardioFitness: .browse
+        case .cardioFitness, .ftp: .browse
         case .metric, .browse, .report, .coach: .browse
         }
     }
@@ -70,6 +73,10 @@ enum Route: Hashable {
         case "coach:settings": .coachSettings
         case "exclusions": .exclusions
         case "cardio": .cardioFitness
+        case "ride": .rideDetail("")
+        case "ride:garminOnly": .rideDetail("garminOnly")
+        case "pmc": .pmc
+        case "metric:ftp": .ftp
         default: nil
         }
     }
@@ -135,6 +142,9 @@ struct RootView: View {
                 .tag(tab)
             }
         }
+        .onReceive(NotificationCenter.default.publisher(for: .vigorDataChanged)) { _ in
+            Task { await model.reloadAfterChange() }
+        }
         .task {
             if let launchRoute {
                 selection = launchRoute.tab
@@ -188,7 +198,10 @@ struct RouteDestination: View {
         case .backup: BackupView(model: model)
         case .exclusions: ExclusionsView(model: model)
         case .cardioFitness: CardioFitnessView(model: model)
-        case .settings: SettingsView()
+        case .settings: SettingsView(model: model)
+        case .rideDetail(let id): RideDetailView(model: model, rideID: id)
+        case .pmc: PMCDetailView(model: model)
+        case .ftp: FTPDetailView(model: model)
         case .lab, .labNight: LabRootView(model: LabModel(source: .synthetic), app: model)
         case .diagnostics: DiagnosticsView()
         case .onboarding: OnboardingView()

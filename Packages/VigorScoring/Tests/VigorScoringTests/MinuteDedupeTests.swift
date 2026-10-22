@@ -56,6 +56,26 @@ struct MinuteDedupeTests {
         #expect(grid(tagged).heartRate[4] == 80)
     }
 
+    @Test("只有 Garmin 训练时，同一分钟的 Garmin 心率优先于手表的被动心率")
+    func garminWorkoutBeatsWatchPassiveWithinSameMinute() {
+        let garminWorkout = WorkoutSample(uuid: UUID(), activityType: "cycling", start: origin, end: origin.addingTimeInterval(600), sourceBundleID: "com.garmin.connect", productType: "iPhone15,2")
+        let watchPassive = HeartRateSample(date: origin.addingTimeInterval(90), bpm: 96, productType: "Watch7,1")
+        let garmin = HeartRateSample(date: origin.addingTimeInterval(95), bpm: 140, sourceBundleID: "com.garmin.connect", productType: "iPhone15,2")
+        let tagged = HeartRateOriginClassifier.tag([watchPassive, garmin], workouts: [garminWorkout])
+        // 手表样本落在 Garmin 训练里：不是手表训练，只能是被动采样
+        #expect(tagged.map(\.origin) == [.watchPassive, .otherWorkout])
+        let grid = grid(tagged)
+        #expect(grid.heartRate[1] == 140)
+    }
+
+    @Test("手表样本落在手表自己的训练中才算训练期间")
+    func watchWorkoutRequiresWatchOwnedWorkout() {
+        let watchWorkout = WorkoutSample(uuid: UUID(), activityType: "cycling", start: origin, end: origin.addingTimeInterval(600), productType: "Watch7,1")
+        let inside = HeartRateSample(date: origin.addingTimeInterval(60), bpm: 130, productType: "Watch7,1")
+        let tagged = HeartRateOriginClassifier.tag([inside], workouts: [watchWorkout])
+        #expect(tagged.map(\.origin) == [.watchWorkout])
+    }
+
     @Test("分类：训练区间内的 Apple Watch 心率为训练期间，区间外为被动采样")
     func classification() {
         let workout = WorkoutSample(uuid: UUID(), activityType: "cycling", start: origin, end: origin.addingTimeInterval(600), productType: "Watch7,1")

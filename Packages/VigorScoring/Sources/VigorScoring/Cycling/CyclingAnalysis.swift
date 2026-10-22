@@ -38,6 +38,8 @@ public struct RideResult: Sendable, Hashable, Codable, Identifiable {
     public var movingSeconds: Int
     public var heartRateOrigin: HeartRateOrigin?
     public var powerSource: PowerSource
+    /// 有效功率覆盖率（有测量的秒 ÷ 有效骑行秒）；没有功率来源时为 nil。低于 50% 时不计算功率指标。
+    public var powerCoverage: Double?
     public var normalizedPower: Double?
     public var intensityFactor: Double?
     public var tss: Double?
@@ -98,7 +100,7 @@ public struct CyclingInput: Sendable {
     }
 }
 
-public struct CyclingOutput: Sendable {
+public struct CyclingOutput: Sendable, Codable, Equatable {
     public var rides: [RideResult]
     public var ftp: FTPEstimate?
     public var powerModel: PowerHeartModel?
@@ -110,6 +112,24 @@ public struct CyclingOutput: Sendable {
     public var pmc: [PMCPoint]
     /// 最近 90 天每个标准时长的最佳平均功率
     public var powerCurve90: [Int: Double]
+
+    public init(
+        rides: [RideResult],
+        ftp: FTPEstimate?,
+        powerModel: PowerHeartModel?,
+        trimpPerTSS: Double?,
+        compensation: [Int: Double],
+        pmc: [PMCPoint],
+        powerCurve90: [Int: Double]
+    ) {
+        self.rides = rides
+        self.ftp = ftp
+        self.powerModel = powerModel
+        self.trimpPerTSS = trimpPerTSS
+        self.compensation = compensation
+        self.pmc = pmc
+        self.powerCurve90 = powerCurve90
+    }
 
     public static let empty = CyclingOutput(
         rides: [], ftp: nil, powerModel: nil, trimpPerTSS: nil, compensation: [:], pmc: [], powerCurve90: [:]
@@ -174,7 +194,7 @@ public enum CyclingAnalysis {
 
         let windowStart = input.now.addingTimeInterval(-Double(autoFTPWindowDays) * 86_400)
         var curve: [Int: Double] = [:]
-        for item in series where item.end >= windowStart {
+        for item in series where item.end >= windowStart && item.powerUsable {
             for (duration, value) in item.powerCurve {
                 curve[duration] = max(curve[duration] ?? 0, value)
             }
@@ -211,7 +231,7 @@ public enum CyclingAnalysis {
         }
         let windowStart = input.now.addingTimeInterval(-Double(autoFTPWindowDays) * 86_400)
         let best = series
-            .filter { $0.end >= windowStart }
+            .filter { $0.end >= windowStart && $0.powerUsable }
             .compactMap { $0.powerCurve[1200] }
             .max()
         guard let best else { return nil }
@@ -257,6 +277,8 @@ public enum CyclingAnalysis {
         input: CyclingInput
     ) -> Compensation {
         var result = Compensation()
+        // 功率数据不足的骑行不做补偿：功率序列不可靠，补偿会放大错误
+        guard item.powerUsable else { return result }
         var runStart: Int?
         for minute in item.lowerMinute...item.upperMinute {
             let hasGap = minute < item.upperMinute
@@ -343,7 +365,9 @@ public enum CyclingAnalysis {
         compensatedMinutes: Int,
         underestimated: Bool
     ) -> RideResult {
-        let np = item.normalizedPower
+        // 没有任何功率数据的骑行（例如只有 HealthKit 心率的训练）不计算功率指标，避免把全零序列当作真实功率
+        let hasPower = item.powerUsable
+        let np = hasPower ? item.normalizedPower : nil
         let moving = max(0, item.power.count - item.pausedSeconds)
         var result = RideResult(
             id: item.group.members.map(\.idKey).sorted().joined(separator: "|"),
@@ -354,16 +378,17 @@ public enum CyclingAnalysis {
             movingSeconds: moving,
             heartRateOrigin: item.heartRateOrigin,
             powerSource: item.powerSource,
+            powerCoverage: item.powerSource == .none ? nil : item.powerCoverage,
             normalizedPower: np,
             intensityFactor: nil,
             tss: nil,
-            mechanicalWorkKJ: item.power.isEmpty ? nil : CyclingMath.mechanicalWorkKJ(item.power),
+            mechanicalWorkKJ: hasPower ? CyclingMath.mechanicalWorkKJ(item.power) : nil,
             wattsPerKilogram: nil,
             averageHeartRate: item.averageHeartRate,
             efficiencyFactor: nil,
             aerobicDecoupling: nil,
             zoneSeconds: nil,
-            powerCurve: item.powerCurve,
+            powerCurve: hasPower ? item.powerCurve : [:],
             compensatedMinutes: compensatedMinutes,
             loadMayBeUnderestimated: underestimated,
             measuredTRIMP: item.measuredTRIMP
@@ -374,12 +399,12 @@ public enum CyclingAnalysis {
         if let np, let average = item.averageHeartRate, average > 0 {
             result.efficiencyFactor = CyclingMath.efficiencyFactor(normalizedPower: np, averageHeartRate: average)
         }
-        if let ftp, ftp > 0, let np {
+        if let ftp, ftp > 0, hasPower, let np {
             result.intensityFactor = CyclingMath.intensityFactor(normalizedPower: np, ftp: ftp)
             result.tss = CyclingMath.tss(durationSeconds: Double(moving), normalizedPower: np, ftp: ftp)
             result.zoneSeconds = CyclingMath.zoneSeconds(item.power, ftp: ftp)
         }
-        if item.power.count >= 3600, moving >= 3600 {
+        if hasPower, item.power.count >= 3600, moving >= 3600 {
             result.aerobicDecoupling = decoupling(item, grid: grid)
         }
         return result
@@ -417,6 +442,10 @@ struct GroupSeries {
     var powerPresent: [Bool]
     var pausedSeconds: Int
     var powerSource: PowerSource
+    /// 有效功率覆盖率（有测量的秒 ÷ 有效骑行秒）
+    var powerCoverage: Double = 0
+    /// 覆盖率 ≥ 50% 时为真；否则不计算 NP、功率区间、功率曲线与功率补偿
+    var powerSufficient: Bool = false
     var heartRateOrigin: HeartRateOrigin?
     var averageHeartRate: Double?
     /// FIT 导入的逐秒心率（组内下标）；没有 FIT 心率时为 nil。其余秒使用分钟网格的去重值。
@@ -431,6 +460,33 @@ struct GroupSeries {
     var normalizedPower: Double?
     var powerCurve: [Int: Double] = [:]
     var movingSeconds: Int { power.count - pausedSeconds }
+    /// 功率可用于指标：有功率来源且覆盖率足够
+    var powerUsable: Bool { powerSource != .none && powerSufficient }
+
+    /// 缺失的秒（非暂停）：不超过 5 秒的空档沿用前一个测量值；更长的空档用本次骑行的平均功率。暂停保持 0。
+    static func fillGaps(_ power: inout [Double], present: [Bool], paused: [Bool], shortGapSeconds: Int = 5) {
+        let measured = present.indices.filter { present[$0] }
+        guard !measured.isEmpty else { return }
+        let mean = measured.reduce(0.0) { $0 + power[$1] } / Double(measured.count)
+        var lastValue = power[measured[0]]
+        var index = 0
+        while index < power.count {
+            if present[index] {
+                lastValue = power[index]
+                index += 1
+                continue
+            }
+            if paused[index] {
+                index += 1
+                continue
+            }
+            var end = index
+            while end < power.count, !present[end], !paused[end] { end += 1 }
+            let fill = (end - index) <= shortGapSeconds ? lastValue : mean
+            for second in index..<end { power[second] = fill }
+            index = end
+        }
+    }
 
     /// 组内第 `second` 秒的心率：FIT 逐秒优先，否则为分钟网格的去重值；没有测量时为 nil。
     static func heartRate(second: Int, fit: [Int?]?, lower: Int, minuteHeartRate: [Double]) -> Double? {
@@ -513,11 +569,13 @@ struct GroupSeries {
         var power = [Double](repeating: 0, count: seconds)
         var present = [Bool](repeating: false, count: seconds)
         var powerSource = PowerSource.none
+        let windowEnd = origin.addingTimeInterval(Double(seconds))
 
-        // HealthKit 功率：每个样本的值覆盖它所在的秒
-        for sample in powerWindow(sortedPower, from: origin, to: origin.addingTimeInterval(Double(seconds))) {
-            let first = max(0, secondIndex(sample.start))
-            let last = min(seconds, max(first + 1, secondIndex(sample.end)))
+        // HealthKit 功率：样本覆盖的真实时间区间内的秒取该值；区间之外的秒不做任何改动（空档不是 0 W）。
+        // 只考虑与本组窗口有重叠的样本，避免把窗口之前的样本写进第 0 秒。
+        for sample in powerWindow(sortedPower, from: origin, to: windowEnd) where sample.end > origin && sample.start < windowEnd {
+            let first = max(0, Int(floor(sample.start.timeIntervalSince(origin))))
+            let last = min(seconds, max(first + 1, Int(ceil(sample.end.timeIntervalSince(origin)))))
             for second in first..<last {
                 power[second] = sample.value
                 present[second] = true
@@ -526,7 +584,7 @@ struct GroupSeries {
         }
 
         // 导入的 FIT：整段覆盖 HealthKit 的功率（FIT 优先）；暂停区间为 0
-        var pausedSeconds = Set<Int>()
+        var pausedFlags = [Bool](repeating: false, count: seconds)
         for member in group.members {
             guard case .imported(let fileID) = member.source, let ride = importedByID[fileID] else { continue }
             let rideOffset = secondIndex(ride.start)
@@ -544,10 +602,20 @@ struct GroupSeries {
                     guard second >= 0, second < seconds else { continue }
                     power[second] = 0
                     present[second] = false
-                    pausedSeconds.insert(second)
+                    pausedFlags[second] = true
                 }
             }
             if hasFITPower { powerSource = .fit }
+        }
+
+        // 覆盖率：有测量的秒 ÷ 有效骑行秒（暂停不计入）。低于 50% 时功率指标不可用。
+        let pausedCount = pausedFlags.reduce(0) { $0 + ($1 ? 1 : 0) }
+        let validCount = present.reduce(0) { $0 + ($1 ? 1 : 0) }
+        let movingCount = seconds - pausedCount
+        let coverage = movingCount > 0 ? Double(validCount) / Double(movingCount) : 0
+        let sufficient = powerSource != .none && validCount > 0 && coverage >= 0.5
+        if sufficient {
+            fillGaps(&power, present: present, paused: pausedFlags)
         }
 
         // 心率：FIT 的逐秒心率优先，其次分钟网格（已去重）。分钟网格部分在使用时按需读取，避免为每组建 1 Hz 数组。
@@ -585,15 +653,17 @@ struct GroupSeries {
             end: group.end,
             power: power,
             powerPresent: present,
-            pausedSeconds: pausedSeconds.count,
+            pausedSeconds: pausedCount,
             powerSource: powerSource,
+            powerCoverage: coverage,
+            powerSufficient: sufficient,
             heartRateOrigin: heartRateOrigin,
             averageHeartRate: average,
             fitHeartRate: fitHeartRate,
             minutePowerPresent: minutePowerPresent,
             p30: p30,
-            normalizedPower: CyclingMath.normalizedPower(smoothed: p30),
-            powerCurve: CyclingMath.powerCurve(power)
+            normalizedPower: sufficient ? CyclingMath.normalizedPower(smoothed: p30) : nil,
+            powerCurve: sufficient ? CyclingMath.powerCurve(power) : [:]
         )
     }
 }
@@ -603,7 +673,7 @@ enum PowerHeartModelFit {
     static func fit(series: [GroupSeries], grid: MinuteGrid) -> PowerHeartModel? {
         var sums = PowerHeartModel.Sums()
         let minuteHeartRate = grid.heartRate
-        for item in series {
+        for item in series where item.powerUsable {
             for second in item.power.indices where second >= PowerHeartModel.lagSeconds {
                 guard item.powerPresent[second], let bpm = item.heartRate(second: second, minuteHeartRate: minuteHeartRate) else { continue }
                 sums.add(x: item.p30[second - PowerHeartModel.lagSeconds], y: bpm)

@@ -80,12 +80,14 @@ final class AppBootstrap {
         var settings = ScoringSettings(
             baseSleepNeedHours: AppSettings.baseSleepNeedHours,
             maxHeartRate: AppSettings.maxHeartRateOverride,
-            targetWakeMinutes: AppSettings.targetWakeMinutes
+            targetWakeMinutes: AppSettings.targetWakeMinutes,
+            manualFTP: AppSettings.manualFTP
         )
         guard let repository = environment.repository else { return settings }
         do {
             settings.sleepOverrides = try await repository.sleepOverrides()
             settings.manualExcludedNights = try await repository.manualExclusions()
+            settings.importedRides = try await repository.importedRides()
         } catch {
             DiagnosticsLog.record("读取手动修正失败：\(error)")
         }

@@ -1,5 +1,6 @@
 import Charts
 import SwiftUI
+import UniformTypeIdentifiers
 import VigorDesign
 import VigorScoring
 
@@ -279,6 +280,9 @@ struct StrainView: View {
                             Label("查看训练详情", systemImage: "list.bullet")
                         }
                     }
+                    if let cycling = model.cycling, !cycling.pmc.isEmpty {
+                        CyclingLoadCard(output: cycling)
+                    }
                 } else {
                     Text(model.message ?? "暂无数据").foregroundStyle(.secondary)
                 }
@@ -301,10 +305,30 @@ struct StrainView: View {
 
 struct WorkoutListView: View {
     let model: AppModel
+    @State private var showFiles = false
+
+    private var rides: [RideResult] {
+        (model.cycling?.rides ?? []).sorted { $0.start > $1.start }
+    }
 
     var body: some View {
         List {
-            ForEach(model.cycles.suffix(14).reversed().flatMap { $0.load.workouts }) { workout in
+            if !rides.isEmpty {
+                Section("骑行") {
+                    ForEach(rides) { ride in
+                        NavigationLink(value: Route.rideDetail(ride.id)) {
+                            RideRow(ride: ride)
+                        }
+                    }
+                }
+                if rides.contains(where: CyclingText.needsFITHint) {
+                    Section {
+                        Button("导入 FIT 文件以获得完整的心率和功率") { showFiles = true }
+                    }
+                }
+            }
+            Section("其他训练") {
+                ForEach(model.cycles.suffix(14).reversed().flatMap { $0.load.workouts }) { workout in
                 VStack(alignment: .leading, spacing: 4) {
                     Text(WorkoutName.text(workout.activityType)).font(.headline)
                     Text(String(format: "负荷 %.1f · TRIMP %.0f · 峰值 %@ bpm",
@@ -315,6 +339,12 @@ struct WorkoutListView: View {
                         Text(String(format: "1 分钟心率恢复 %.0f bpm", recovery)).font(.caption2).foregroundStyle(.secondary)
                     }
                 }
+            }
+            }
+        }
+        .fileImporter(isPresented: $showFiles, allowedContentTypes: [UTType(filenameExtension: "fit") ?? .data], allowsMultipleSelection: true) { result in
+            if case .success(let urls) = result {
+                Task { _ = await RideImportCoordinator.importURLs(urls) }
             }
         }
         .navigationTitle("训练")
@@ -449,6 +479,11 @@ struct BrowseView: View {
                 NavigationLink("睡眠", value: Route.sleep)
                 NavigationLink("训练", value: Route.workout(UUID()))
                 NavigationLink("报告", value: Route.report)
+            }
+            Section("骑行") {
+                NavigationLink("体能管理（CTL / ATL / TSB）", value: Route.pmc)
+                NavigationLink("FTP 与 90 天最佳功率", value: Route.ftp)
+                NavigationLink("骑行列表", value: Route.workout(UUID()))
             }
             if let age = model.bodyAge {
                 Section("身体年龄（示意，待校准）") {

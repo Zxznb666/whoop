@@ -1,4 +1,5 @@
 import Foundation
+import VigorFIT
 import VigorHealth
 import VigorScoring
 import VigorStore
@@ -55,19 +56,27 @@ public struct ScoringSettings: Sendable, Hashable {
     public var sleepOverrides: [DateComponents: SleepOverride]
     /// 手动排除的醒来日（设置中的“排除指定夜晚”）
     public var manualExcludedNights: Set<DateComponents>
+    /// 导入的 FIT 骑行（M6）。不来自 HealthKit，每次刷新时由调用方提供，不进入快照缓存。
+    public var importedRides: [RideStream]
+    /// 手动设置的 FTP（瓦）；为 nil 时使用 HealthKit 或自动估算
+    public var manualFTP: Double?
 
     public init(
         baseSleepNeedHours: Double = 7.5,
         maxHeartRate: Double? = nil,
         targetWakeMinutes: Int? = nil,
         sleepOverrides: [DateComponents: SleepOverride] = [:],
-        manualExcludedNights: Set<DateComponents> = []
+        manualExcludedNights: Set<DateComponents> = [],
+        importedRides: [RideStream] = [],
+        manualFTP: Double? = nil
     ) {
         self.baseSleepNeedHours = baseSleepNeedHours
         self.maxHeartRate = maxHeartRate
         self.targetWakeMinutes = targetWakeMinutes
         self.sleepOverrides = sleepOverrides
         self.manualExcludedNights = manualExcludedNights
+        self.importedRides = importedRides
+        self.manualFTP = manualFTP
     }
 }
 
@@ -117,7 +126,9 @@ public actor SyncEngine {
     ) async throws -> [PlannedNotification] {
         warnings = []
         do {
-            let snapshot = try await readSnapshot(mode: mode, now: now)
+            var snapshot = try await readSnapshot(mode: mode, now: now)
+            // 导入的骑行在评分前填入（不经过快照缓存，见 ScoringSettings.importedRides）
+            snapshot.importedRides = settings.importedRides
             let journal = try await repository.journal(from: snapshot.rangeStart, to: now)
             let config = try await repository.currentConfig() ?? .default
             status.progressText = "计算分数"
@@ -129,11 +140,13 @@ public actor SyncEngine {
                 baseSleepNeedHours: settings.baseSleepNeedHours,
                 maxHeartRate: settings.maxHeartRate,
                 targetWakeMinutes: settings.targetWakeMinutes,
+                manualFTP: settings.manualFTP,
                 config: config,
                 now: now,
                 calendar: calendar
             ))
             try await repository.upsert(output.cycles, now: now)
+            try await repository.saveCycling(output.cycling, now: now)
             let notifications = NotificationPlanner.plan(
                 cycles: output.cycles,
                 announcedRecovery: announcedRecovery,

@@ -19,6 +19,8 @@ enum JournalSaveError: LocalizedError {
 final class AppModel {
     private(set) var cycles: [CycleResult] = []
     private(set) var output: PipelineOutput?
+    /// 骑行汇总：分组后的骑行、FTP、体能管理与功率曲线（M6）
+    private(set) var cycling: CyclingOutput?
     /// 当前生效的评分配置（实验室的对比与采用以它为基准）
     private(set) var config: ScoringConfig = .default
     private(set) var snapshot: HealthSnapshot?
@@ -163,6 +165,7 @@ final class AppModel {
             calendar: calendar
         ))
         self.output = output
+        self.cycling = output.cycling
         self.config = config
         self.snapshot = scenario.snapshot
         self.journal = scenario.journal
@@ -183,12 +186,22 @@ final class AppModel {
         await reloadFromStore(repository: repository)
     }
 
+    /// 导入或刷新后重新读取（真机从存储读取，模拟器重算合成数据）。
+    func reloadAfterChange() async {
+        if source == .live, let repository = AppBootstrap.shared.environment.repository {
+            await reloadFromStore(repository: repository)
+        } else if source == .synthetic {
+            await loadSynthetic()
+        }
+    }
+
     private func reloadFromStore(repository: ScoreRepository) async {
         let now = Date()
         let start = calendar.date(byAdding: .day, value: -180, to: now) ?? now
         do {
             config = try await repository.currentConfig() ?? .default
             cycles = try await repository.cycles(from: start, to: now)
+            cycling = try await repository.cyclingOutput()
             journal = try await repository.journal(from: start, to: now)
             snapshot = await AppBootstrap.shared.environment.sync?.cachedSnapshot()
             lastUpdated = now

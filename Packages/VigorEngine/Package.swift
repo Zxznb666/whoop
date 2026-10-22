@@ -9,13 +9,15 @@ let package = Package(
         .package(path: "../VigorScoring"),
         .package(path: "../VigorHealth"),
         .package(path: "../VigorStore"),
+        .package(path: "../VigorFIT"),
     ],
     targets: [
         .target(name: "VigorEngine", dependencies: [
             "VigorScoring",
             "VigorHealth",
             "VigorStore",
+            "VigorFIT",
         ]),
-        .testTarget(name: "VigorEngineTests", dependencies: ["VigorEngine", "VigorScoring", "VigorHealth", "VigorStore"]),
+        .testTarget(name: "VigorEngineTests", dependencies: ["VigorEngine", "VigorScoring", "VigorHealth", "VigorStore", "VigorFIT"]),
     ]
 )

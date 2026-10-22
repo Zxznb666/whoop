@@ -13,15 +13,18 @@ public struct BackupPayload: Codable, Sendable, Equatable {
     public var sleepOverrides: [String: SleepOverride]
     public var manualExcludedNights: [String]
     public var cycles: [CycleResult]
+    /// 导入的 FIT 骑行的原始文件（M6 §4.3：FIT 无法从 HealthKit 重建）。v1 备份中缺失为 nil。
+    public var importedRides: [BackupImportedRide]?
 
     public init(
-        formatVersion: Int = 1,
+        formatVersion: Int = 2,
         exportedAt: Date,
         journal: [JournalEntry],
         config: ScoringConfig,
         sleepOverrides: [String: SleepOverride],
         manualExcludedNights: [String],
-        cycles: [CycleResult]
+        cycles: [CycleResult],
+        importedRides: [BackupImportedRide]? = nil
     ) {
         self.formatVersion = formatVersion
         self.exportedAt = exportedAt
@@ -30,6 +33,22 @@ public struct BackupPayload: Codable, Sendable, Equatable {
         self.sleepOverrides = sleepOverrides
         self.manualExcludedNights = manualExcludedNights
         self.cycles = cycles
+        self.importedRides = importedRides
+    }
+}
+
+/// 备份中的一次 FIT 导入：原始文件与导入时间。恢复时重新解析（与导入流程相同）。
+public struct BackupImportedRide: Codable, Sendable, Equatable {
+    public var fileID: String
+    public var importedAt: Date
+    public var rawFileName: String
+    public var rawFIT: Data
+
+    public init(fileID: String, importedAt: Date, rawFileName: String, rawFIT: Data) {
+        self.fileID = fileID
+        self.importedAt = importedAt
+        self.rawFileName = rawFileName
+        self.rawFIT = rawFIT
     }
 }
 

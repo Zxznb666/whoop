@@ -58,3 +58,40 @@ struct BackupTests {
         #expect(a.withUnsafeBytes { Data($0) } != c.withUnsafeBytes { Data($0) })
     }
 }
+
+@Suite("VigorBackup 导入的骑行")
+struct BackupImportedRideTests {
+    @Test("导入的骑行原始文件往返后完全相等；v1 备份（无该字段）仍可解码")
+    func importedRidesRoundTrip() throws {
+        var payload = BackupPayload(
+            exportedAt: Date(timeIntervalSince1970: 1_800_000_000),
+            journal: [],
+            config: ScoringConfig.default,
+            sleepOverrides: [:],
+            manualExcludedNights: [],
+            cycles: []
+        )
+        payload.importedRides = [BackupImportedRide(
+            fileID: "3456789-1767000000",
+            importedAt: Date(timeIntervalSince1970: 1_800_000_100),
+            rawFileName: "ride.fit",
+            rawFIT: Data([0x0C, 0x20, 0x01, 0x02, 0x03])
+        )]
+        let data = try VigorBackup.encrypt(payload, password: "密码", iterations: 1_000)
+        #expect(try VigorBackup.decrypt(data, password: "密码", iterations: 1_000) == payload)
+
+        // v1 备份的 JSON 没有 importedRides 键：解码后为 nil
+        let legacy = """
+        {"formatVersion":1,"exportedAt":1800000000,"journal":[],"config":\(try configJSON()),"sleepOverrides":{},"manualExcludedNights":[],"cycles":[]}
+        """
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .secondsSince1970
+        let decoded = try decoder.decode(BackupPayload.self, from: Data(legacy.utf8))
+        #expect(decoded.importedRides == nil)
+    }
+
+    private func configJSON() throws -> String {
+        let data = try JSONEncoder().encode(ScoringConfig.default)
+        return String(decoding: data, as: UTF8.self)
+    }
+}

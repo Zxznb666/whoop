@@ -113,3 +113,36 @@ final class ManualExclusionRecord {
         self.createdAt = createdAt
     }
 }
+
+/// 导入的 FIT 骑行（M6 §4.3）。`payload` 为解码后的 `RideStream`（JSON）；原始文件保存在 `RideFileStore` 中。
+/// 去重键为 `fileID`（序列号 + 创建时间）。
+@Model
+final class ImportedRideRecord {
+    @Attribute(.unique) var fileID: String
+    var start: Date
+    var importedAt: Date
+    var rawFileName: String
+    var payload: Data
+
+    init(fileID: String, start: Date, importedAt: Date, rawFileName: String, payload: Data) {
+        self.fileID = fileID
+        self.start = start
+        self.importedAt = importedAt
+        self.rawFileName = rawFileName
+        self.payload = payload
+    }
+}
+
+/// 骑行汇总（M6 §3、§6）：分组后的每次骑行、FTP、PMC、90 天功率曲线。整体以 JSON 保存，每个存储只有一条（key 固定）。
+@Model
+final class CyclingSummaryRecord {
+    @Attribute(.unique) var key: String
+    var updatedAt: Date
+    var payload: Data
+
+    init(key: String, updatedAt: Date, payload: Data) {
+        self.key = key
+        self.updatedAt = updatedAt
+        self.payload = payload
+    }
+}
