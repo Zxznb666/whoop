@@ -115,6 +115,9 @@ public struct CyclingOutput: Sendable, Codable, Equatable {
     public var pmc: [PMCPoint]
     /// 最近 90 天每个标准时长的最佳平均功率
     public var powerCurve90: [Int: Double]
+    /// 流水线实际使用的静息与最大心率（骑行详情的双轴曲线用）；可选字段，旧数据为 nil
+    public var restingHeartRate: Double? = nil
+    public var maxHeartRate: Double? = nil
 
     public init(
         rides: [RideResult],
@@ -203,7 +206,7 @@ public enum CyclingAnalysis {
             }
         }
 
-        return CyclingOutput(
+        var output = CyclingOutput(
             rides: rides,
             ftp: ftp,
             powerModel: model,
@@ -212,6 +215,9 @@ public enum CyclingAnalysis {
             pmc: pmc,
             powerCurve90: curve
         )
+        output.restingHeartRate = input.restingHeartRate
+        output.maxHeartRate = input.maxHeartRate
+        return output
     }
 
     static func candidatesFrom(_ input: CyclingInput) -> [RideCandidate] {

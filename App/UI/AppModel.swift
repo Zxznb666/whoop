@@ -1,6 +1,7 @@
 import Foundation
 import Observation
 import VigorDesign
+import VigorFIT
 import VigorHealth
 import VigorScoring
 import VigorStore
@@ -24,6 +25,8 @@ final class AppModel {
     /// 当前生效的评分配置（实验室的对比与采用以它为基准）
     private(set) var config: ScoringConfig = .default
     private(set) var snapshot: HealthSnapshot?
+    /// 导入的 FIT 骑行（来自存储；缓存中的快照不含它们）。骑行详情的逐秒曲线用。
+    private(set) var importedRides: [RideStream] = []
     private(set) var journal: [JournalEntry] = []
     private(set) var lastUpdated: Date?
     var message: String?
@@ -168,6 +171,7 @@ final class AppModel {
         self.cycling = output.cycling
         self.config = config
         self.snapshot = scenario.snapshot
+        self.importedRides = scenario.snapshot.importedRides
         self.journal = scenario.journal
         self.cycles = output.cycles
         self.lastUpdated = Self.syntheticEnd
@@ -204,6 +208,7 @@ final class AppModel {
             cycling = try await repository.cyclingOutput()
             journal = try await repository.journal(from: start, to: now)
             snapshot = await AppBootstrap.shared.environment.sync?.cachedSnapshot()
+            importedRides = try await repository.importedRides()
             lastUpdated = now
             message = cycles.isEmpty ? "还没有数据，请先完成授权与同步" : nil
         } catch {

@@ -87,6 +87,8 @@ struct RideDetailView: View {
     let model: AppModel
     /// 空字符串表示最近一次骑行；`garminOnly` 表示最近一次只有 Garmin 写入、没有 FIT 的骑行
     let rideID: String
+    /// 逐秒曲线与分圈（由 `RideTimelineBuilder` 生成，进入页面时计算一次）
+    @State private var timeline: RideTimeline?
 
     private var ride: RideResult? {
         let rides = (model.cycling?.rides ?? []).sorted { $0.start > $1.start }
@@ -103,6 +105,11 @@ struct RideDetailView: View {
                 if let ride {
                     header(ride)
                     metrics(ride)
+                    timelineCard(ride)
+                    if let timeline, !timeline.laps.isEmpty {
+                        RideLapTable(laps: timeline.laps)
+                    }
+                    if let zones = ride.heartRateZoneSeconds { heartRateZoneChart(zones) }
                     if let zones = ride.zoneSeconds { zoneChart(zones) }
                     curveChart(ride)
                 } else {
@@ -113,6 +120,59 @@ struct RideDetailView: View {
             .padding(.bottom, 24)
         }
         .navigationTitle("骑行详情")
+        .task(id: ride?.id) {
+            guard let ride else {
+                timeline = nil
+                return
+            }
+            timeline = RideTimelineBuilder.build(ride: ride, snapshot: model.snapshot ?? Self.emptySnapshot, importedRides: model.importedRides)
+        }
+    }
+
+    /// 没有快照时（例如刚启动）用于让构建器返回空曲线的占位。
+    private static var emptySnapshot: HealthSnapshot {
+        HealthSnapshot(
+            exportedAt: .distantPast, rangeStart: .distantPast, rangeEnd: .distantPast,
+            profile: UserProfile(birthYear: nil, sex: .unknown), sleep: [], heartRate: [], hrvSDNN: [],
+            restingHeartRate: [], respiratoryRate: [], wristTemperature: [], oxygenSaturation: [],
+            heartbeatSeries: []
+        )
+    }
+
+    /// 功率 / 心率双轴曲线卡片。没有逐秒数据（既没有功率也没有心率）时给出说明。
+    private func timelineCard(_ ride: RideResult) -> some View {
+        SectionCard {
+            VStack(alignment: .leading, spacing: 6) {
+                Text("功率与心率").font(.headline)
+                if let timeline, timeline.points.contains(where: { $0.power != nil || $0.heartRate != nil }) {
+                    RideTimelineChart(
+                        timeline: timeline,
+                        ftp: model.cycling?.ftp?.watts,
+                        restingHeartRate: model.cycling?.restingHeartRate ?? 60,
+                        maxHeartRate: model.cycling?.maxHeartRate ?? 190
+                    )
+                    Text("灰色底纹为暂停。左轴为功率（橙），心率（粉）按同一刻度映射，右轴为换算后的 bpm。点按曲线可查看具体数值。")
+                        .font(.caption2).foregroundStyle(.secondary)
+                } else {
+                    Text("这次骑行没有逐秒的功率或心率数据，无法绘制曲线。").font(.callout).foregroundStyle(.secondary)
+                }
+            }
+        }
+    }
+
+    private func heartRateZoneChart(_ zones: [Int]) -> some View {
+        SectionCard {
+            VStack(alignment: .leading, spacing: 6) {
+                Text("心率区间（分钟）").font(.headline)
+                Chart(Array(zones.enumerated()), id: \.offset) { index, seconds in
+                    BarMark(x: .value("区间", "Z\(index + 1)"), y: .value("分钟", Double(seconds) / 60))
+                        .foregroundStyle(.pink)
+                }
+                .frame(height: 140)
+                Text("按心率储备比 HRR%：Z1 50–60%、Z2 60–70%、Z3 70–80%、Z4 80–90%、Z5 90–100%。低于 50% 不计入。")
+                    .font(.caption2).foregroundStyle(.secondary)
+            }
+        }
     }
 
     private func header(_ ride: RideResult) -> some View {

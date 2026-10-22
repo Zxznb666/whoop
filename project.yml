@@ -10,6 +10,8 @@ settings:
     SWIFT_STRICT_CONCURRENCY: complete
     DEVELOPMENT_TEAM: ""          # 用户之后填入企业团队 ID
 packages:
+  VigorFIT:
+    path: Packages/VigorFIT
   VigorScoring:
     path: Packages/VigorScoring
   VigorHealth:
@@ -28,6 +30,7 @@ targets:
     platform: iOS
     sources: [App]
     dependencies:
+      - package: VigorFIT
       - package: VigorScoring
       - package: VigorHealth
       - package: VigorStore

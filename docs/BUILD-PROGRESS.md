@@ -177,3 +177,9 @@
 - 测试：VigorScoring 161 个通过（新增 3 个：CyclingZoneTests，含旧 JSON 解码为 nil 与往返）
 - 构建：iOS ✅（见 C2 的构建记录）  watchOS —
 - 备注：先于 C2 完成，因为 C2 的心率区间卡片读取这里的数据。口径为 PRD §5.1 的 HRR%（Z1 50–60 … Z5 90–100）；FIT 按秒、其他按分钟（每分钟 60 秒）。
+
+### C2 骑行详情：双轴曲线、分圈表、心率区间 —— ✅ 完成
+- 提交：见 `git log --oneline`（提交信息 `feat(cycling): ride detail dual-axis chart, laps and HR zones`）
+- 测试：VigorScoring 164 个通过（新增 3 个：RideChartScaleTests）
+- 构建：iOS ✅（0 个 error，App 中新文件无警告）  watchOS —
+- 备注：双轴映射为纯函数 `RideChartScale`（`VigorScoring/Cycling/RideChartScale.swift`）。`CyclingOutput` 新增可选的 `restingHeartRate`、`maxHeartRate`（图表右轴与映射用）。`AppModel` 新增 `importedRides`（缓存快照不含 FIT，曲线从存储读取）。App target 增加 VigorFIT 依赖（project.yml）。曲线顺序：指标 → 双轴曲线 → 分圈 → 心率区间 → 功率区间 → 功率曲线。真机与截图检查见 C6。
