@@ -40,6 +40,11 @@ public struct FITSession: Sendable, Codable, Equatable, Hashable {
 public struct FITLap: Sendable, Codable, Equatable, Hashable {
     public var startTime: Date?
     public var endTime: Date?
+
+    public init(startTime: Date?, endTime: Date?) {
+        self.startTime = startTime
+        self.endTime = endTime
+    }
 }
 
 /// `record` 消息（逐秒采样点）。缺失或无效的字段为 nil。

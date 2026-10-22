@@ -163,3 +163,11 @@
 - 构建：iOS ✅  watchOS ✅
 - IPA：`dist/Vigor-1.2.0.ipa`（版本 1.2.0，build 5；主 App、手表 App 与两个小组件均已核对）
 - 备注：`docs/BUILD-REPORT.md` 的 M6 一节包含完成情况、截图逐张检查结论、未验证项与给用户的建议。
+
+## M6 补完 C1–C6（施工文档 M6-completion-build-prompt.md）
+
+### C1 骑行时间线数据 —— ✅ 完成
+- 提交：见 `git log --oneline`（提交信息 `feat(cycling): ride timeline ...`）
+- 测试：VigorScoring 158 个通过（新增 7 个：RideTimelineTests）；全部包合计 284 个通过
+- 构建：iOS ✅  watchOS —（C1 不改界面）
+- 备注：`RideTimelineBuilder` 放在 `Cycling/RideTimeline.swift`。分圈序号从 1 开始。FIT 路径用逐秒数组；非 FIT 的心率按分钟网格去重（D-130），空档以分钟为单位；HealthKit 功率的空档不超过 5 秒沿用前值，更长为 nil。`FITLap` 增加显式初始化器以便测试构造（VigorFIT）。
