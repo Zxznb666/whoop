@@ -156,3 +156,10 @@
 - 构建：iOS ✅（`Vigor` scheme，0 个 error）  watchOS ✅（`VigorWatch` scheme，0 个 error）
 - 截图：`ride`、`ride:garminOnly`、`pmc`、`metric:ftp` 共 8 张，已逐张检查（结论见 BUILD-REPORT 的 M6 一节）。`pmc` 与 `metric:ftp` 在 iPhone 17 Pro Max 上重拍（同一台 iPhone 17 Pro 模拟器被另一个会话占用，见 BUILD-REPORT）；其余 `ride` 系列在 iPhone 17 Pro 上拍摄。
 - 备注：决策 D-119 至 D-133。审查修正（D-128 至 D-133）：稀疏功率、覆盖率门槛、手表被动心率分类、中文日期。界面未做的项见 D-125。
+
+## 阶段 13：打包 1.2.0、构建报告 —— ✅ 完成
+- 提交：见 `git log --oneline`（提交信息 `docs(report): ...`）
+- 测试：全部包合计 277 个通过（同阶段 12）
+- 构建：iOS ✅  watchOS ✅
+- IPA：`dist/Vigor-1.2.0.ipa`（版本 1.2.0，build 5；主 App、手表 App 与两个小组件均已核对）
+- 备注：`docs/BUILD-REPORT.md` 的 M6 一节包含完成情况、截图逐张检查结论、未验证项与给用户的建议。
