@@ -228,6 +228,14 @@ public enum RideTimelineBuilder {
         distance: [Double?],
         paused: [Bool]
     ) -> [RideLapSummary] {
+        // 分圈 NP 与整次骑行同一口径（D-128）：短空档沿用前值、长空档用本次平均功率、暂停为 0；
+        // 整次骑行的功率覆盖率不足 50%（D-129）时，分圈也不出 NP。
+        let present = power.map { $0 != nil }
+        let movingSeconds = paused.filter { !$0 }.count
+        let measuredSeconds = present.indices.filter { present[$0] && !paused[$0] }.count
+        let powerUsable = movingSeconds > 0 && Double(measuredSeconds) / Double(movingSeconds) >= 0.5
+        var filledPower = power.map { $0 ?? 0 }
+        GroupSeries.fillGaps(&filledPower, present: present, paused: paused)
         let laps = fits.flatMap(\.laps).compactMap { lap -> (Date, Date)? in
             guard let start = lap.startTime, let end = lap.endTime, end > start else { return nil }
             return (start, end)
@@ -239,14 +247,14 @@ public enum RideTimelineBuilder {
             let watts = seconds.compactMap { power[$0] }
             let bpm = seconds.compactMap { heartRate[$0] }
             let meters = seconds.compactMap { distance[$0] }
-            let padded = seconds.map { paused[$0] ? 0 : (power[$0] ?? 0) }
+            let padded = seconds.map { paused[$0] ? 0 : filledPower[$0] }
             return RideLapSummary(
                 index: offset + 1,
                 start: bounds.0,
                 durationSeconds: seconds.filter { !paused[$0] }.count,
                 distanceMeters: meters.count >= 2 ? (meters.max() ?? 0) - (meters.min() ?? 0) : nil,
                 averagePower: watts.isEmpty ? nil : watts.reduce(0, +) / Double(watts.count),
-                normalizedPower: CyclingMath.normalizedPower(padded),
+                normalizedPower: powerUsable && !watts.isEmpty ? CyclingMath.normalizedPower(padded) : nil,
                 averageHeartRate: bpm.isEmpty ? nil : bpm.reduce(0, +) / Double(bpm.count),
                 maxHeartRate: bpm.max()
             )

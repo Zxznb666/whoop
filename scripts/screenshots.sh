@@ -10,6 +10,8 @@ BUNDLE_ID="com.example.vigor"
 DERIVED="build/screenshots"
 OUT="docs/screenshots"
 ROUTES=(summary recovery sleep strain workout journal journal:edit journal:questions browse metric:hrv metric:rhr settings exclusions backup coach:settings cardio ride ride:garminOnly ride:chart ride:laps pmc metric:ftp ftp-history metric:ef settings:sources lab lab:night report coach diagnostics onboarding)
+# 传入参数时只截指定的路由，例如：scripts/screenshots.sh ride:chart ride:laps
+if [[ $# -gt 0 ]]; then ROUTES=("$@"); fi
 
 UDID="$(xcrun simctl list devices available | grep "iPhone 17 Pro (" | head -1 | sed -E 's/.*\(([0-9A-F-]{36})\).*/\1/')"
 if [[ -z "$UDID" ]]; then

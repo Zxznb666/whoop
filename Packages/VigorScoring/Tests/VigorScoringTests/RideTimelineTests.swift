@@ -176,3 +176,40 @@ struct RideTimelineTests {
         #expect(timeline.laps.isEmpty)
     }
 }
+
+@Suite("RideTimeline 分圈 NP 口径")
+struct RideLapPowerGapTests {
+    let base = RideTimelineTests()
+
+    func lapTimeline(power: [Int?]) -> RideTimeline {
+        var stream = RideStream.simple(
+            fileID: "gap",
+            start: base.start,
+            heartRate: Array(repeating: 140, count: power.count),
+            power: power
+        )
+        stream.laps = [FITLap(startTime: base.start, endTime: base.start.addingTimeInterval(Double(power.count)))]
+        return RideTimelineBuilder.build(
+            ride: base.ride(id: "fit-gap", seconds: power.count),
+            snapshot: base.snapshot(),
+            importedRides: [stream]
+        )
+    }
+
+    @Test("功率中途掉线 60 秒：分圈 NP 按 D-128 用平均功率填充，而不是按 0 W")
+    func longGapUsesRideMean() throws {
+        // 前 300 秒 200 W，掉线 60 秒，后 300 秒 200 W：长空档填平均功率 200 → NP = 200（按 0 W 计会明显偏低）
+        let power: [Int?] = Array(repeating: 200, count: 300) + Array(repeating: nil, count: 60) + Array(repeating: 200, count: 300)
+        let lap = try #require(lapTimeline(power: power).laps.first)
+        let np = try #require(lap.normalizedPower)
+        #expect(abs(np - 200) < 1e-9)
+        #expect(lap.averagePower == 200)
+    }
+
+    @Test("功率覆盖不足 50%：分圈不出 NP")
+    func lowCoverageHasNoNormalizedPower() throws {
+        let power: [Int?] = Array(repeating: 200, count: 200) + Array(repeating: nil, count: 400)
+        let lap = try #require(lapTimeline(power: power).laps.first)
+        #expect(lap.normalizedPower == nil)
+    }
+}

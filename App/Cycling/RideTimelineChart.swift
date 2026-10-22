@@ -105,17 +105,21 @@ struct RideTimelineChart: View {
                 )
                 .foregroundStyle(Color.gray.opacity(0.15))
             }
-            if hasPower {
-                ForEach(powerRows) { row in
-                    LineMark(x: .value("时间", row.offset), y: .value(row.kind, row.value), series: .value("段", "\(row.kind)\(row.segment)"))
-                        .foregroundStyle(by: .value("指标", row.kind))
-                        .interpolationMethod(.linear)
-                }
-            }
+            // 先画心率、后画功率：心率抖动大，放在下层并调淡，避免盖住功率线
             if hasHeartRate {
                 ForEach(heartRateRows) { row in
                     LineMark(x: .value("时间", row.offset), y: .value(row.kind, row.value), series: .value("段", "\(row.kind)\(row.segment)"))
                         .foregroundStyle(by: .value("指标", row.kind))
+                        .opacity(hasPower ? 0.45 : 1)
+                        .lineStyle(StrokeStyle(lineWidth: 1))
+                        .interpolationMethod(.linear)
+                }
+            }
+            if hasPower {
+                ForEach(powerRows) { row in
+                    LineMark(x: .value("时间", row.offset), y: .value(row.kind, row.value), series: .value("段", "\(row.kind)\(row.segment)"))
+                        .foregroundStyle(by: .value("指标", row.kind))
+                        .lineStyle(StrokeStyle(lineWidth: 2))
                         .interpolationMethod(.linear)
                 }
             }
@@ -127,7 +131,7 @@ struct RideTimelineChart: View {
                     }
             }
         }
-        .chartForegroundStyleScale([Self.powerName: Color.orange, Self.heartRateName: Color.pink])
+        .chartForegroundStyleScale(domain: [Self.powerName, Self.heartRateName], range: [Color.orange, Color.pink])
         .chartYScale(domain: yDomain)
         .chartXSelection(value: $selected)
         .chartXAxis {
@@ -164,8 +168,9 @@ struct RideTimelineChart: View {
                 AxisMarks(position: .trailing, values: rightTickPositions) { value in
                     AxisValueLabel {
                         if let mapped = value.as(Double.self) {
-                            let bpm = RideChartScale.heartRate(mapped: mapped, low: low, high: high, top: powerTop)
-                            Text("\(Int(bpm.rounded()))").foregroundStyle(.pink)
+                            let bpm = Int(RideChartScale.heartRate(mapped: mapped, low: low, high: high, top: powerTop).rounded())
+                            // 只在最上面的刻度写单位，避免右轴过宽
+                            Text(mapped == rightTickPositions.last ? "\(bpm) bpm" : "\(bpm)").foregroundStyle(.pink)
                         }
                     }
                 }
