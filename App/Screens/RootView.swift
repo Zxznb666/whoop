@@ -23,6 +23,7 @@ enum Route: Hashable {
     case ftp
     case ftpHistory
     case efTrend
+    case cyclingSettings
     case report
     case coach
     case settings
@@ -42,7 +43,7 @@ enum Route: Hashable {
     /// 路由所属的标签页。
     var tab: AppTab {
         switch self {
-        case .recovery, .settings, .lab, .labNight, .diagnostics, .onboarding: .summary
+        case .recovery, .settings, .cyclingSettings, .lab, .labNight, .diagnostics, .onboarding: .summary
         case .sleep: .sleep
         case .strain, .workout, .rideDetail, .pmc: .strain
         case .journal, .journalEdit: .journal
@@ -77,9 +78,12 @@ enum Route: Hashable {
         case "cardio": .cardioFitness
         case "ride": .rideDetail("")
         case "ride:garminOnly": .rideDetail("garminOnly")
+        case "ride:chart": .rideDetail("chart")
+        case "ride:laps": .rideDetail("laps")
         case "pmc": .pmc
         case "metric:ftp": .ftp
         case "ftp-history": .ftpHistory
+        case "settings:sources": .cyclingSettings
         case "metric:ef": .efTrend
         default: nil
         }
@@ -208,6 +212,7 @@ struct RouteDestination: View {
         case .ftp: FTPDetailView(model: model)
         case .ftpHistory: FTPHistoryView(model: model)
         case .efTrend: EFTrendView(model: model)
+        case .cyclingSettings: CyclingSettingsPage(model: model)
         case .lab, .labNight: LabRootView(model: LabModel(source: .synthetic), app: model)
         case .diagnostics: DiagnosticsView()
         case .onboarding: OnboardingView()

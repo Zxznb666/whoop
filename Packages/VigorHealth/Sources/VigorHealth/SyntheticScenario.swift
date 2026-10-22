@@ -354,12 +354,24 @@ private struct ScenarioBuilder {
             let fitHeartRate: [Int?] = (0..<seconds).map { second in
                 Int(bpmAt[min(bpmAt.count - 1, second / 10)])
             }
-            importedRides.append(RideStream.simple(
+            var stream = RideStream.simple(
                 fileID: "synthetic-ride-\(ride.start.timeIntervalSince1970)",
                 start: ride.start,
                 heartRate: fitHeartRate,
                 power: powers.map { Optional($0) }
-            ))
+            )
+            // 分圈（M6 补完 C6）：时长足够的 FIT 骑行切成三圈等长的段，供分圈表与截图使用。不进入评分。
+            if seconds >= 900 {
+                let lapLength = seconds / 3
+                stream.laps = (0..<3).map { index in
+                    let lapEnd = index == 2 ? seconds : (index + 1) * lapLength
+                    return FITLap(
+                        startTime: ride.start.addingTimeInterval(Double(index * lapLength)),
+                        endTime: ride.start.addingTimeInterval(Double(lapEnd))
+                    )
+                }
+            }
+            importedRides.append(stream)
         }
     }
 

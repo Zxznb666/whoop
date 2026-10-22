@@ -94,31 +94,50 @@ struct RideDetailView: View {
     private var ride: RideResult? {
         let rides = (model.cycling?.rides ?? []).sorted { $0.start > $1.start }
         switch rideID {
-        case "": return rides.first { $0.powerSource != .none } ?? rides.first
+        case "", "chart": return rides.first { $0.powerSource != .none } ?? rides.first
+        case "laps": return rides.first { $0.sourceLabels.contains("FIT 导入") } ?? rides.first
         case "garminOnly": return rides.first { CyclingText.needsFITHint($0) } ?? rides.first
         default: return rides.first { $0.id == rideID }
         }
     }
 
+    /// 截图用：打开后滚动到的卡片（`ride:chart`、`ride:laps`）。
+    private var scrollAnchor: String? {
+        switch rideID {
+        case "chart", "laps": rideID
+        default: nil
+        }
+    }
+
     var body: some View {
-        ScrollView {
-            VStack(spacing: VigorTokens.cardSpacing) {
-                if let ride {
-                    header(ride)
-                    metrics(ride)
-                    timelineCard(ride)
-                    if let timeline, !timeline.laps.isEmpty {
-                        RideLapTable(laps: timeline.laps)
+        ScrollViewReader { proxy in
+            ScrollView {
+                VStack(spacing: VigorTokens.cardSpacing) {
+                    if let ride {
+                        header(ride)
+                        metrics(ride)
+                        timelineCard(ride)
+                            .id("chart")
+                        if let timeline, !timeline.laps.isEmpty {
+                            RideLapTable(laps: timeline.laps)
+                                .id("laps")
+                        }
+                        if let zones = ride.heartRateZoneSeconds { heartRateZoneChart(zones) }
+                        if let zones = ride.zoneSeconds { zoneChart(zones) }
+                        curveChart(ride)
+                    } else {
+                        Text("还没有骑行记录。导入 FIT 文件或完成一次骑行训练后显示。").foregroundStyle(.secondary)
                     }
-                    if let zones = ride.heartRateZoneSeconds { heartRateZoneChart(zones) }
-                    if let zones = ride.zoneSeconds { zoneChart(zones) }
-                    curveChart(ride)
-                } else {
-                    Text("还没有骑行记录。导入 FIT 文件或完成一次骑行训练后显示。").foregroundStyle(.secondary)
                 }
+                .padding(.horizontal, VigorTokens.pageMargin)
+                .padding(.bottom, 24)
             }
-            .padding(.horizontal, VigorTokens.pageMargin)
-            .padding(.bottom, 24)
+            .task(id: timeline?.points.count) {
+                // 等布局完成后再滚动，否则截图时目标还没有位置
+                guard let scrollAnchor else { return }
+                try? await Task.sleep(for: .milliseconds(600))
+                proxy.scrollTo(scrollAnchor, anchor: .top)
+            }
         }
         .navigationTitle("骑行详情")
         .task(id: ride?.id) {
@@ -541,5 +560,17 @@ struct CyclingSettingsSection: View {
         case .failure(let error):
             message = "无法打开所选文件：\(error.localizedDescription)"
         }
+    }
+}
+
+/// 设置中的“骑行”分组单独成页（截图路由 `settings:sources` 使用）。
+struct CyclingSettingsPage: View {
+    let model: AppModel
+
+    var body: some View {
+        Form {
+            CyclingSettingsSection(model: model)
+        }
+        .navigationTitle("骑行设置")
     }
 }

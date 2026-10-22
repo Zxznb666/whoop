@@ -9,7 +9,9 @@ import VigorScoring
 enum CyclingTrendText {
     static func monthlyChange(_ slopePerDay: Double) -> String {
         let monthly = slopePerDay * 30
-        let direction = monthly >= 0 ? "提高" : "下降"
+        // 变化小于 0.005（EF 的显示精度）时写“基本持平”，避免出现“提高 0.00”
+        guard abs(monthly) >= 0.005 else { return "近 90 天每月基本持平" }
+        let direction = monthly > 0 ? "提高" : "下降"
         return "近 90 天每月\(direction) \(String(format: "%.2f", abs(monthly)))"
     }
 
