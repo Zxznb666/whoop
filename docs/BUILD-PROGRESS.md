@@ -171,3 +171,9 @@
 - 测试：VigorScoring 158 个通过（新增 7 个：RideTimelineTests）；全部包合计 284 个通过
 - 构建：iOS ✅  watchOS —（C1 不改界面）
 - 备注：`RideTimelineBuilder` 放在 `Cycling/RideTimeline.swift`。分圈序号从 1 开始。FIT 路径用逐秒数组；非 FIT 的心率按分钟网格去重（D-130），空档以分钟为单位；HealthKit 功率的空档不超过 5 秒沿用前值，更长为 nil。`FITLap` 增加显式初始化器以便测试构造（VigorFIT）。
+
+### C3 每次骑行的心率区间 —— ✅ 完成
+- 提交：见 `git log --oneline`（提交信息 `feat(cycling): heart rate zones per ride`）
+- 测试：VigorScoring 161 个通过（新增 3 个：CyclingZoneTests，含旧 JSON 解码为 nil 与往返）
+- 构建：iOS ✅（见 C2 的构建记录）  watchOS —
+- 备注：先于 C2 完成，因为 C2 的心率区间卡片读取这里的数据。口径为 PRD §5.1 的 HRR%（Z1 50–60 … Z5 90–100）；FIT 按秒、其他按分钟（每分钟 60 秒）。

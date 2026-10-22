@@ -58,6 +58,9 @@ public struct RideResult: Sendable, Hashable, Codable, Identifiable {
     public var loadMayBeUnderestimated: Bool
     /// 本次 TRIMP（只统计有心率的分钟，不含补偿）；用于拟合 k
     public var measuredTRIMP: Double
+    /// 心率区间秒数（Z1…Z5，按心率储备比 HRR%，PRD §5.1）；HRR% < 50% 的秒不计入任何区间。没有心率时为 nil。
+    /// 可选字段：旧数据解码时为 nil。
+    public var heartRateZoneSeconds: [Int]? = nil
 }
 
 public struct CyclingInput: Sendable {
@@ -407,7 +410,31 @@ public enum CyclingAnalysis {
         if hasPower, item.power.count >= 3600, moving >= 3600 {
             result.aerobicDecoupling = decoupling(item, grid: grid)
         }
+        result.heartRateZoneSeconds = heartRateZones(item, grid: grid, input: input)
         return result
+    }
+
+    /// 心率区间（PRD §5.1，按 HRR%）：Z1 50–60%、Z2 60–70%、Z3 70–80%、Z4 80–90%、Z5 90–100%。
+    /// FIT 有逐秒心率时按秒计；否则每个有测量的分钟计 60 秒（与分钟网格的去重结果一致）。
+    static func heartRateZones(_ item: GroupSeries, grid: MinuteGrid, input: CyclingInput) -> [Int]? {
+        guard item.averageHeartRate != nil else { return nil }
+        let reserve = input.maxHeartRate - input.restingHeartRate
+        guard reserve > 0 else { return nil }
+        var zones = [Int](repeating: 0, count: 5)
+        func add(_ bpm: Double, seconds: Int) {
+            let ratio = min(max((bpm - input.restingHeartRate) / reserve, 0), 1)
+            guard ratio >= 0.5 else { return }
+            let zone = ratio < 0.6 ? 0 : ratio < 0.7 ? 1 : ratio < 0.8 ? 2 : ratio < 0.9 ? 3 : 4
+            zones[zone] += seconds
+        }
+        if let fit = item.fitHeartRate {
+            for case let bpm? in fit { add(Double(bpm), seconds: 1) }
+        } else {
+            for minute in item.lowerMinute..<item.upperMinute where !grid.heartRate[minute].isNaN {
+                add(grid.heartRate[minute], seconds: 60)
+            }
+        }
+        return zones
     }
 
     /// 有氧解耦：按时长对半分（分钟粒度），分别计算 NP 与平均心率。
