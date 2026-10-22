@@ -11,19 +11,23 @@ public struct SyncStatus: Sendable, Hashable {
     public var lastCycleCount: Int
     public var progress: Double
     public var progressText: String
+    /// 最近一次评分所用数据的条数（诊断用）
+    public var inventory: SnapshotInventory?
 
     public init(
         lastSuccessAt: Date? = nil,
         lastError: String? = nil,
         lastCycleCount: Int = 0,
         progress: Double = 0,
-        progressText: String = ""
+        progressText: String = "",
+        inventory: SnapshotInventory? = nil
     ) {
         self.lastSuccessAt = lastSuccessAt
         self.lastError = lastError
         self.lastCycleCount = lastCycleCount
         self.progress = progress
         self.progressText = progressText
+        self.inventory = inventory
     }
 }
 
@@ -131,6 +135,7 @@ public actor SyncEngine {
         warnings = []
         do {
             var snapshot = try await readSnapshot(mode: mode, now: now)
+            let inventory = SnapshotInventory(snapshot)
             // 导入的骑行在评分前填入（不经过快照缓存，见 ScoringSettings.importedRides）
             snapshot.importedRides = settings.importedRides
             let journal = try await repository.journal(from: snapshot.rangeStart, to: now)
@@ -171,7 +176,8 @@ public actor SyncEngine {
                 lastError: warnings.isEmpty ? nil : warnings.joined(separator: "\n"),
                 lastCycleCount: output.cycles.count,
                 progress: 1,
-                progressText: "完成"
+                progressText: "完成",
+                inventory: inventory
             )
             return notifications
         } catch {

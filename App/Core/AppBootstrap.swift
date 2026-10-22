@@ -22,7 +22,7 @@ final class AppBootstrap {
 
     /// 最近一次刷新的结果，供欢迎页显示导入是否成功
     enum RefreshOutcome {
-        case success(cycleCount: Int)
+        case success(cycleCount: Int, inventory: SnapshotInventory?)
         case failure(String)
         case notAuthorized
     }
@@ -95,7 +95,12 @@ final class AppBootstrap {
             let weekly = NotificationPlanner.weeklyReport(now: Date(), sent: NotificationScheduler.sent, calendar: .current)
             await NotificationScheduler.schedule(planned + reminders + weekly)
             await publishToWidgetsAndWatch()
-            lastOutcome = .success(cycleCount: await sync.status.lastCycleCount)
+            let status = await sync.status
+            lastOutcome = .success(cycleCount: status.lastCycleCount, inventory: status.inventory)
+            // 全量导入时把读到的数据条数记进诊断日志，便于判断“没数据”是权限问题还是识别问题
+            if mode == .full, let inventory = status.inventory {
+                DiagnosticsLog.record("全量导入：评分 \(status.lastCycleCount) 天；\(inventory.summary)")
+            }
             // 让已经显示的界面（摘要等）重新读取存储；否则授权导入后仍显示授权前的空状态
             NotificationCenter.default.post(name: .vigorDataChanged, object: nil)
         } catch {

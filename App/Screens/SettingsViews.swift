@@ -138,10 +138,12 @@ struct OnboardingView: View {
             // 授权前的刷新读不到数据，这里必须全量导入，否则缓存里只有空数据
             await AppBootstrap.shared.refreshNow(mode: .full)
             switch AppBootstrap.shared.lastOutcome {
-            case .success(let count) where count > 0:
+            case .success(let count, _) where count > 0:
                 status = "导入完成：共 \(count) 天的数据。"
-            case .success:
-                status = "导入完成，但没有找到可用的睡眠数据。请确认手表开启了睡眠追踪，并在“健康 → 共享 → App”中允许元气读取睡眠与心率。"
+            case .success(_, let inventory) where inventory?.isEmpty ?? true:
+                status = "导入完成，但没有读到任何健康数据。最可能是读取权限没有打开：请到“设置 → 隐私与安全性 → 健康 → 元气”（或“健康”App → 右上角头像 → 隐私 → App → 元气）中打开全部读取项，然后回到这里再点一次授权。"
+            case .success(_, let inventory):
+                status = "读到了数据，但没有识别出睡眠。\(inventory?.summary ?? "")。请把这段文字截图发给开发者。"
             case .failure(let message):
                 status = "导入失败：\(message)。详情见诊断页。"
             case .notAuthorized, nil:
