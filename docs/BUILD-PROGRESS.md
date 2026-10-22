@@ -195,3 +195,10 @@
 - 测试：全部包合计 307 个通过（VigorScoring 178，新增 7 个：SourcePreferenceTests；VigorEngine 20，新增 3 个：SourcePreferenceSyncTests；VigorReplay 黄金快照未变）
 - 构建：iOS ✅  watchOS —（watchOS 构建在 C6 统一验证）
 - 备注：`HeartRateOrigin` 新增 `preferredWorkout`（rawValue 5），排序改为显式 `rank`。`ScoringSettings` 增加 `heartRateSourcePreferences`，只在 `SyncEngine.refresh` 中传入 `PipelineInput`。设置中列出最近 180 天的非 Apple Watch 来源，修改后 `refreshNow(mode: .window(days: 30))`。
+
+### C6 截图、打包、报告 —— ✅ 完成（真机验证待做，见 BUILD-REPORT）
+- 提交：见 `git log --oneline`（提交信息 `docs(report): M6 completion ...` 与 `chore(release): 1.3.0 ...`）
+- 测试：全部包合计 307 个通过；黄金快照未变
+- 构建：iOS ✅（0 个 error）  watchOS ✅（0 个 error）
+- IPA：`dist/Vigor-1.3.0.ipa`（版本 1.3.0，build 6；手表 App 与两个小组件均已核对）
+- 备注：截图 62 张（31 个路由 × 浅深两色），新增的 10 张与 `ride`、`cardio` 已逐张检查，结论见 BUILD-REPORT 的 M6 补完一节。`metric:ef` 与 `cardio` 在修正 EF 文案后重新截图。

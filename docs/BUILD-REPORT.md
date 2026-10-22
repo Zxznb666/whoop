@@ -197,3 +197,44 @@
 1. 如果心率带与功率计支持 ANT+ 和蓝牙同时连接，可以把它们也通过蓝牙配对到 Apple Watch（在手表的“设置 → 蓝牙”中）。这样在手表上开运动时，心率带的心率和功率计的功率会直接写入健康数据，不需要再导入 FIT。注意：部分功率计限制蓝牙连接数，可能需要先断开手机上的其他 App。
 2. 没开手表运动的那一半骑行：导入 FIT 是最完整的方案。可以从 Garmin Connect 网页版的活动页面“导出原始文件”（得到包含 FIT 的 zip，解压后导入），或者从码表的 `Garmin/Activity` 目录拷出来。
 3. 导入的 FIT 文件只保存在本机并包含在加密备份中，不会写回健康数据，因此换机或恢复时请先导出备份。
+
+## M6 补完（C1–C6，版本 1.3.0 build 6）
+
+### 完成情况
+| 项 | 内容 | 提交 |
+|---|---|---|
+| C1 | 骑行时间线（逐秒 / 降采样 / 分圈），`RideTimelineBuilder` | `feat(cycling): ride timeline builder ...` |
+| C3 | 每次骑行的心率区间（HRR%），可选字段，旧数据解码为 nil | `feat(cycling): heart rate zones per ride` |
+| C2 | 双轴曲线、分圈表、心率区间卡片，骑行详情页 | `feat(cycling): ride detail dual-axis chart ...` |
+| C4 | FTP 历史、EF 趋势、心肺适能两项 | `feat(cycling): FTP history ...` |
+| C5 | 心率来源偏好（优先 / 忽略），同步链路的唯一扩展 | `feat(cycling): heart rate source preferences ...` |
+| C6 | 截图路由、合成分圈、版本 1.3.0、IPA、本报告 | 见 `git log` |
+
+C3 排在 C2 之前完成，因为 C2 的心率区间卡片读取 C3 的数据（D-138）。
+
+### 测试
+- 全部包合计 307 个通过（C 阶段开始时 277 个）：VigorScoring 178（新增 RideTimelineTests 7、CyclingZoneTests 3、RideChartScaleTests 3、FTPHistoryTests 11、SourcePreferenceTests 7 等）、VigorEngine 20（新增 SourcePreferenceSyncTests 3）、VigorFIT 14、VigorHealth 52、VigorStore 26、VigorCoach 11、VigorDesign 2、VigorReplay 4。
+- 黄金快照（VigorReplay）未变化。分圈与合成分圈只影响显示，不进入评分（D-139）。
+- 构建：iOS（Vigor scheme，generic iOS Simulator）0 个 error；watchOS（VigorWatch scheme）0 个 error。
+
+### 截图逐张检查（iPhone 17 Pro，浅色与深色）
+- `ride:chart`：双轴曲线可见，右轴 100–180 bpm 与心率曲线位置对得上（映射方向正确）；本次合成骑行没有暂停，因此没有灰色底纹，这一项需要真机或含暂停的 FIT 才能确认。浅色、深色都可读。
+- `ride:laps`：三圈各 29:00，合计约 87 分钟，与整次骑行一致；合成数据没有距离，距离列显示 “—”，属于数据缺失而不是显示错误。NP 与平均功率相同（恒定功率的合成数据）。
+- `ride`：心率区间柱状图 Z1–Z4 有值、Z5 为 0，口径标注清楚；功率区间与功率曲线未变。
+- `metric:ef`：散点与趋势线位置正常；斜率文案在 EF 变化很小时改为“近 90 天每月基本持平”（之前显示为“提高 0.00”，已修正并重新截图）。
+- `ftp-history`：每周一个点，图例与“取值来源”说明一致。说明文字写明历史覆盖的快照窗口（合成场景为约 121 天，真机应为约 180 天）。
+- `settings:sources`：独立的“骑行设置”页，Garmin 来源列出 Bundle ID、心率样本数与骑行次数，选择器默认“自动”，Apple Watch 不在列表中。
+- `cardio`：EF 与 20 分钟功率两项正常（211 W，上期 209 W，+1.0%）。原有的“1 分钟心率恢复 后半段比前半段的中位数 0 bpm”在合成数据上为 0，这是既有行为，未改。
+- 深色模式：上述各页的卡片、坐标轴与文字在深色下均可读。
+
+### 版本与 IPA
+- 版本 1.3.0（build 6），主 App、手表 App、手表小组件与小组件四个 target 统一（`project.yml`）。
+- `dist/Vigor-1.3.0.ipa`（6.9 MB）已由 `scripts/package-ipa.sh` 生成：`Payload/Vigor.app` 中包含 `Watch/VigorWatch.app` 与 `PlugIns/VigorWidgets.appex`，手表小组件 `VigorWatch.app/PlugIns/VigorWatchWidgets.appex` 也在包内（`appex/Info.plist` 共 2 个）。`CFBundleShortVersionString` = 1.3.0，`CFBundleVersion` = 6。
+
+### 未验证项（仍需真机）
+- 真实 Garmin FIT 文件的分圈、距离与暂停：合成数据不含距离，暂停只在解析器测试中覆盖。
+- 双轴曲线在真实含暂停的骑行上的灰色底纹。
+- HealthKit 180 天历史下的 FTP 历史：快照窗口为 180 天，365 天的范围在真机上只能覆盖约 180 天（D-134）。
+- 心率来源偏好在真实 Garmin 与手表同时记录的数据上的效果（合成数据只验证了流水线路径，D-135）。
+- 设置中的“修改后重新计算最近 30 天”在真机上的耗时。
+- 同配速心率的心肺适能比较仍未实现（PRD 要求中的一项，M6 补完范围外）。
