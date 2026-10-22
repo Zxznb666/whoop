@@ -1,4 +1,5 @@
 import Foundation
+import VigorScoring
 
 /// 设置（PRD §6.12）。保存在本机的 UserDefaults 中，并直接影响评分流水线。
 enum AppSettings {
@@ -6,6 +7,7 @@ enum AppSettings {
     private static let maxHeartRateKey = "vigor.settings.maxHeartRate"
     private static let targetWakeKey = "vigor.settings.targetWakeMinutes"
     private static let manualFTPKey = "vigor.settings.manualFTP"
+    private static let manualFTPHistoryKey = "vigor.settings.manualFTPHistory"
 
     static var baseSleepNeedHours: Double {
         get {
@@ -40,5 +42,25 @@ enum AppSettings {
             return value > 0 ? value : nil
         }
         set { UserDefaults.standard.set(newValue ?? 0, forKey: manualFTPKey) }
+    }
+
+    /// 手动 FTP 的修改记录（M6 补完 C4）。只从本版本开始记录，之前的日期没有手动值的历史。
+    static var manualFTPHistory: [ManualFTPEntry] {
+        get {
+            guard let data = UserDefaults.standard.data(forKey: manualFTPHistoryKey) else { return [] }
+            return (try? JSONDecoder().decode([ManualFTPEntry].self, from: data)) ?? []
+        }
+        set {
+            UserDefaults.standard.set(try? JSONEncoder().encode(newValue), forKey: manualFTPHistoryKey)
+        }
+    }
+
+    /// 设置手动 FTP（nil 表示清除），并把修改记入历史。值没有变化时不记录。
+    static func setManualFTP(_ watts: Double?, now: Date = Date()) {
+        guard manualFTP != watts else { return }
+        manualFTP = watts
+        var history = manualFTPHistory
+        history.append(ManualFTPEntry(date: now, watts: watts))
+        manualFTPHistory = history
     }
 }

@@ -12,6 +12,8 @@ struct CardioFitnessView: View {
             VStack(spacing: VigorTokens.cardSpacing) {
                 vo2Card
                 recoveryCard
+                efCard
+                powerCard
                 SectionCard {
                     Text("心肺适能的趋势只描述变化方向，不做医学判断。同配速心率的比较暂未提供。")
                         .font(.caption)
@@ -88,6 +90,38 @@ struct CardioFitnessView: View {
                     Text("测量次数不足，至少需要 4 次。")
                         .font(.callout)
                         .foregroundStyle(.secondary)
+                }
+            }
+        }
+    }
+
+    private var now: Date { model.lastUpdated ?? Date() }
+
+    @ViewBuilder
+    private var efCard: some View {
+        SectionCard {
+            VStack(alignment: .leading, spacing: 8) {
+                Text("有氧效率 EF（近 90 天）").font(.headline)
+                if let slope = model.cycling?.efficiencySlopePerDay {
+                    Text(CyclingTrendText.monthlyChange(slope)).font(.callout)
+                } else {
+                    Text("数据不足：至少需要 3 次同时有功率和心率的骑行。").font(.callout).foregroundStyle(.secondary)
+                }
+            }
+        }
+    }
+
+    @ViewBuilder
+    private var powerCard: some View {
+        SectionCard {
+            VStack(alignment: .leading, spacing: 8) {
+                Text("最佳 20 分钟功率（近 90 天对比上期）").font(.headline)
+                if let change = CyclingTrends.bestTwentyMinuteChange(rides: model.cycling?.rides ?? [], now: now, calendar: model.calendar) {
+                    let percent = (change.current - change.previous) / change.previous * 100
+                    Text("\(Int(change.current.rounded())) W，上期 \(Int(change.previous.rounded())) W（\(Formatters.signed(percent, digits: 1, unit: "%"))）")
+                        .font(.callout)
+                } else {
+                    Text("数据不足：本期与上期都需要有功率的骑行。").font(.callout).foregroundStyle(.secondary)
                 }
             }
         }

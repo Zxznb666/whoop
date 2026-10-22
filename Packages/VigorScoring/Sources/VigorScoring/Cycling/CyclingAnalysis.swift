@@ -118,6 +118,8 @@ public struct CyclingOutput: Sendable, Codable, Equatable {
     /// 流水线实际使用的静息与最大心率（骑行详情的双轴曲线用）；可选字段，旧数据为 nil
     public var restingHeartRate: Double? = nil
     public var maxHeartRate: Double? = nil
+    /// 有氧效率 EF 的 90 天线性斜率（每天）；数据不足时为 nil（M6 补完 C4）
+    public var efficiencySlopePerDay: Double? = nil
 
     public init(
         rides: [RideResult],
@@ -217,6 +219,7 @@ public enum CyclingAnalysis {
         )
         output.restingHeartRate = input.restingHeartRate
         output.maxHeartRate = input.maxHeartRate
+        output.efficiencySlopePerDay = CyclingTrends.efficiencySlopePerDay(rides: rides, now: input.now, calendar: input.calendar)
         return output
     }
 

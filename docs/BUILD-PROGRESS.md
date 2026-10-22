@@ -183,3 +183,9 @@
 - 测试：VigorScoring 164 个通过（新增 3 个：RideChartScaleTests）
 - 构建：iOS ✅（0 个 error，App 中新文件无警告）  watchOS —
 - 备注：双轴映射为纯函数 `RideChartScale`（`VigorScoring/Cycling/RideChartScale.swift`）。`CyclingOutput` 新增可选的 `restingHeartRate`、`maxHeartRate`（图表右轴与映射用）。`AppModel` 新增 `importedRides`（缓存快照不含 FIT，曲线从存储读取）。App target 增加 VigorFIT 依赖（project.yml）。曲线顺序：指标 → 双轴曲线 → 分圈 → 心率区间 → 功率区间 → 功率曲线。真机与截图检查见 C6。
+
+### C4 FTP 历史、EF 趋势、心肺适能新增两项 —— ✅ 完成（与施工文档的偏离见 D-134）
+- 提交：见 `git log --oneline`（提交信息 `feat(cycling): FTP history, EF trend and cardio additions`）
+- 测试：VigorScoring 172 个通过（新增 11 个：FTPHistoryTests，含 FTP 优先级、清除手动值、周一网格、EF 斜率 0.001/天、20 分钟功率对比）
+- 构建：iOS ✅  watchOS —
+- 备注：FTP 历史不放进 `CyclingOutput`，由界面用 `FTPHistory.make` 计算（手动修改历史不在流水线输入中，见 D-134）。`CyclingOutput` 新增可选的 `efficiencySlopePerDay`。浏览页“骑行”分组新增“FTP 历史”“有氧效率 EF 趋势”；心肺适能新增 EF 趋势与 90 天最佳 20 分钟功率对比。

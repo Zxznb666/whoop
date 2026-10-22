@@ -429,7 +429,7 @@ struct CyclingSettingsSection: View {
             Stepper(value: $manualFTP, in: 0...600, step: 1) {
                 LabeledContent("手动 FTP", value: manualFTP > 0 ? "\(Int(manualFTP)) W" : "未设置")
             }
-            .onChange(of: manualFTP) { AppSettings.manualFTP = manualFTP > 0 ? manualFTP : nil }
+            .onChange(of: manualFTP) { AppSettings.setManualFTP(manualFTP > 0 ? manualFTP : nil) }
             if let ftp = model.cycling?.ftp {
                 LabeledContent("当前使用", value: "\(Int(ftp.watts.rounded())) W · \(CyclingText.ftpSource(ftp.source))")
             }

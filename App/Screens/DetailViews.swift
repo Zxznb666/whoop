@@ -483,6 +483,8 @@ struct BrowseView: View {
             Section("骑行") {
                 NavigationLink("体能管理（CTL / ATL / TSB）", value: Route.pmc)
                 NavigationLink("FTP 与 90 天最佳功率", value: Route.ftp)
+                NavigationLink("FTP 历史（近 365 天）", value: Route.ftpHistory)
+                NavigationLink("有氧效率 EF 趋势", value: Route.efTrend)
                 NavigationLink("骑行列表", value: Route.workout(UUID()))
             }
             if let age = model.bodyAge {

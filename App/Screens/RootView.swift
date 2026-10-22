@@ -21,6 +21,8 @@ enum Route: Hashable {
     case rideDetail(String)
     case pmc
     case ftp
+    case ftpHistory
+    case efTrend
     case report
     case coach
     case settings
@@ -45,7 +47,7 @@ enum Route: Hashable {
         case .strain, .workout, .rideDetail, .pmc: .strain
         case .journal, .journalEdit: .journal
         case .journalQuestions, .coachSettings, .backup, .exclusions: .summary
-        case .cardioFitness, .ftp: .browse
+        case .cardioFitness, .ftp, .ftpHistory, .efTrend: .browse
         case .metric, .browse, .report, .coach: .browse
         }
     }
@@ -77,6 +79,8 @@ enum Route: Hashable {
         case "ride:garminOnly": .rideDetail("garminOnly")
         case "pmc": .pmc
         case "metric:ftp": .ftp
+        case "ftp-history": .ftpHistory
+        case "metric:ef": .efTrend
         default: nil
         }
     }
@@ -202,6 +206,8 @@ struct RouteDestination: View {
         case .rideDetail(let id): RideDetailView(model: model, rideID: id)
         case .pmc: PMCDetailView(model: model)
         case .ftp: FTPDetailView(model: model)
+        case .ftpHistory: FTPHistoryView(model: model)
+        case .efTrend: EFTrendView(model: model)
         case .lab, .labNight: LabRootView(model: LabModel(source: .synthetic), app: model)
         case .diagnostics: DiagnosticsView()
         case .onboarding: OnboardingView()
