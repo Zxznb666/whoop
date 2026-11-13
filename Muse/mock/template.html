@@ -1,0 +1,303 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Vigor Muse Mock</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #000000; --card: #121619; --line: #1F262B; --text: #FFFFFF; --muted: #8A979F; --dim: #5A646B;
+  --green: #16EC06; --yellow: #FFDE00; --red: #FF0026; --strain: #0093E7; --sleep: #7BA1BB; --teal: #00F19F; --recblue: #67AEE6;
+  --awake: #E5E5E5; --rem: #00F19F; --light: #7BA1BB; --deep: #5B3FD9;
+  --num: 'Barlow Condensed', 'DIN Alternate', 'Arial Narrow', sans-serif;
+  --ui: 'Inter', -apple-system, 'PingFang SC', 'Noto Sans SC', sans-serif;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--ui); -webkit-font-smoothing: antialiased; }
+.app { max-width: 430px; margin: 0 auto; padding: 0 16px 96px; }
+.top { position: sticky; top: 0; background: var(--bg); padding: 14px 0 10px; z-index: 5; }
+.datebar { display: flex; align-items: center; justify-content: space-between; }
+.datebar button { background: none; border: 0; color: var(--text); font-size: 26px; width: 44px; height: 44px; cursor: pointer; }
+.datebar button:disabled { color: var(--line); cursor: default; }
+.date { font-weight: 600; font-size: 15px; letter-spacing: .04em; text-align: center; }
+.meta { display: flex; justify-content: center; gap: 8px; align-items: center; color: var(--muted); font-size: 12px; margin-top: 2px; }
+.dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; }
+.label { font-size: 11px; font-weight: 600; letter-spacing: .12em; text-transform: uppercase; color: var(--muted); }
+.card { background: var(--card); border-radius: 12px; padding: 16px; margin-top: 12px; }
+.num { font-family: var(--num); font-weight: 700; letter-spacing: .01em; }
+.rings { display: grid; grid-template-columns: 1fr 1.25fr 1fr; align-items: end; gap: 6px; margin-top: 8px; }
+.ring { text-align: center; }
+.ring svg { width: 100%; height: auto; display: block; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.grid2 .card { margin-top: 0; }
+.stat .v { font-family: var(--num); font-weight: 700; font-size: 30px; margin-top: 6px; }
+.stat .u { font-size: 13px; color: var(--muted); font-family: var(--ui); font-weight: 500; margin-left: 3px; }
+.stat .b { font-size: 12px; color: var(--muted); margin-top: 2px; }
+.up { color: var(--teal); } .down { color: var(--red); } .flat { color: var(--muted); }
+.note { font-size: 13px; color: var(--muted); line-height: 1.55; }
+.tag { display: inline-block; font-size: 11px; color: var(--yellow); border: 1px solid #3a3a1a; border-radius: 4px; padding: 1px 6px; margin: 4px 4px 0 0; }
+.row { display: grid; grid-template-columns: 1.4fr 1fr 1fr 24px; align-items: center; padding: 11px 0; border-top: 1px solid var(--line); font-size: 14px; }
+.row:first-of-type { border-top: 0; }
+.row .k { font-size: 11px; font-weight: 600; letter-spacing: .1em; color: var(--muted); }
+.row .x { font-family: var(--num); font-weight: 700; font-size: 20px; }
+.row .bl { color: var(--muted); font-size: 12px; }
+.pen { font-size: 11px; color: var(--red); display: block; }
+.bars { display: flex; align-items: flex-end; gap: 8px; height: 120px; margin-top: 12px; }
+.bars .c { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
+.bars .bar { width: 100%; border-radius: 4px 4px 0 0; }
+.bars .bv { font-family: var(--num); font-weight: 700; font-size: 14px; margin-bottom: 4px; }
+.bars .bd { font-size: 10px; color: var(--muted); margin-top: 6px; }
+.zone { display: grid; grid-template-columns: 30px 1fr 52px; gap: 8px; align-items: center; margin: 8px 0; font-size: 12px; }
+.zone .t { height: 10px; background: var(--line); border-radius: 5px; overflow: hidden; }
+.zone .t i { display: block; height: 100%; background: var(--strain); }
+.wk { display: grid; grid-template-columns: 1fr auto; padding: 12px 0; border-top: 1px solid var(--line); }
+.wk:first-of-type { border-top: 0; }
+.wk .n { font-weight: 600; font-size: 14px; }
+.wk .s { color: var(--muted); font-size: 12px; margin-top: 3px; }
+.wk .st { font-family: var(--num); font-weight: 700; font-size: 26px; color: var(--strain); text-align: right; }
+.stage { display: grid; grid-template-columns: 12px 1fr auto 46px; gap: 10px; align-items: center; padding: 8px 0; font-size: 14px; }
+.stage .sw { width: 12px; height: 12px; border-radius: 3px; }
+.stage .p { text-align: right; color: var(--muted); font-family: var(--num); font-weight: 600; font-size: 16px; }
+.hbar { height: 12px; border-radius: 6px; background: var(--line); margin: 6px 0 12px; overflow: hidden; }
+.hbar i { display: block; height: 100%; border-radius: 6px; }
+.big { font-family: var(--num); font-weight: 700; font-size: 64px; line-height: 1; }
+.tabs { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(0,0,0,.94); border-top: 1px solid var(--line); display: flex; justify-content: center; padding-bottom: env(safe-area-inset-bottom); }
+.tabs div { display: flex; width: 100%; max-width: 430px; }
+.tabs button { flex: 1; background: none; border: 0; color: var(--dim); font: 600 11px var(--ui); letter-spacing: .1em; padding: 16px 0 18px; cursor: pointer; }
+.tabs button.on { color: var(--text); }
+.tiers { display: flex; gap: 6px; justify-content: center; margin: 8px 0 0; }
+.tiers button { background: var(--card); border: 1px solid var(--line); color: var(--muted); font: 600 11px var(--ui); letter-spacing: .08em; border-radius: 12px; padding: 4px 10px; cursor: pointer; }
+.tiers button.on { color: var(--text); border-color: var(--muted); }
+.empty { text-align: center; padding: 28px 0 10px; color: var(--muted); }
+.demo { text-align: center; margin-top: 18px; font-size: 12px; }
+.demo a { color: var(--muted); }
+svg text { font-family: var(--ui); }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="top">
+    <div class="datebar"><button id="prev" aria-label="前一天">‹</button><div><div class="date" id="date"></div><div class="meta" id="meta"></div></div><button id="next" aria-label="后一天">›</button></div>
+    <div class="tiers" id="tiers"></div>
+  </div>
+  <main id="page"></main>
+  <div class="demo"><a href="#" id="unwornDemo">查看“未佩戴”状态示例</a> · 样机数据：<span id="src"></span></div>
+</div>
+<nav class="tabs"><div id="tabs"></div></nav>
+<script>
+const DATA = /*__DATA__*/null;
+const TZ = 8 * 3600;
+const C = { green: '#16EC06', yellow: '#FFDE00', red: '#FF0026', strain: '#0093E7', sleep: '#7BA1BB', teal: '#00F19F', line: '#1F262B', dim: '#5A646B', muted: '#8A979F', awake: '#E5E5E5', rem: '#00F19F', light: '#7BA1BB', deep: '#5B3FD9' };
+const TABS = ['OVERVIEW', 'RECOVERY', 'STRAIN', 'SLEEP'];
+const state = { tier: 'A', tab: 'OVERVIEW', idx: null, unworn: false };
+try { const s = JSON.parse(localStorage.getItem('muse-mock') || '{}'); Object.assign(state, { tab: s.tab || state.tab, tier: s.tier || state.tier }); } catch (e) {}
+const save = () => { try { localStorage.setItem('muse-mock', JSON.stringify({ tab: state.tab, tier: state.tier })); } catch (e) {} };
+
+const pad = (n) => String(n).padStart(2, '0');
+const hm = (t) => { const d = new Date((t + TZ) * 1000); return `${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}`; };
+const hhmmDur = (h) => `${Math.floor(h)}:${pad(Math.round((h % 1) * 60) % 60)}`;
+const fmt = (x, k = 0) => (x == null || !isFinite(x) ? '—' : Number(x).toFixed(k));
+const zoneColor = (z) => C[z] || C.dim;
+const zoneName = { green: 'HIGH', yellow: 'MEDIUM', red: 'LOW' };
+const qColor = { high: C.green, medium: C.yellow, low: C.dim, none: C.dim };
+const qName = { high: '高', medium: '中', low: '低', none: '无' };
+const WEEK = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+function dateLabel(k) { const [y, m, d] = k.split('-').map(Number); const w = new Date(Date.UTC(y, m - 1, d)).getUTCDay(); return `${m}月${d}日 ${WEEK[w]}`; }
+
+function ring({ value, max, color, center, label, size = 120, stroke = 10, sub }) {
+  const r = (size - stroke) / 2 - 2, c = 2 * Math.PI * r, cx = size / 2;
+  const p = value == null ? 0 : Math.max(0, Math.min(1, value / max));
+  return `<svg viewBox="0 0 ${size} ${size + 18}" role="img" aria-label="${label} ${center}">
+    <circle cx="${cx}" cy="${cx}" r="${r}" fill="none" stroke="${C.line}" stroke-width="${stroke}"/>
+    ${value == null ? '' : `<circle cx="${cx}" cy="${cx}" r="${r}" fill="none" stroke="${color}" stroke-width="${stroke}" stroke-linecap="round" stroke-dasharray="${c * p} ${c}" transform="rotate(-90 ${cx} ${cx})"/>`}
+    <text x="${cx}" y="${cx + size * 0.11}" text-anchor="middle" fill="#fff" style="font-family:var(--num);font-weight:700;font-size:${size * 0.3}px">${center}</text>
+    ${sub ? `<text x="${cx}" y="${cx + size * 0.27}" text-anchor="middle" fill="${C.muted}" style="font-size:${size * 0.085}px">${sub}</text>` : ''}
+    <text x="${cx}" y="${size + 14}" text-anchor="middle" fill="${C.muted}" style="font-size:11px;font-weight:600;letter-spacing:.12em">${label}</text>
+  </svg>`;
+}
+
+function arrow(value, mu, sigma, goodWhenHigher) {
+  if (value == null || mu == null) return '<span class="flat">—</span>';
+  const d = value - mu;
+  if (sigma && Math.abs(d) < 0.5 * sigma) return '<span class="flat">—</span>';
+  const good = goodWhenHigher ? d > 0 : d < 0;
+  return `<span class="${good ? 'up' : 'down'}">${d > 0 ? '▲' : '▼'}</span>`;
+}
+
+const days = () => DATA.tiers[state.tier].days;
+function current() { return state.unworn ? DATA.unwornExample : days()[state.idx]; }
+function history(k, n) { return DATA.tiers[state.tier].history.filter((h) => h.wakeDay <= k).slice(-n); }
+
+function tags(list) { return (list || []).map((t) => `<span class="tag">${t}</span>`).join(''); }
+
+function overview(d) {
+  const r = d.recovery, s = d.sleep, st = d.strain;
+  const rec = r.status === 'ok';
+  const ins = r.inputs || {}, bl = r.baselines || {};
+  const lowQ = r.quality && r.quality.level === 'low';
+  let html = `<div class="rings">
+    <div class="ring">${ring({ value: s ? s.performance : null, max: 100, color: C.sleep, center: s ? fmt(s.performance) + '%' : '—', label: 'SLEEP', size: 104, stroke: 8 })}</div>
+    <div class="ring">${ring({ value: rec ? r.score : null, max: 100, color: lowQ ? C.dim : zoneColor(r.zone), center: rec ? fmt(r.score) + '%' : '—', label: 'RECOVERY', size: 132, stroke: 11, sub: rec ? '' : (r.status === 'unworn' ? '昨晚未佩戴' : '无 HRV') })}</div>
+    <div class="ring">${ring({ value: st ? st.strain : null, max: 21, color: C.strain, center: st ? fmt(st.strain, 1) : '—', label: 'STRAIN', size: 104, stroke: 8 })}</div>
+  </div>`;
+  html += `<div>${tags([...(r.labels || []), ...((st && st.labels) || [])])}</div>`;
+  if (r.status === 'unworn') return html + `<div class="card empty">昨晚未佩戴（没有睡眠记录），不出恢复分数。<br>白天的负荷照常累计。</div>`;
+  const rhrMu = bl.restingHeartRate && bl.restingHeartRate.mu, respMu = bl.respiratoryRate && bl.respiratoryRate.mu;
+  const tst = s ? s.tstHours : null;
+  html += `<div class="grid2" style="margin-top:14px">
+    ${stat('HRV', fmt(ins.hrvMs), 'ms', arrow(ins.hrvMs, bl.hrvMs, bl.hrvMs * 0.1, true), `基线 ${fmt(bl.hrvMs)} ms`)}
+    ${stat('RHR', fmt(ins.rhr), 'bpm', arrow(ins.rhr, rhrMu, bl.restingHeartRate && bl.restingHeartRate.sigma, false), `基线 ${fmt(rhrMu)} bpm`)}
+    ${stat('RESP RATE', fmt(ins.respiratoryRate, 1), 'rpm', arrow(ins.respiratoryRate, respMu, bl.respiratoryRate && bl.respiratoryRate.sigma, false), respMu == null ? 'C 档无此项' : `基线 ${fmt(respMu, 1)} rpm`)}
+    ${stat('HOURS OF SLEEP', tst == null ? '—' : hhmmDur(tst), '', '', s && s.need ? `需求 ${hhmmDur(s.need.total)}` : '')}
+  </div>`;
+  if (rec && st && st.target) html += `<div class="card note">恢复 ${fmt(r.score)}%（${{ green: '绿', yellow: '黄', red: '红' }[r.zone]}区），今天适合 <b style="color:#fff">${st.target[0]}–${st.target[1]}</b> 的负荷；当前 ${fmt(st.strain, 1)}。</div>`;
+  return html;
+}
+function stat(k, v, u, a, b) { return `<div class="card stat"><div class="label">${k}</div><div class="v">${v}<span class="u">${u}</span> ${a}</div><div class="b">${b}</div></div>`; }
+
+function recovery(d) {
+  const r = d.recovery;
+  if (r.status !== 'ok') {
+    return `<div class="card empty"><svg viewBox="0 0 160 160" width="160"><circle cx="80" cy="80" r="66" fill="none" stroke="${C.line}" stroke-width="12"/></svg><div style="margin-top:8px">${r.status === 'unworn' ? '昨晚未佩戴' : '睡眠期间没有 HRV 记录'}</div><div class="note">不出恢复分数，不估算。</div></div>` + barsCard(d);
+  }
+  const ins = r.inputs, bl = r.baselines, pen = r.penalties || {};
+  const lowQ = r.quality.level === 'low';
+  let html = `<div class="card" style="text-align:center">
+    <div style="max-width:220px;margin:0 auto">${ring({ value: r.score, max: 100, color: lowQ ? C.dim : zoneColor(r.zone), center: fmt(r.score) + '%', label: 'RECOVERY', size: 180, stroke: 14, sub: zoneName[r.zone] })}</div>
+    <div class="note">数据质量 <span class="dot" style="background:${qColor[r.quality.level]}"></span> ${qName[r.quality.level]}${r.quality.reasons.length ? '：' + r.quality.reasons.join('；') : ''}</div>
+    <div>${tags(r.labels)}${r.contradiction ? '<span class="tag">信号矛盾</span>' : ''}${r.capped ? '<span class="tag">可能不适，封顶 33</span>' : ''}</div>
+  </div>`;
+  const rows = [
+    ['HRV', fmt(ins.hrvMs) + ' ms', `基线 ${fmt(bl.hrvMs)}`, arrow(ins.hrvMs, bl.hrvMs, bl.hrvMs * 0.1, true), ''],
+    ['RHR', fmt(ins.rhr) + ' bpm', `基线 ${fmt(bl.restingHeartRate && bl.restingHeartRate.mu)}`, arrow(ins.rhr, bl.restingHeartRate && bl.restingHeartRate.mu, bl.restingHeartRate && bl.restingHeartRate.sigma, false), ''],
+  ];
+  if (bl.respiratoryRate) rows.push(['RESP RATE', fmt(ins.respiratoryRate, 1) + ' rpm', `基线 ${fmt(bl.respiratoryRate.mu, 1)}`, arrow(ins.respiratoryRate, bl.respiratoryRate.mu, bl.respiratoryRate.sigma, false), pen.resp]);
+  if ('tempDelta' in ins) rows.push(['WRIST TEMP', ins.tempDelta == null ? '—' : (ins.tempDelta >= 0 ? '+' : '') + fmt(ins.tempDelta, 2) + ' °C', '相对基线', arrow(ins.tempDelta, 0, 0.15, false), pen.temp]);
+  if (bl.oxygenSaturation && state.tier === 'A') rows.push(['SPO2', ins.spo2Median == null ? '—' : fmt(ins.spo2Median, 1) + ' %', `基线 ${fmt(bl.oxygenSaturation.mu, 1)}`, arrow(ins.spo2Median, bl.oxygenSaturation.mu, bl.oxygenSaturation.sigma, true), pen.spo2]);
+  rows.push(['SLEEP PERF.', fmt(d.sleep.performance) + ' %', `睡眠分 ${fmt(d.sleep.score)}`, '', '']);
+  html += `<div class="card"><div class="label" style="margin-bottom:6px">贡献项 · 当日 / 基线</div>${rows.map(([k, v, b, a, p]) => `<div class="row"><span class="k">${k}</span><span class="x">${v}</span><span class="bl">${b}${p ? `<span class="pen">扣 ${fmt(p, 2)}</span>` : ''}</span><span>${a}</span></div>`).join('')}</div>`;
+  if (r.contributions) {
+    html += `<div class="card"><div class="label">贡献拆解 · 从 59% 出发</div>${r.contributions.filter((c) => Math.abs(c.points) >= 0.05).map((c) => {
+      const w = Math.min(100, Math.abs(c.points) * 3);
+      return `<div class="zone"><span>${c.component}</span><div class="t"><i style="width:${w}%;background:${c.points >= 0 ? C.teal : C.red}"></i></div><span style="text-align:right" class="${c.points >= 0 ? 'up' : 'down'}">${c.points >= 0 ? '+' : ''}${fmt(c.points, 1)}</span></div>`;
+    }).join('')}</div>`;
+  }
+  return html + barsCard(d);
+}
+function barsCard(d) {
+  const h = history(d.wakeDay, 7);
+  return `<div class="card"><div class="label">近 7 天 RECOVERY</div><div class="bars">${h.map((x) => {
+    const [, m, dd] = x.wakeDay.split('-').map(Number);
+    if (x.score == null) return `<div class="c"><div class="bv" style="color:${C.muted}">—</div><div class="bar" style="height:30%;border:1px dashed ${C.dim};border-bottom:0"></div><div class="bd">${x.status === 'unworn' ? '未佩戴' : m + '/' + dd}</div></div>`;
+    return `<div class="c"><div class="bv">${fmt(x.score)}</div><div class="bar" style="height:${Math.max(4, x.score)}%;background:${zoneColor(x.zone)}"></div><div class="bd">${m}/${dd}</div></div>`;
+  }).join('')}</div></div>`;
+}
+
+function strain(d) {
+  const st = d.strain, r = d.recovery;
+  if (!st) return `<div class="card empty">没有负荷数据</div>`;
+  const target = st.target;
+  const W = 300, R = 110, cx = 150, cy = 130;
+  const pt = (v) => { const a = Math.PI * (1 - v / 21); return [cx + R * Math.cos(a), cy - R * Math.sin(a)]; };
+  const arc = (a, b, color, w) => { const [x1, y1] = pt(a), [x2, y2] = pt(b); return `<path d="M${x1} ${y1} A${R} ${R} 0 0 1 ${x2} ${y2}" fill="none" stroke="${color}" stroke-width="${w}" stroke-linecap="round"/>`; };
+  let html = `<div class="card" style="text-align:center"><svg viewBox="0 0 ${W} 160" width="100%">${arc(0, 21, C.line, 14)}${target ? arc(target[0], target[1], C.teal, 4) : ''}${st.strain > 0 ? arc(0, Math.max(0.05, st.strain), C.strain, 14) : ''}
+    <text x="${cx}" y="${cy - 10}" text-anchor="middle" fill="#fff" style="font-family:var(--num);font-weight:700;font-size:58px">${fmt(st.strain, 1)}</text>
+    <text x="${cx}" y="${cy + 18}" text-anchor="middle" fill="${C.muted}" style="font-size:11px;font-weight:600;letter-spacing:.12em">STRAIN · 0–21</text></svg>
+    <div class="note">${target ? `目标区间 <b style="color:${C.teal}">${target[0]}–${target[1]}</b>（来自今日恢复${st.acwr != null && st.acwr > 1.3 ? '，ACWR 偏高已下调' : ''}）` : '没有恢复分数，不给目标区间'} · TRIMP ${fmt(st.trimp, 0)}${st.unwornMinutes ? ` · 未佩戴 ${st.unwornMinutes} 分钟` : ''}</div>
+    <div>${tags(st.labels)}</div></div>`;
+  if (st.curve && st.curve.length) html += hrCurve(st);
+  if (st.zoneMinutes) {
+    const mx = Math.max(1, ...st.zoneMinutes);
+    html += `<div class="card"><div class="label">心率区间（按 HRR%）</div>${st.zoneMinutes.map((m, i) => `<div class="zone"><span>Z${i + 1}</span><div class="t"><i style="width:${(100 * m) / mx}%"></i></div><span style="text-align:right">${m} 分钟</span></div>`).join('')}</div>`;
+  }
+  if (st.workouts && st.workouts.length) {
+    const nm = { running: '跑步', cycling: '骑行', traditionalStrengthTraining: '力量训练', walking: '步行', swimming: '游泳', highIntensityIntervalTraining: 'HIIT' };
+    html += `<div class="card"><div class="label" style="margin-bottom:4px">训练</div>${st.workouts.map((w) => `<div class="wk"><div><div class="n">${nm[w.type] || w.type}</div><div class="s">${hm(w.start)}–${hm(w.end)} · ${fmt(w.minutes)} 分钟 · 平均 ${fmt(w.meanHR)} / 最高 ${fmt(w.peakHR)} bpm</div></div><div class="st">${fmt(w.strain, 1)}</div></div>`).join('')}</div>`;
+  } else if (st.workouts) html += `<div class="card note">这个周期没有训练记录。</div>`;
+  return html;
+}
+function hrCurve(st) {
+  const pts = st.curve, W = 340, H = 150, padL = 26, padB = 18;
+  const t0 = pts[0][0], t1 = pts[pts.length - 1][0];
+  const vals = pts.map((p) => p[1]).filter((v) => v != null);
+  const lo = Math.min(40, ...vals), hi = Math.max(160, ...vals);
+  const x = (t) => padL + ((W - padL - 4) * (t - t0)) / Math.max(1, t1 - t0);
+  const y = (v) => 6 + ((H - padB - 6) * (hi - v)) / (hi - lo);
+  let path = '', pen = false;
+  for (const [t, v] of pts) { if (v == null) { pen = false; continue; } path += `${pen ? 'L' : 'M'}${x(t).toFixed(1)} ${y(v).toFixed(1)}`; pen = true; }
+  const bands = (st.workouts || []).map((w) => `<rect x="${x(Math.max(t0, w.start))}" y="0" width="${Math.max(2, x(Math.min(t1, w.end)) - x(Math.max(t0, w.start)))}" height="${H - padB}" fill="${C.strain}" opacity=".18"/>`).join('');
+  const gaps = []; let gs = null;
+  for (const [t, v] of pts) { if (v == null && gs == null) gs = t; if (v != null && gs != null) { gaps.push([gs, t]); gs = null; } }
+  const ticks = []; for (let t = Math.ceil((t0 + TZ) / 10800) * 10800 - TZ; t < t1; t += 10800) ticks.push(t);
+  return `<div class="card"><div class="label">全天心率 · 本周期</div><svg viewBox="0 0 ${W} ${H}" width="100%" style="margin-top:8px">${bands}
+    ${[60, 100, 140].map((v) => `<line x1="${padL}" x2="${W}" y1="${y(v)}" y2="${y(v)}" stroke="${C.line}"/><text x="0" y="${y(v) + 4}" fill="${C.muted}" style="font-size:10px">${v}</text>`).join('')}
+    <path d="${path}" fill="none" stroke="${C.strain}" stroke-width="1.6"/>
+    ${gaps.filter(([a, b]) => b - a > 1800).map(([a, b]) => `<rect x="${x(a)}" y="${H - padB - 3}" width="${x(b) - x(a)}" height="3" fill="${C.dim}"/>`).join('')}
+    ${ticks.map((t) => `<text x="${x(t)}" y="${H - 3}" text-anchor="middle" fill="${C.muted}" style="font-size:10px">${hm(t)}</text>`).join('')}
+  </svg><div class="note">蓝色底为训练时段；底部灰条为超过 30 分钟没有心率的时段。</div></div>`;
+}
+
+function sleep(d) {
+  const s = d.sleep;
+  if (!s) return `<div class="card empty">昨晚未佩戴（没有睡眠记录）</div>`;
+  const need = s.need.total, mx = Math.max(need, s.tstHours) * 1.05;
+  let html = `<div class="card" style="text-align:center"><div class="label">SLEEP PERFORMANCE</div><div class="big" style="color:${C.sleep};margin-top:8px">${fmt(s.performance)}%</div><div class="note">睡眠分 ${fmt(s.score)}</div><div>${tags(s.labels)}</div></div>`;
+  html += `<div class="card"><div class="label">实际睡眠 vs 睡眠需求</div>
+    <div style="display:flex;justify-content:space-between;margin-top:12px;font-size:13px"><span>HOURS OF SLEEP</span><b class="num" style="font-size:18px">${hhmmDur(s.tstHours)}</b></div><div class="hbar"><i style="width:${(100 * s.tstHours) / mx}%;background:${C.sleep}"></i></div>
+    <div style="display:flex;justify-content:space-between;font-size:13px"><span>SLEEP NEEDED</span><b class="num" style="font-size:18px">${hhmmDur(need)}</b></div><div class="hbar"><i style="width:${(100 * need) / mx}%;background:${C.teal}"></i></div>
+    <div class="note">基础 ${hhmmDur(s.need.base)} · 负荷追加 ${fmt(s.need.loadAddition * 60)} 分 · 还债 ${fmt((s.need.repayment || 0) * 60)} 分 · 小睡抵扣 ${fmt((s.need.napCredit || 0) * 60)} 分</div></div>`;
+  if (s.hypnogram) html += hypno(s);
+  const tot = s.stageMinutes.awake + s.stageMinutes.rem + s.stageMinutes.light + s.stageMinutes.deep;
+  const tst = s.tstHours * 60;
+  html += `<div class="card"><div class="label">分期</div>${[['AWAKE', 'awake'], ['REM', 'rem'], ['LIGHT', 'light'], ['SWS (DEEP)', 'deep']].map(([n, k]) => `<div class="stage"><span class="sw" style="background:${C[k]}"></span><span>${n}</span><span class="num" style="font-size:18px">${hhmmDur(s.stageMinutes[k] / 60)}</span><span class="p">${k === 'awake' ? fmt((100 * s.stageMinutes[k]) / tot) : fmt((100 * s.stageMinutes[k]) / tst)}%</span></div>`).join('')}<div class="note">REM / LIGHT / DEEP 的百分比是占睡眠时长；AWAKE 占整段。</div></div>`;
+  html += `<div class="grid2" style="margin-top:12px">
+    ${stat('EFFICIENCY', fmt(s.efficiency * 100), '%', '', s.efficiencyIsSleepPeriod ? '睡眠期效率' : '睡着 ÷ 在床')}
+    ${stat('CONSISTENCY', s.consistency == null ? '—' : fmt(s.consistency), '', '', s.consistency == null ? '数据不足或 C 档' : '近 7 天 SRI')}
+    ${stat('SLEEP DEBT', fmt(s.debtAfterHours * 60), 'min', '', '今晚之后的负债')}
+    ${stat('BED · WAKE', s.onsetLocal ? s.onsetLocal : '—', '', '', s.wakeLocal ? `醒来 ${s.wakeLocal}${s.awakenings != null ? ` · 觉醒 ${s.awakenings} 次` : ''}` : '')}
+  </div>`;
+  return html;
+}
+function hypno(s) {
+  const segs = s.hypnogram, t0 = s.onset, t1 = s.wake, W = 340, rowH = 22, padL = 50;
+  const rows = ['AWAKE', 'REM', 'LIGHT', 'DEEP'], col = { AWAKE: C.awake, REM: C.rem, LIGHT: C.light, DEEP: C.deep };
+  const x = (t) => padL + ((W - padL) * (t - t0)) / (t1 - t0);
+  const ticks = []; for (let t = Math.ceil((t0 + TZ) / 7200) * 7200 - TZ; t < t1; t += 7200) ticks.push(t);
+  return `<div class="card"><div class="label">睡眠分期 · ${s.onsetLocal}–${s.wakeLocal}</div><svg viewBox="0 0 ${W} ${rows.length * rowH + 20}" width="100%" style="margin-top:10px">
+    ${rows.map((r, i) => `<text x="0" y="${i * rowH + 15}" fill="${C.muted}" style="font-size:10px;font-weight:600;letter-spacing:.08em">${r}</text><line x1="${padL}" x2="${W}" y1="${i * rowH + 11}" y2="${i * rowH + 11}" stroke="${C.line}"/>`).join('')}
+    ${segs.map((g) => { const i = rows.indexOf(g.label); return `<rect x="${x(g.start)}" y="${i * rowH + 3}" width="${Math.max(1, x(g.end) - x(g.start))}" height="16" rx="2" fill="${col[g.label]}"/>`; }).join('')}
+    ${ticks.map((t) => `<text x="${x(t)}" y="${rows.length * rowH + 16}" text-anchor="middle" fill="${C.muted}" style="font-size:10px">${hm(t)}</text>`).join('')}
+  </svg></div>`;
+}
+
+function render() {
+  const list = days();
+  if (state.idx == null || state.idx >= list.length) {
+    // 默认显示最近一个白天已有负荷数据的醒来日（最后一天往往周期才刚开始）
+    let i = list.length - 1;
+    while (i > 0 && !(list[i].strain && list[i].strain.trimp > 0)) i--;
+    state.idx = i;
+  }
+  const d = current();
+  document.getElementById('date').textContent = (state.unworn ? '示例 · ' : '') + dateLabel(d.wakeDay);
+  const q = d.recovery.quality;
+  document.getElementById('meta').innerHTML = (q ? `<span class="dot" style="background:${qColor[q.level]}"></span> 质量${qName[q.level]} · ` : '') + `数据截至 ${d.asOfLocal ? d.asOfLocal.slice(5).replace('-', '/') : '—'}`;
+  document.getElementById('prev').disabled = state.unworn || state.idx === 0;
+  document.getElementById('next').disabled = state.unworn || state.idx === list.length - 1;
+  document.getElementById('tiers').innerHTML = ['A', 'B', 'C'].map((t) => `<button class="${t === state.tier ? 'on' : ''}" data-tier="${t}">${t} 档</button>`).join('');
+  document.getElementById('tabs').innerHTML = TABS.map((t) => `<button class="${t === state.tab ? 'on' : ''}" data-tab="${t}">${t}</button>`).join('');
+  const fn = { OVERVIEW: overview, RECOVERY: recovery, STRAIN: strain, SLEEP: sleep }[state.tab];
+  document.getElementById('page').innerHTML = fn(d);
+  document.getElementById('src').textContent = DATA.source;
+}
+document.getElementById('prev').onclick = () => { state.idx--; render(); };
+document.getElementById('next').onclick = () => { state.idx++; render(); };
+document.getElementById('tabs').onclick = (e) => { const t = e.target.dataset.tab; if (t) { state.tab = t; save(); render(); window.scrollTo(0, 0); } };
+document.getElementById('tiers').onclick = (e) => { const t = e.target.dataset.tier; if (t) { state.tier = t; state.unworn = false; save(); render(); } };
+document.getElementById('unwornDemo').onclick = (e) => { e.preventDefault(); state.unworn = !state.unworn; e.target.textContent = state.unworn ? '返回正常数据' : '查看“未佩戴”状态示例'; render(); };
+render();
+</script>
+</body>
+</html>
