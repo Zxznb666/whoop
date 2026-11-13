@@ -100,3 +100,52 @@ export function toTierC(snap, cfg = CONFIG) {
   }
   return { tier: 'C', profile: snap.profile, asOf: snap.rangeEnd, daily };
 }
+
+// —— H 档：Muse 实测粒度（2026-11-13 探测）——————————————————————————————
+// 心率、HRV、呼吸率、血氧、手腕温度、活动能量都只有“每小时汇总”（按样本开始时间归到本地整点小时，取平均；活动能量取总和）；
+// 睡眠只有整晚会话：起止时间 + 各分期总时长，没有逐段时间线、没有“在床”；训练有起止、能量、平均/最高心率。
+
+const HOUR = 3600;
+/** 本地整点小时的开始时刻（时区偏移是整小时，所以直接按 UTC 取整即可）。 */
+export const hourStart = (t) => Math.floor(t / HOUR) * HOUR;
+
+export function hourly(samples, getT, getV, agg = 'mean') {
+  const m = new Map();
+  for (const s of samples) {
+    const h = hourStart(getT(s));
+    if (!m.has(h)) m.set(h, []);
+    m.get(h).push(getV(s));
+  }
+  return [...m].sort((a, b) => a[0] - b[0]).map(([t, v]) => ({ t, value: agg === 'sum' ? sum(v) : mean(v) }));
+}
+
+/** 整晚会话：只保留 Muse 能读到的字段。 */
+export function sessionSummaries(snap, cfg = CONFIG) {
+  return buildSessions(snap.sleep, [], cfg).map((s) => {
+    const st = (name) => s.stages.filter((x) => x.stage === name).reduce((a, x) => a + x.end - x.start, 0);
+    return {
+      kind: s.kind, start: s.start, end: s.end, wakeDay: s.wakeDay, bedtime: null, stages: [],
+      asleepSeconds: s.asleepSeconds,
+      totals: { deep: st('deep'), rem: st('rem'), core: st('core') + st('asleepUnspecified'), awake: st('awake') },
+    };
+  });
+}
+
+export function toTierH(snap, cfg = CONFIG) {
+  return {
+    tier: 'H',
+    profile: snap.profile,
+    asOf: snap.rangeEnd,
+    sessions: sessionSummaries(snap, cfg),
+    hourly: {
+      hr: hourly(snap.heartRate, (s) => s.date, (s) => s.bpm),
+      sdnn: hourly(snap.hrvSDNN, (s) => s.start, (s) => s.value),
+      resp: hourly(snap.respiratoryRate, (s) => s.start, (s) => s.value),
+      spo2: hourly(snap.oxygenSaturation, (s) => s.start, (s) => s.value),
+      temp: hourly(snap.wristTemperature, (s) => s.start, (s) => s.value),
+      kcal: hourly(snap.activeEnergy ?? [], (s) => s.start, (s) => s.value, 'sum'),
+    },
+    restingHR: new Map(snap.restingHeartRate.map((s) => [dayKey(s.start, cfg), s.value])),
+    workouts: workoutSummaries(snap),
+  };
+}

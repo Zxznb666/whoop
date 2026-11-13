@@ -133,6 +133,25 @@ export function buildSessions(stages, inBed = [], cfg = CONFIG) {
   return sessions.sort((a, b) => a.start - b.start);
 }
 
+/** H 档：只有整晚会话的起止和各分期总量时的睡眠指标；需要逐段时间线的量为 null。 */
+export function sleepMetricsFromTotals(session) {
+  const tst = session.asleepSeconds;
+  const t = session.totals;
+  const span = session.end - session.start;
+  return {
+    totalSleepHours: tst / 3600,
+    efficiency: span > 0 ? tst / span : 0,
+    efficiencyIsSleepPeriod: true,
+    sleepLatencyMinutes: null,
+    wasoMinutes: Math.max(0, (span - tst) / 60),
+    awakenings: null,
+    remLatencyMinutes: null,
+    restorativeHours: (t.deep + t.rem) / 3600,
+    restorativeFraction: tst > 0 ? (t.deep + t.rem) / tst : 0,
+    stageMinutes: { awake: t.awake / 60, rem: t.rem / 60, light: t.core / 60, deep: t.deep / 60 },
+  };
+}
+
 /** 基础睡眠指标（PRD §5.9.1）。 */
 export function sleepMetrics(session, cfg = CONFIG) {
   const tst = session.asleepSeconds;

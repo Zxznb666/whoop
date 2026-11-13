@@ -5,7 +5,7 @@ import { writeFileSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { readJSON, readSnapshot } from '../src/io.js';
-import { toTierA, toTierB, toTierC } from '../src/tiers.js';
+import { toTierA, toTierB, toTierC, toTierH } from '../src/tiers.js';
 import { run } from '../src/pipeline.js';
 import { recoveryScore } from '../src/recovery.js';
 import { CONFIG } from '../src/config.js';
@@ -154,11 +154,15 @@ const datasets = [
 ];
 const result = { generatedFrom: dir, reference: 'Vigor 完整管线（逐拍 RMSSD，含 FIT 骑行）', datasets: [] };
 for (const [name, s] of datasets) {
-  const tiers = { A: run(toTierA(s)), B: run(toTierB(s)), C: run(toTierC(s)) };
+  const tiers = {
+    A: run(toTierA(s)), B: run(toTierB(s)), C: run(toTierC(s)), H: run(toTierH(s)),
+    'H（静息心率取夜间最低小时均值）': run(toTierH(s), { ...CONFIG, tierHRestingSource: 'hourlyMin' }),
+  };
   result.datasets.push({
     name,
     tiers: Object.fromEntries(Object.entries(tiers).map(([k, days]) => [k, compareTier(days, vigor.cycles)])),
     parityA: parity(tiers.A, vigor.parityCycles),
+    parityH: parity(tiers.H, vigor.parityCycles),
     oracleA: compareTier(oracleHRV(tiers.A, vigor.cycles), vigor.cycles),
   });
 }
@@ -183,4 +187,6 @@ for (const ds of result.datasets) {
 }
 lines.push('', '### A 档逐项特征 vs Vigor（去掉 FIT 骑行与功率，只检验移植）', '', '| 特征 | 天数 | 平均绝对差 | 最大差 | 差 ≤ 0.01 的天数 |', '|---|---|---|---|---|');
 for (const [k, m] of Object.entries(result.datasets[0].parityA)) lines.push(`| ${k} | ${m.n} | ${m.mae} | ${m.max} | ${m.exactWithin001} |`);
+lines.push('', '### H 档逐项特征 vs Vigor（去掉 FIT 骑行与功率；H 档本来就是近似，看差多少）', '', '| 特征 | 天数 | 平均绝对差 | 最大差 | 差 ≤ 0.01 的天数 |', '|---|---|---|---|---|');
+for (const [k, m] of Object.entries(result.datasets[0].parityH)) lines.push(`| ${k} | ${m.n} | ${m.mae} | ${m.max} | ${m.exactWithin001} |`);
 console.log(lines.join('\n'));

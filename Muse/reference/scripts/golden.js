@@ -6,7 +6,7 @@ import { mkdirSync, writeFileSync } from 'node:fs';
 import { join, dirname, basename } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { readJSON, readSnapshot } from '../src/io.js';
-import { toTierA, toTierB, toTierC } from '../src/tiers.js';
+import { toTierA, toTierB, toTierC, toTierH } from '../src/tiers.js';
 import { run } from '../src/pipeline.js';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
@@ -17,7 +17,7 @@ const out = join(root, 'golden', name);
 mkdirSync(out, { recursive: true });
 
 const snap = readSnapshot(dir);
-const tiers = { A: run(toTierA(snap)), B: run(toTierB(snap)), C: run(toTierC(snap)) };
+const tiers = { A: run(toTierA(snap)), B: run(toTierB(snap)), C: run(toTierC(snap)), H: run(toTierH(snap)) };
 
 for (const [tier, days] of Object.entries(tiers)) {
   writeFileSync(join(out, `${tier}.json`), JSON.stringify({ tier, source: name, days: days.slice(-keep) }, null, 1) + '\n');
@@ -33,4 +33,4 @@ for (const [tier, days] of Object.entries(tiers)) {
   });
   writeFileSync(join(out, `${tier}-days.csv`), [cols.join(','), ...rows].join('\n') + '\n');
 }
-console.log(`golden 已写入 ${out}：A/B/C 各 ${keep} 天详细 JSON + 全部 ${tiers.A.length} 天关键列 CSV`);
+console.log(`golden 已写入 ${out}：A/B/C/H 各 ${keep} 天详细 JSON + 全部 ${tiers.A.length} 天关键列 CSV`);

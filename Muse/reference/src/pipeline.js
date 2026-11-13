@@ -3,7 +3,7 @@
 import { CONFIG, prior } from './config.js';
 import { percentile, median, mean } from './stats.js';
 import { dayKey, hhmm, localYear, startOfDayKey } from './time.js';
-import { buildSessions, sleepMetrics, sri, sleepNeed, nextDebt, sleepScore, hypnogram } from './sleep.js';
+import { buildSessions, sleepMetrics, sleepMetricsFromTotals, sri, sleepNeed, nextDebt, sleepScore, hypnogram } from './sleep.js';
 import { BaselineHistory, zScore } from './baseline.js';
 import { penalties, recoveryScore, illnessSignals, loadTarget, acwr } from './recovery.js';
 import { buildMinuteGrid, observedPeak, tanaka, cycleLoadA, cycleLoadB, dayLoadC } from './load.js';
@@ -106,6 +106,50 @@ function featuresB(input, session, cfg) {
   };
 }
 
+// —— H 档夜间特征（每小时汇总）——————————————————————————————————————
+
+const inHours = (rows, a, b) => rows.filter((r) => r.t >= a && r.t <= b);
+
+function featuresH(input, session, cfg) {
+  const { start, end, wakeDay } = session;
+  const H = input.hourly;
+  // 只取“小时开始时刻落在睡眠窗口内”的小时值（与 Muse 探测 P6 的口径一致）
+  const sdnn = inHours(H.sdnn, start, end);
+  const resp = inHours(H.resp, start, end).map((r) => r.value);
+  const ox = inHours(H.spo2, start, end).map((r) => spo2Percent(r.value));
+  // 手腕温度每晚一条，开始于入睡前后：取开始小时 ∈ [入睡所在整点, 醒来] 的值
+  const temp = inHours(H.temp, Math.floor(start / 3600) * 3600, end).map((r) => r.value);
+  const fullHours = H.hr.filter((r) => r.t >= start && r.t + 3600 <= end);
+  const apple = input.restingHR.get(wakeDay) ?? null;
+  let rhr;
+  if (cfg.tierHRestingSource === 'hourlyMin' && fullHours.length) {
+    rhr = { value: Math.min(...fullHours.map((r) => r.value)), source: 'hourlyMin', n: fullHours.length };
+  } else {
+    rhr = apple != null ? { value: apple, source: 'appleDaily', n: 0 } : fullHours.length
+      ? { value: Math.min(...fullHours.map((r) => r.value)), source: 'hourlyMin', n: fullHours.length } : { value: null, source: 'none', n: 0 };
+  }
+  const n = sdnn.length;
+  const qHrv = n >= 3 ? cfg.tierAHrvQuality[3] : n === 2 ? cfg.tierAHrvQuality[2] : n === 1 ? cfg.tierAHrvQuality[1] : 0;
+  const respMed = resp.length >= cfg.tierHMinHourlyVitals ? median(resp) : null;
+  const oxMed = ox.length >= cfg.tierHMinHourlyVitals ? median(ox) : null;
+  const tempV = temp.length ? mean(temp) : null;
+  const qVitals = [respMed, tempV, oxMed].filter((x) => x != null).length / 3;
+  const reasons = [];
+  if (n === 0) reasons.push('睡眠期间没有 HRV 小时值，不出恢复分数');
+  else if (n < 3) reasons.push(`睡眠期间只有 ${n} 个 HRV 小时值`);
+  return {
+    hrv: { value: n ? median(sdnn.map((r) => r.value)) : null, samples: sdnn.map((r) => ({ t: r.t, ms: r.value })), label: 'SDNN · 睡眠窗口内每小时平均' },
+    rhr,
+    respiratoryRate: respMed,
+    wristTemperature: tempV,
+    spo2Median: oxMed,
+    breathingElevated: false,
+    heartRate: { count: fullHours.length, mean: mean(fullHours.map((r) => r.value)), longestGapMin: null, partialWear: null },
+    quality: { components: { hrv: qHrv, hr: H.hr.some((r) => r.t >= start && r.t <= end) ? cfg.tierHHrQuality : 0, sleep: 1, vitals: qVitals }, reasons },
+    labels: ['HRV 为每小时平均'],
+  };
+}
+
 // —— 通用：逐晚评分 ——————————————————————————————————————————————
 
 /**
@@ -114,10 +158,10 @@ function featuresB(input, session, cfg) {
 export function runStaged(input, cfg = CONFIG) {
   const tier = input.tier;
   const profile = input.profile;
-  const sessions = buildSessions(input.sleep, input.inBed, cfg);
+  const sessions = input.sessions ?? buildSessions(input.sleep, input.inBed, cfg);
   const mains = sessions.filter((s) => s.kind === 'main').sort((a, b) => a.end - b.end);
   const naps = sessions.filter((s) => s.kind === 'nap');
-  const sleepByEnd = [...input.sleep].sort((a, b) => a.end - b.end);
+  const sleepByEnd = input.sleep ? [...input.sleep].sort((a, b) => a.end - b.end) : [];
 
   let grid = null;
   let peaks = [];
@@ -142,13 +186,14 @@ export function runStaged(input, cfg = CONFIG) {
   mains.forEach((session, index) => {
     const wake = session.end;
     const year = localYear(wake, cfg);
-    const f = tier === 'A' ? featuresA(input, session, cfg) : featuresB(input, session, cfg);
+    const f = tier === 'A' ? featuresA(input, session, cfg) : tier === 'H' ? featuresH(input, session, cfg) : featuresB(input, session, cfg);
     const stats = Object.fromEntries(METRICS.map((m) => [m, history.stat(m, year)]));
 
     // 睡眠（§5.9）
-    const sm = sleepMetrics(session, cfg);
+    const sm = tier === 'H' ? sleepMetricsFromTotals(session) : sleepMetrics(session, cfg);
     const lo = sleepByEnd.findIndex((s) => s.end >= wake - 8 * 86400);
-    const sriValue = sri(lo < 0 ? [] : sleepByEnd.slice(lo).filter((s) => s.end <= wake), wake, cfg);
+    // H 档没有逐段时间线，算不了 SRI：一致性项去掉，权重按比例分给其余三项
+    const sriValue = tier === 'H' ? null : sri(lo < 0 ? [] : sleepByEnd.slice(lo).filter((s) => s.end <= wake), wake, cfg);
     const prevWakeT = index > 0 ? mains[index - 1].end : -Infinity;
     const napHours = naps.filter((n) => n.start >= prevWakeT && n.start < session.start).reduce((a, n) => a + n.asleepSeconds, 0) / 3600;
     const need = sleepNeed({ previousStrain, napHours, previousDebt }, cfg);
@@ -171,6 +216,12 @@ export function runStaged(input, cfg = CONFIG) {
     let load;
     if (tier === 'A') {
       load = cycleLoadA({ grid, wake, until, workouts: cycleWorkouts, rest, max: maxHR, sex: profile.sex }, cfg);
+    } else if (tier === 'H') {
+      const kcal = input.hourly.kcal.filter((r) => r.t >= Math.floor(wake / 3600) * 3600 && r.t < until).reduce((a, r) => a + r.value, 0);
+      const wkcal = cycleWorkouts.reduce((a, w) => a + (w.kcal ?? 0), 0);
+      load = cycleLoadB({ workouts: cycleWorkouts, nonWorkoutKcal: kcal - wkcal, rest, max: maxHR, sex: profile.sex }, cfg);
+      load.curve = input.hourly.hr.filter((r) => r.t >= Math.floor(wake / 3600) * 3600 && r.t < until).map((r) => ({ t: r.t, bpm: Math.round(r.value * 10) / 10 }));
+      load.method = 'hourly-estimate';
     } else {
       const d = input.daily.get(session.wakeDay) ?? {};
       const nonWorkoutKcal = d.activeKcal == null ? null : d.activeKcal - (d.workoutKcal ?? 0);
@@ -238,7 +289,7 @@ function assembleDay(c) {
   const { tier, cfg, session, f, stats, sm, rec } = c;
   const status = rec ? 'ok' : 'no-hrv';
   const tierLabels = [...f.labels];
-  if (tier === 'B') tierLabels.push('负荷为估算');
+  if (tier === 'B' || tier === 'H') tierLabels.push('负荷为估算');
   return {
     wakeDay: session.wakeDay,
     tier,
@@ -284,7 +335,7 @@ function assembleDay(c) {
       zRestorative: round(c.zRestorative),
       score: round(c.ss.score, 2), performance: round(c.ss.performance, 2),
       components: Object.fromEntries(Object.entries(c.ss.components).map(([k, v]) => [k, round(v)])),
-      hypnogram: hypnogram(session.stages, cfg).map((s) => ({ start: s.start, end: s.end, label: s.label })),
+      hypnogram: tier === 'H' ? null : hypnogram(session.stages, cfg).map((s) => ({ start: s.start, end: s.end, label: s.label })),
     },
     strain: {
       method: c.load.method,
@@ -295,7 +346,7 @@ function assembleDay(c) {
       acwr: round(c.acwrValue, 3),
       target: rec ? loadTarget(rec.zone, c.acwrValue, cfg) : null,
       curve: c.load.curve ?? null,
-      labels: tier === 'B' ? ['估算'] : [],
+      labels: tier === 'B' || tier === 'H' ? ['估算'] : [],
     },
   };
 }

@@ -97,7 +97,11 @@ export const CONFIG = Object.freeze({
   tierBQuality: { hrv: 0.5, hr: 0.5 },
   tierCQuality: { hrv: 0.5, hr: 0.5, sleep: 0.5 },
   // 基线有效夜的质量门槛：A/B 为“至少中”（PRD §5.6），C 档整体为低，门槛放到 0.4（M-05）
-  baselineValidMinQuality: { A: 0.5, B: 0.5, C: 0.4 },
+  baselineValidMinQuality: { A: 0.5, B: 0.5, C: 0.4, H: 0.5 },
+  // H 档（探测实测：Muse 只拿到每小时汇总 + 整晚睡眠会话总量，M-09）
+  tierHHrQuality: 0.5,             // 心率只有每小时平均
+  tierHMinHourlyVitals: 2,         // 呼吸率、血氧至少 2 个小时值才取中位数
+  tierHRestingSource: 'hourlyMin',  // 'hourlyMin' | 'appleDaily'：对照 Vigor，夜间最低小时均值明显更接近（COMPARISON.md）
   // B/C 档负荷估算（M-06）
   nonWorkoutKcalFloor: 300,        // 日常零碎活动消耗，不产生 HRR ≥ 0.25 的负荷
   trimpPerKcal: 0.075,             // 快走约 4.5 kcal/min、HRR≈0.3 → 男性 TRIMP ≈0.34/min
