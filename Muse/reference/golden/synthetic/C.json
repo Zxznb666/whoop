@@ -1,0 +1,1826 @@
+{
+ "tier": "C",
+ "source": "synthetic",
+ "days": [
+  {
+   "wakeDay": "2026-09-18",
+   "tier": "C",
+   "asOf": 1790784000,
+   "asOfLocal": "2026-10-01 00:00",
+   "recovery": {
+    "status": "ok",
+    "score": 53.38,
+    "zone": "yellow",
+    "raw": -0.1534,
+    "quality": {
+     "level": "low",
+     "total": 0.45,
+     "components": {
+      "hrv": 0.5,
+      "hr": 0.5,
+      "sleep": 0.5,
+      "vitals": 0
+     },
+     "reasons": [
+      "只有每日汇总数据"
+     ]
+    },
+    "labels": [
+     "低精度"
+    ],
+    "inputs": {
+     "hrvMs": 37.48,
+     "hrvLabel": "SDNN · 全天平均（含日间读数）",
+     "rhr": 53.09,
+     "rhrSource": "appleDaily"
+    },
+    "baselines": {
+     "hrvMs": 41,
+     "lnSDNN": {
+      "mu": 3.7137,
+      "sigma": 0.1847,
+      "n": 30,
+      "calibrating": false
+     },
+     "restingHeartRate": {
+      "mu": 55.1607,
+      "sigma": 3.6724,
+      "n": 30,
+      "calibrating": false
+     },
+     "restorativeHours": {
+      "mu": 3.2431,
+      "sigma": 0.3836,
+      "n": 30,
+      "calibrating": false
+     }
+    },
+    "z": {
+     "hrv": -0.4864,
+     "rhr": 0.5628,
+     "sleep": -0.1328
+    },
+    "contributions": [
+     {
+      "component": "HRV",
+      "points": -9.18
+     },
+     {
+      "component": "RHR",
+      "points": 4.81
+     },
+     {
+      "component": "SLEEP",
+      "points": -0.91
+     },
+     {
+      "component": "RESP",
+      "points": 0
+     },
+     {
+      "component": "TEMP",
+      "points": 0
+     },
+     {
+      "component": "SPO2",
+      "points": 0
+     },
+     {
+      "component": "BD",
+      "points": 0
+     }
+    ]
+   },
+   "sleep": {
+    "tstHours": 7.1236,
+    "efficiency": 0.9403,
+    "restorativeHours": 3.1539,
+    "stageMinutes": {
+     "awake": 15.5,
+     "rem": 104.4,
+     "light": 238.2,
+     "deep": 84.8
+    },
+    "need": {
+     "base": 7.5,
+     "loadAddition": 0.2356,
+     "napCredit": 0,
+     "repayment": 0.8295,
+     "baseNeed": 7.7356,
+     "total": 8.5651
+    },
+    "debtAfterHours": 2.8239,
+    "score": 78.41,
+    "performance": 83.17,
+    "hypnogram": null,
+    "labels": [
+     "低精度",
+     "无分期图"
+    ]
+   },
+   "strain": {
+    "method": "daily-estimate",
+    "trimp": 364.301,
+    "strain": 19.199,
+    "acwr": 1.148,
+    "target": [
+     10,
+     14
+    ],
+    "labels": [
+     "低精度"
+    ]
+   }
+  },
+  {
+   "wakeDay": "2026-09-19",
+   "tier": "C",
+   "asOf": 1790784000,
+   "asOfLocal": "2026-10-01 00:00",
+   "recovery": {
+    "status": "ok",
+    "score": 59.46,
+    "zone": "yellow",
+    "raw": 0.0235,
+    "quality": {
+     "level": "low",
+     "total": 0.45,
+     "components": {
+      "hrv": 0.5,
+      "hr": 0.5,
+      "sleep": 0.5,
+      "vitals": 0
+     },
+     "reasons": [
+      "只有每日汇总数据"
+     ]
+    },
+    "labels": [
+     "低精度"
+    ],
+    "inputs": {
+     "hrvMs": 39.88,
+     "hrvLabel": "SDNN · 全天平均（含日间读数）",
+     "rhr": 55.97,
+     "rhrSource": "appleDaily"
+    },
+    "baselines": {
+     "hrvMs": 41,
+     "lnSDNN": {
+      "mu": 3.7137,
+      "sigma": 0.1752,
+      "n": 30,
+      "calibrating": false
+     },
+     "restingHeartRate": {
+      "mu": 55.1607,
+      "sigma": 3.6724,
+      "n": 30,
+      "calibrating": false
+     },
+     "restorativeHours": {
+      "mu": 3.2431,
+      "sigma": 0.3836,
+      "n": 30,
+      "calibrating": false
+     }
+    },
+    "z": {
+     "hrv": -0.1581,
+     "rhr": -0.2207,
+     "sleep": 0.8283
+    },
+    "contributions": [
+     {
+      "component": "HRV",
+      "points": -2.93
+     },
+     {
+      "component": "RHR",
+      "points": -1.86
+     },
+     {
+      "component": "SLEEP",
+      "points": 5.59
+     },
+     {
+      "component": "RESP",
+      "points": 0
+     },
+     {
+      "component": "TEMP",
+      "points": 0
+     },
+     {
+      "component": "SPO2",
+      "points": 0
+     },
+     {
+      "component": "BD",
+      "points": 0
+     }
+    ]
+   },
+   "sleep": {
+    "tstHours": 8.185,
+    "efficiency": 0.9506,
+    "restorativeHours": 3.6978,
+    "stageMinutes": {
+     "awake": 13.4,
+     "rem": 98.4,
+     "light": 269.2,
+     "deep": 123.4
+    },
+    "need": {
+     "base": 7.5,
+     "loadAddition": 0.7466,
+     "napCredit": 0,
+     "repayment": 0.8472,
+     "baseNeed": 8.2466,
+     "total": 9.0938
+    },
+    "debtAfterHours": 2.3207,
+    "score": 89.94,
+    "performance": 90.01,
+    "hypnogram": null,
+    "labels": [
+     "低精度",
+     "无分期图"
+    ]
+   },
+   "strain": {
+    "method": "daily-estimate",
+    "trimp": 38.025,
+    "strain": 8.316,
+    "acwr": 1.181,
+    "target": [
+     10,
+     14
+    ],
+    "labels": [
+     "低精度"
+    ]
+   }
+  },
+  {
+   "wakeDay": "2026-09-20",
+   "tier": "C",
+   "asOf": 1790784000,
+   "asOfLocal": "2026-10-01 00:00",
+   "recovery": {
+    "status": "ok",
+    "score": 63.31,
+    "zone": "yellow",
+    "raw": 0.1398,
+    "quality": {
+     "level": "low",
+     "total": 0.45,
+     "components": {
+      "hrv": 0.5,
+      "hr": 0.5,
+      "sleep": 0.5,
+      "vitals": 0
+     },
+     "reasons": [
+      "只有每日汇总数据"
+     ]
+    },
+    "labels": [
+     "低精度"
+    ],
+    "inputs": {
+     "hrvMs": 40.5,
+     "hrvLabel": "SDNN · 全天平均（含日间读数）",
+     "rhr": 56.88,
+     "rhrSource": "appleDaily"
+    },
+    "baselines": {
+     "hrvMs": 40.68,
+     "lnSDNN": {
+      "mu": 3.7057,
+      "sigma": 0.1731,
+      "n": 30,
+      "calibrating": false
+     },
+     "restingHeartRate": {
+      "mu": 55.4952,
+      "sigma": 3.7055,
+      "n": 30,
+      "calibrating": false
+     },
+     "restorativeHours": {
+      "mu": 3.2724,
+      "sigma": 0.3729,
+      "n": 30,
+      "calibrating": false
+     }
+    },
+    "z": {
+     "hrv": -0.0256,
+     "rhr": -0.3729,
+     "sleep": 1.2353
+    },
+    "contributions": [
+     {
+      "component": "HRV",
+      "points": -0.47
+     },
+     {
+      "component": "RHR",
+      "points": -3.08
+     },
+     {
+      "component": "SLEEP",
+      "points": 8.2
+     },
+     {
+      "component": "RESP",
+      "points": 0
+     },
+     {
+      "component": "TEMP",
+      "points": 0
+     },
+     {
+      "component": "SPO2",
+      "points": 0
+     },
+     {
+      "component": "BD",
+      "points": 0
+     }
+    ]
+   },
+   "sleep": {
+    "tstHours": 8.1908,
+    "efficiency": 0.94,
+    "restorativeHours": 3.6728,
+    "stageMinutes": {
+     "awake": 16,
+     "rem": 107.3,
+     "light": 271.1,
+     "deep": 113.1
+    },
+    "need": {
+     "base": 7.5,
+     "loadAddition": 0.0211,
+     "napCredit": 0,
+     "repayment": 0.6962,
+     "baseNeed": 7.5211,
+     "total": 8.2173
+    },
+    "debtAfterHours": 1.1869,
+    "score": 94.82,
+    "performance": 99.68,
+    "hypnogram": null,
+    "labels": [
+     "低精度",
+     "无分期图"
+    ]
+   },
+   "strain": {
+    "method": "daily-estimate",
+    "trimp": 30.3,
+    "strain": 7.387,
+    "acwr": 1.119,
+    "target": [
+     10,
+     14
+    ],
+    "labels": [
+     "低精度"
+    ]
+   }
+  },
+  {
+   "wakeDay": "2026-09-21",
+   "tier": "C",
+   "asOf": 1790784000,
+   "asOfLocal": "2026-10-01 00:00",
+   "recovery": {
+    "status": "ok",
+    "score": 69.57,
+    "zone": "green",
+    "raw": 0.3407,
+    "quality": {
+     "level": "low",
+     "total": 0.45,
+     "components": {
+      "hrv": 0.5,
+      "hr": 0.5,
+      "sleep": 0.5,
+      "vitals": 0
+     },
+     "reasons": [
+      "只有每日汇总数据"
+     ]
+    },
+    "labels": [
+     "低精度"
+    ],
+    "inputs": {
+     "hrvMs": 43.73,
+     "hrvLabel": "SDNN · 全天平均（含日间读数）",
+     "rhr": 54.18,
+     "rhrSource": "appleDaily"
+    },
+    "baselines": {
+     "hrvMs": 40.49,
+     "lnSDNN": {
+      "mu": 3.701,
+      "sigma": 0.1577,
+      "n": 30,
+      "calibrating": false
+     },
+     "restingHeartRate": {
+      "mu": 55.4952,
+      "sigma": 3.7055,
+      "n": 30,
+      "calibrating": false
+     },
+     "restorativeHours": {
+      "mu": 3.2724,
+      "sigma": 0.3729,
+      "n": 30,
+      "calibrating": false
+     }
+    },
+    "z": {
+     "hrv": 0.4886,
+     "rhr": 0.3562,
+     "sleep": -0.0852
+    },
+    "contributions": [
+     {
+      "component": "HRV",
+      "points": 8.61
+     },
+     {
+      "component": "RHR",
+      "points": 2.84
+     },
+     {
+      "component": "SLEEP",
+      "points": -0.54
+     },
+     {
+      "component": "RESP",
+      "points": 0
+     },
+     {
+      "component": "TEMP",
+      "points": 0
+     },
+     {
+      "component": "SPO2",
+      "points": 0
+     },
+     {
+      "component": "BD",
+      "points": 0
+     }
+    ]
+   },
+   "sleep": {
+    "tstHours": 6.9256,
+    "efficiency": 0.9223,
+    "restorativeHours": 3.0956,
+    "stageMinutes": {
+     "awake": 20.7,
+     "rem": 91,
+     "light": 229.8,
+     "deep": 94.7
+    },
+    "need": {
+     "base": 7.5,
+     "loadAddition": 0,
+     "napCredit": 0,
+     "repayment": 0.3561,
+     "baseNeed": 7.5,
+     "total": 7.8561
+    },
+    "debtAfterHours": 1.5239,
+    "score": 78.98,
+    "performance": 88.16,
+    "hypnogram": null,
+    "labels": [
+     "低精度",
+     "无分期图"
+    ]
+   },
+   "strain": {
+    "method": "daily-estimate",
+    "trimp": 285.369,
+    "strain": 17.944,
+    "acwr": 1.067,
+    "target": [
+     14,
+     18
+    ],
+    "labels": [
+     "低精度"
+    ]
+   }
+  },
+  {
+   "wakeDay": "2026-09-22",
+   "tier": "C",
+   "asOf": 1790784000,
+   "asOfLocal": "2026-10-01 00:00",
+   "recovery": {
+    "status": "ok",
+    "score": 85.31,
+    "zone": "green",
+    "raw": 1.0064,
+    "quality": {
+     "level": "low",
+     "total": 0.45,
+     "components": {
+      "hrv": 0.5,
+      "hr": 0.5,
+      "sleep": 0.5,
+      "vitals": 0
+     },
+     "reasons": [
+      "只有每日汇总数据"
+     ]
+    },
+    "labels": [
+     "低精度"
+    ],
+    "inputs": {
+     "hrvMs": 47.92,
+     "hrvLabel": "SDNN · 全天平均（含日间读数）",
+     "rhr": 50.19,
+     "rhrSource": "appleDaily"
+    },
+    "baselines": {
+     "hrvMs": 40.49,
+     "lnSDNN": {
+      "mu": 3.701,
+      "sigma": 0.1577,
+      "n": 30,
+      "calibrating": false
+     },
+     "restingHeartRate": {
+      "mu": 55.4952,
+      "sigma": 3.6277,
+      "n": 30,
+      "calibrating": false
+     },
+     "restorativeHours": {
+      "mu": 3.2724,
+      "sigma": 0.3295,
+      "n": 30,
+      "calibrating": false
+     }
+    },
+    "z": {
+     "hrv": 1.0692,
+     "rhr": 1.4614,
+     "sleep": 0.2649
+    },
+    "contributions": [
+     {
+      "component": "HRV",
+      "points": 15.61
+     },
+     {
+      "component": "RHR",
+      "points": 9.64
+     },
+     {
+      "component": "SLEEP",
+      "points": 1.39
+     },
+     {
+      "component": "RESP",
+      "points": 0
+     },
+     {
+      "component": "TEMP",
+      "points": 0
+     },
+     {
+      "component": "SPO2",
+      "points": 0
+     },
+     {
+      "component": "BD",
+      "points": 0
+     }
+    ]
+   },
+   "sleep": {
+    "tstHours": 7.9678,
+    "efficiency": 0.9134,
+    "restorativeHours": 3.2817,
+    "stageMinutes": {
+     "awake": 22,
+     "rem": 88,
+     "light": 281.2,
+     "deep": 108.9
+    },
+    "need": {
+     "base": 7.5,
+     "loadAddition": 0.6629,
+     "napCredit": 0,
+     "repayment": 0.4572,
+     "baseNeed": 8.1629,
+     "total": 8.6201
+    },
+    "debtAfterHours": 1.4143,
+    "score": 83.18,
+    "performance": 92.43,
+    "hypnogram": null,
+    "labels": [
+     "低精度",
+     "无分期图"
+    ]
+   },
+   "strain": {
+    "method": "daily-estimate",
+    "trimp": 97.537,
+    "strain": 12.589,
+    "acwr": 1.185,
+    "target": [
+     14,
+     18
+    ],
+    "labels": [
+     "低精度"
+    ]
+   }
+  },
+  {
+   "wakeDay": "2026-09-23",
+   "tier": "C",
+   "asOf": 1790784000,
+   "asOfLocal": "2026-10-01 00:00",
+   "recovery": {
+    "status": "ok",
+    "score": 73.91,
+    "zone": "green",
+    "raw": 0.4936,
+    "quality": {
+     "level": "low",
+     "total": 0.45,
+     "components": {
+      "hrv": 0.5,
+      "hr": 0.5,
+      "sleep": 0.5,
+      "vitals": 0
+     },
+     "reasons": [
+      "只有每日汇总数据"
+     ]
+    },
+    "labels": [
+     "低精度"
+    ],
+    "inputs": {
+     "hrvMs": 45.33,
+     "hrvLabel": "SDNN · 全天平均（含日间读数）",
+     "rhr": 55.48,
+     "rhrSource": "appleDaily"
+    },
+    "baselines": {
+     "hrvMs": 40.49,
+     "lnSDNN": {
+      "mu": 3.701,
+      "sigma": 0.1577,
+      "n": 30,
+      "calibrating": false
+     },
+     "restingHeartRate": {
+      "mu": 55.4952,
+      "sigma": 3.7055,
+      "n": 30,
+      "calibrating": false
+     },
+     "restorativeHours": {
+      "mu": 3.2876,
+      "sigma": 0.2928,
+      "n": 30,
+      "calibrating": false
+     }
+    },
+    "z": {
+     "hrv": 0.7164,
+     "rhr": 0.0038,
+     "sleep": 0.4931
+    },
+    "contributions": [
+     {
+      "component": "HRV",
+      "points": 12.19
+     },
+     {
+      "component": "RHR",
+      "points": 0.03
+     },
+     {
+      "component": "SLEEP",
+      "points": 3.03
+     },
+     {
+      "component": "RESP",
+      "points": 0
+     },
+     {
+      "component": "TEMP",
+      "points": 0
+     },
+     {
+      "component": "SPO2",
+      "points": 0
+     },
+     {
+      "component": "BD",
+      "points": 0
+     }
+    ]
+   },
+   "sleep": {
+    "tstHours": 7.3944,
+    "efficiency": 0.9514,
+    "restorativeHours": 3.3747,
+    "stageMinutes": {
+     "awake": 9.2,
+     "rem": 89.7,
+     "light": 241.2,
+     "deep": 112.8
+    },
+    "need": {
+     "base": 7.5,
+     "loadAddition": 0.3059,
+     "napCredit": 0,
+     "repayment": 0.4243,
+     "baseNeed": 7.8059,
+     "total": 8.2302
+    },
+    "debtAfterHours": 1.5429,
+    "score": 85.92,
+    "performance": 89.85,
+    "hypnogram": null,
+    "labels": [
+     "低精度",
+     "无分期图"
+    ]
+   },
+   "strain": {
+    "method": "daily-estimate",
+    "trimp": 103.202,
+    "strain": 12.861,
+    "acwr": 1.199,
+    "target": [
+     14,
+     18
+    ],
+    "labels": [
+     "低精度"
+    ]
+   }
+  },
+  {
+   "wakeDay": "2026-09-24",
+   "tier": "C",
+   "asOf": 1790784000,
+   "asOfLocal": "2026-10-01 00:00",
+   "recovery": {
+    "status": "ok",
+    "score": 58.28,
+    "zone": "yellow",
+    "raw": -0.0111,
+    "quality": {
+     "level": "low",
+     "total": 0.45,
+     "components": {
+      "hrv": 0.5,
+      "hr": 0.5,
+      "sleep": 0.5,
+      "vitals": 0
+     },
+     "reasons": [
+      "只有每日汇总数据"
+     ]
+    },
+    "labels": [
+     "低精度"
+    ],
+    "inputs": {
+     "hrvMs": 41.23,
+     "hrvLabel": "SDNN · 全天平均（含日间读数）",
+     "rhr": 56.99,
+     "rhrSource": "appleDaily"
+    },
+    "baselines": {
+     "hrvMs": 40.69,
+     "lnSDNN": {
+      "mu": 3.706,
+      "sigma": 0.1553,
+      "n": 30,
+      "calibrating": false
+     },
+     "restingHeartRate": {
+      "mu": 55.3909,
+      "sigma": 3.5509,
+      "n": 30,
+      "calibrating": false
+     },
+     "restorativeHours": {
+      "mu": 3.3047,
+      "sigma": 0.2955,
+      "n": 30,
+      "calibrating": false
+     }
+    },
+    "z": {
+     "hrv": 0.0843,
+     "rhr": -0.4501,
+     "sleep": 0.2755
+    },
+    "contributions": [
+     {
+      "component": "HRV",
+      "points": 1.57
+     },
+     {
+      "component": "RHR",
+      "points": -3.82
+     },
+     {
+      "component": "SLEEP",
+      "points": 1.87
+     },
+     {
+      "component": "RESP",
+      "points": 0
+     },
+     {
+      "component": "TEMP",
+      "points": 0
+     },
+     {
+      "component": "SPO2",
+      "points": 0
+     },
+     {
+      "component": "BD",
+      "points": 0
+     }
+    ]
+   },
+   "sleep": {
+    "tstHours": 7.3356,
+    "efficiency": 0.933,
+    "restorativeHours": 3.3753,
+    "stageMinutes": {
+     "awake": 19.8,
+     "rem": 92.3,
+     "light": 237.6,
+     "deep": 110.2
+    },
+    "need": {
+     "base": 7.5,
+     "loadAddition": 0.3241,
+     "napCredit": 0,
+     "repayment": 0.4629,
+     "baseNeed": 7.8241,
+     "total": 8.2869
+    },
+    "debtAfterHours": 1.7228,
+    "score": 83.31,
+    "performance": 88.52,
+    "hypnogram": null,
+    "labels": [
+     "低精度",
+     "无分期图"
+    ]
+   },
+   "strain": {
+    "method": "daily-estimate",
+    "trimp": 37.8,
+    "strain": 8.292,
+    "acwr": 1.119,
+    "target": [
+     10,
+     14
+    ],
+    "labels": [
+     "低精度"
+    ]
+   }
+  },
+  {
+   "wakeDay": "2026-09-25",
+   "tier": "C",
+   "asOf": 1790784000,
+   "asOfLocal": "2026-10-01 00:00",
+   "recovery": {
+    "status": "ok",
+    "score": 80.44,
+    "zone": "green",
+    "raw": 0.7601,
+    "quality": {
+     "level": "low",
+     "total": 0.45,
+     "components": {
+      "hrv": 0.5,
+      "hr": 0.5,
+      "sleep": 0.5,
+      "vitals": 0
+     },
+     "reasons": [
+      "只有每日汇总数据"
+     ]
+    },
+    "labels": [
+     "低精度"
+    ],
+    "inputs": {
+     "hrvMs": 49.72,
+     "hrvLabel": "SDNN · 全天平均（含日间读数）",
+     "rhr": 53.81,
+     "rhrSource": "appleDaily"
+    },
+    "baselines": {
+     "hrvMs": 40.69,
+     "lnSDNN": {
+      "mu": 3.706,
+      "sigma": 0.1442,
+      "n": 30,
+      "calibrating": false
+     },
+     "restingHeartRate": {
+      "mu": 55.5853,
+      "sigma": 3.6981,
+      "n": 30,
+      "calibrating": false
+     },
+     "restorativeHours": {
+      "mu": 3.3172,
+      "sigma": 0.2708,
+      "n": 30,
+      "calibrating": false
+     }
+    },
+    "z": {
+     "hrv": 1.3906,
+     "rhr": 0.4792,
+     "sleep": -0.6228
+    },
+    "contributions": [
+     {
+      "component": "HRV",
+      "points": 21.89
+     },
+     {
+      "component": "RHR",
+      "points": 3.36
+     },
+     {
+      "component": "SLEEP",
+      "points": -3.47
+     },
+     {
+      "component": "RESP",
+      "points": 0
+     },
+     {
+      "component": "TEMP",
+      "points": 0
+     },
+     {
+      "component": "SPO2",
+      "points": 0
+     },
+     {
+      "component": "BD",
+      "points": 0
+     }
+    ]
+   },
+   "sleep": {
+    "tstHours": 6.6681,
+    "efficiency": 0.9152,
+    "restorativeHours": 3.0369,
+    "stageMinutes": {
+     "awake": 17.8,
+     "rem": 75.5,
+     "light": 217.9,
+     "deep": 106.7
+    },
+    "need": {
+     "base": 7.5,
+     "loadAddition": 0.0194,
+     "napCredit": 0,
+     "repayment": 0.5168,
+     "baseNeed": 7.5194,
+     "total": 8.0363
+    },
+    "debtAfterHours": 2.2296,
+    "score": 72.53,
+    "performance": 82.97,
+    "hypnogram": null,
+    "labels": [
+     "低精度",
+     "无分期图"
+    ]
+   },
+   "strain": {
+    "method": "daily-estimate",
+    "trimp": 151.792,
+    "strain": 14.754,
+    "acwr": 1.08,
+    "target": [
+     14,
+     18
+    ],
+    "labels": [
+     "低精度"
+    ]
+   }
+  },
+  {
+   "wakeDay": "2026-09-26",
+   "tier": "C",
+   "asOf": 1790784000,
+   "asOfLocal": "2026-10-01 00:00",
+   "recovery": {
+    "status": "ok",
+    "score": 61.43,
+    "zone": "yellow",
+    "raw": 0.0825,
+    "quality": {
+     "level": "low",
+     "total": 0.45,
+     "components": {
+      "hrv": 0.5,
+      "hr": 0.5,
+      "sleep": 0.5,
+      "vitals": 0
+     },
+     "reasons": [
+      "只有每日汇总数据"
+     ]
+    },
+    "labels": [
+     "低精度"
+    ],
+    "inputs": {
+     "hrvMs": 41.84,
+     "hrvLabel": "SDNN · 全天平均（含日间读数）",
+     "rhr": 57.55,
+     "rhrSource": "appleDaily"
+    },
+    "baselines": {
+     "hrvMs": 41.05,
+     "lnSDNN": {
+      "mu": 3.7149,
+      "sigma": 0.1514,
+      "n": 30,
+      "calibrating": false
+     },
+     "restingHeartRate": {
+      "mu": 55.3909,
+      "sigma": 3.4098,
+      "n": 30,
+      "calibrating": false
+     },
+     "restorativeHours": {
+      "mu": 3.3047,
+      "sigma": 0.2955,
+      "n": 30,
+      "calibrating": false
+     }
+    },
+    "z": {
+     "hrv": 0.126,
+     "rhr": -0.6326,
+     "sleep": 0.8569
+    },
+    "contributions": [
+     {
+      "component": "HRV",
+      "points": 2.32
+     },
+     {
+      "component": "RHR",
+      "points": -5.28
+     },
+     {
+      "component": "SLEEP",
+      "points": 5.74
+     },
+     {
+      "component": "RESP",
+      "points": 0
+     },
+     {
+      "component": "TEMP",
+      "points": 0
+     },
+     {
+      "component": "SPO2",
+      "points": 0
+     },
+     {
+      "component": "BD",
+      "points": 0
+     }
+    ]
+   },
+   "sleep": {
+    "tstHours": 8.1736,
+    "efficiency": 0.9656,
+    "restorativeHours": 3.4689,
+    "stageMinutes": {
+     "awake": 7.9,
+     "rem": 99.7,
+     "light": 282.3,
+     "deep": 108.5
+    },
+    "need": {
+     "base": 7.5,
+     "loadAddition": 0.4503,
+     "napCredit": 0,
+     "repayment": 0.6689,
+     "baseNeed": 7.9503,
+     "total": 8.6191
+    },
+    "debtAfterHours": 1.5604,
+    "score": 90.28,
+    "performance": 94.83,
+    "hypnogram": null,
+    "labels": [
+     "低精度",
+     "无分期图"
+    ]
+   },
+   "strain": {
+    "method": "daily-estimate",
+    "trimp": 32.55,
+    "strain": 7.675,
+    "acwr": 0.892,
+    "target": [
+     10,
+     14
+    ],
+    "labels": [
+     "低精度"
+    ]
+   }
+  },
+  {
+   "wakeDay": "2026-09-27",
+   "tier": "C",
+   "asOf": 1790784000,
+   "asOfLocal": "2026-10-01 00:00",
+   "recovery": {
+    "status": "ok",
+    "score": 82.48,
+    "zone": "green",
+    "raw": 0.8567,
+    "quality": {
+     "level": "low",
+     "total": 0.45,
+     "components": {
+      "hrv": 0.5,
+      "hr": 0.5,
+      "sleep": 0.5,
+      "vitals": 0
+     },
+     "reasons": [
+      "只有每日汇总数据"
+     ]
+    },
+    "labels": [
+     "低精度"
+    ],
+    "inputs": {
+     "hrvMs": 51.84,
+     "hrvLabel": "SDNN · 全天平均（含日间读数）",
+     "rhr": 53.74,
+     "rhrSource": "appleDaily"
+    },
+    "baselines": {
+     "hrvMs": 41.05,
+     "lnSDNN": {
+      "mu": 3.7149,
+      "sigma": 0.1489,
+      "n": 30,
+      "calibrating": false
+     },
+     "restingHeartRate": {
+      "mu": 55.5853,
+      "sigma": 3.1281,
+      "n": 30,
+      "calibrating": false
+     },
+     "restorativeHours": {
+      "mu": 3.3047,
+      "sigma": 0.2955,
+      "n": 30,
+      "calibrating": false
+     }
+    },
+    "z": {
+     "hrv": 1.5665,
+     "rhr": 0.589,
+     "sleep": -0.7607
+    },
+    "contributions": [
+     {
+      "component": "HRV",
+      "points": 23.91
+     },
+     {
+      "component": "RHR",
+      "points": 4
+     },
+     {
+      "component": "SLEEP",
+      "points": -4.09
+     },
+     {
+      "component": "RESP",
+      "points": 0
+     },
+     {
+      "component": "TEMP",
+      "points": 0
+     },
+     {
+      "component": "SPO2",
+      "points": 0
+     },
+     {
+      "component": "BD",
+      "points": 0
+     }
+    ]
+   },
+   "sleep": {
+    "tstHours": 6.7769,
+    "efficiency": 0.9163,
+    "restorativeHours": 2.7917,
+    "stageMinutes": {
+     "awake": 22.4,
+     "rem": 77.9,
+     "light": 239.1,
+     "deep": 89.6
+    },
+    "need": {
+     "base": 7.5,
+     "loadAddition": 0,
+     "napCredit": 0,
+     "repayment": 0.4681,
+     "baseNeed": 7.5,
+     "total": 7.9681
+    },
+    "debtAfterHours": 1.9713,
+    "score": 70.87,
+    "performance": 85.05,
+    "hypnogram": null,
+    "labels": [
+     "低精度",
+     "无分期图"
+    ]
+   },
+   "strain": {
+    "method": "daily-estimate",
+    "trimp": 39.975,
+    "strain": 8.527,
+    "acwr": 0.894,
+    "target": [
+     14,
+     18
+    ],
+    "labels": [
+     "低精度"
+    ]
+   }
+  },
+  {
+   "wakeDay": "2026-09-28",
+   "tier": "C",
+   "asOf": 1790784000,
+   "asOfLocal": "2026-10-01 00:00",
+   "recovery": {
+    "status": "ok",
+    "score": 39.81,
+    "zone": "yellow",
+    "raw": -0.5454,
+    "quality": {
+     "level": "low",
+     "total": 0.45,
+     "components": {
+      "hrv": 0.5,
+      "hr": 0.5,
+      "sleep": 0.5,
+      "vitals": 0
+     },
+     "reasons": [
+      "只有每日汇总数据"
+     ]
+    },
+    "labels": [
+     "低精度"
+    ],
+    "inputs": {
+     "hrvMs": 30.95,
+     "hrvLabel": "SDNN · 全天平均（含日间读数）",
+     "rhr": 50.05,
+     "rhrSource": "appleDaily"
+    },
+    "baselines": {
+     "hrvMs": 41.41,
+     "lnSDNN": {
+      "mu": 3.7235,
+      "sigma": 0.1434,
+      "n": 30,
+      "calibrating": false
+     },
+     "restingHeartRate": {
+      "mu": 55.5853,
+      "sigma": 2.9059,
+      "n": 30,
+      "calibrating": false
+     },
+     "restorativeHours": {
+      "mu": 3.3047,
+      "sigma": 0.2955,
+      "n": 30,
+      "calibrating": false
+     }
+    },
+    "z": {
+     "hrv": -2.0313,
+     "rhr": 1.9039,
+     "sleep": 0.479
+    },
+    "contributions": [
+     {
+      "component": "HRV",
+      "points": -36.19
+     },
+     {
+      "component": "RHR",
+      "points": 14.38
+     },
+     {
+      "component": "SLEEP",
+      "points": 2.96
+     },
+     {
+      "component": "RESP",
+      "points": 0
+     },
+     {
+      "component": "TEMP",
+      "points": 0
+     },
+     {
+      "component": "SPO2",
+      "points": 0
+     },
+     {
+      "component": "BD",
+      "points": 0
+     }
+    ]
+   },
+   "sleep": {
+    "tstHours": 7.4922,
+    "efficiency": 0.9461,
+    "restorativeHours": 3.3028,
+    "stageMinutes": {
+     "awake": 20.4,
+     "rem": 94.2,
+     "light": 251.4,
+     "deep": 104
+    },
+    "need": {
+     "base": 7.5,
+     "loadAddition": 0.0352,
+     "napCredit": 0,
+     "repayment": 0.5914,
+     "baseNeed": 7.5352,
+     "total": 8.1266
+    },
+    "debtAfterHours": 1.62,
+    "score": 85.75,
+    "performance": 92.19,
+    "hypnogram": null,
+    "labels": [
+     "低精度",
+     "无分期图"
+    ]
+   },
+   "strain": {
+    "method": "daily-estimate",
+    "trimp": 114.35,
+    "strain": 13.359,
+    "acwr": 0.919,
+    "target": [
+     10,
+     14
+    ],
+    "labels": [
+     "低精度"
+    ]
+   }
+  },
+  {
+   "wakeDay": "2026-09-29",
+   "tier": "C",
+   "asOf": 1790784000,
+   "asOfLocal": "2026-10-01 00:00",
+   "recovery": {
+    "status": "ok",
+    "score": 83.08,
+    "zone": "green",
+    "raw": 0.8867,
+    "quality": {
+     "level": "low",
+     "total": 0.45,
+     "components": {
+      "hrv": 0.5,
+      "hr": 0.5,
+      "sleep": 0.5,
+      "vitals": 0
+     },
+     "reasons": [
+      "只有每日汇总数据"
+     ]
+    },
+    "labels": [
+     "低精度"
+    ],
+    "inputs": {
+     "hrvMs": 52.25,
+     "hrvLabel": "SDNN · 全天平均（含日间读数）",
+     "rhr": 55.27,
+     "rhrSource": "appleDaily"
+    },
+    "baselines": {
+     "hrvMs": 41.05,
+     "lnSDNN": {
+      "mu": 3.7149,
+      "sigma": 0.1514,
+      "n": 30,
+      "calibrating": false
+     },
+     "restingHeartRate": {
+      "mu": 55.5853,
+      "sigma": 3.1281,
+      "n": 30,
+      "calibrating": false
+     },
+     "restorativeHours": {
+      "mu": 3.2982,
+      "sigma": 0.2858,
+      "n": 30,
+      "calibrating": false
+     }
+    },
+    "z": {
+     "hrv": 1.5927,
+     "rhr": 0.0997,
+     "sleep": -0.0711
+    },
+    "contributions": [
+     {
+      "component": "HRV",
+      "points": 24.13
+     },
+     {
+      "component": "RHR",
+      "points": 0.67
+     },
+     {
+      "component": "SLEEP",
+      "points": -0.38
+     },
+     {
+      "component": "RESP",
+      "points": 0
+     },
+     {
+      "component": "TEMP",
+      "points": 0
+     },
+     {
+      "component": "SPO2",
+      "points": 0
+     },
+     {
+      "component": "BD",
+      "points": 0
+     }
+    ]
+   },
+   "sleep": {
+    "tstHours": 7.2011,
+    "efficiency": 0.9342,
+    "restorativeHours": 3.1831,
+    "stageMinutes": {
+     "awake": 17.3,
+     "rem": 94.8,
+     "light": 241.1,
+     "deep": 96.2
+    },
+    "need": {
+     "base": 7.5,
+     "loadAddition": 0.3572,
+     "napCredit": 0,
+     "repayment": 0.486,
+     "baseNeed": 7.8572,
+     "total": 8.3433
+    },
+    "debtAfterHours": 1.9521,
+    "score": 79.15,
+    "performance": 86.31,
+    "hypnogram": null,
+    "labels": [
+     "低精度",
+     "无分期图"
+    ]
+   },
+   "strain": {
+    "method": "daily-estimate",
+    "trimp": 78.502,
+    "strain": 11.556,
+    "acwr": 0.756,
+    "target": [
+     14,
+     18
+    ],
+    "labels": [
+     "低精度"
+    ]
+   }
+  },
+  {
+   "wakeDay": "2026-09-30",
+   "tier": "C",
+   "asOf": 1790784000,
+   "asOfLocal": "2026-10-01 00:00",
+   "recovery": {
+    "status": "ok",
+    "score": 58.26,
+    "zone": "yellow",
+    "raw": -0.0117,
+    "quality": {
+     "level": "low",
+     "total": 0.45,
+     "components": {
+      "hrv": 0.5,
+      "hr": 0.5,
+      "sleep": 0.5,
+      "vitals": 0
+     },
+     "reasons": [
+      "只有每日汇总数据"
+     ]
+    },
+    "labels": [
+     "低精度"
+    ],
+    "inputs": {
+     "hrvMs": 40.6,
+     "hrvLabel": "SDNN · 全天平均（含日间读数）",
+     "rhr": 55.95,
+     "rhrSource": "appleDaily"
+    },
+    "baselines": {
+     "hrvMs": 41.05,
+     "lnSDNN": {
+      "mu": 3.7149,
+      "sigma": 0.1657,
+      "n": 30,
+      "calibrating": false
+     },
+     "restingHeartRate": {
+      "mu": 55.3909,
+      "sigma": 3.3017,
+      "n": 30,
+      "calibrating": false
+     },
+     "restorativeHours": {
+      "mu": 3.2876,
+      "sigma": 0.2794,
+      "n": 30,
+      "calibrating": false
+     }
+    },
+    "z": {
+     "hrv": -0.0672,
+     "rhr": -0.1691,
+     "sleep": 0.3375
+    },
+    "contributions": [
+     {
+      "component": "HRV",
+      "points": -1.26
+     },
+     {
+      "component": "RHR",
+      "points": -1.44
+     },
+     {
+      "component": "SLEEP",
+      "points": 2.29
+     },
+     {
+      "component": "RESP",
+      "points": 0
+     },
+     {
+      "component": "TEMP",
+      "points": 0
+     },
+     {
+      "component": "SPO2",
+      "points": 0
+     },
+     {
+      "component": "BD",
+      "points": 0
+     }
+    ]
+   },
+   "sleep": {
+    "tstHours": 7.6069,
+    "efficiency": 0.9146,
+    "restorativeHours": 3.3864,
+    "stageMinutes": {
+     "awake": 21.6,
+     "rem": 103.5,
+     "light": 253.2,
+     "deep": 99.7
+    },
+    "need": {
+     "base": 7.5,
+     "loadAddition": 0.2371,
+     "napCredit": 0,
+     "repayment": 0.5856,
+     "baseNeed": 7.7371,
+     "total": 8.3227
+    },
+    "debtAfterHours": 1.6919,
+    "score": 84.05,
+    "performance": 91.4,
+    "hypnogram": null,
+    "labels": [
+     "低精度",
+     "无分期图"
+    ]
+   },
+   "strain": {
+    "method": "daily-estimate",
+    "trimp": 34.875,
+    "strain": 7.957,
+    "acwr": 0.72,
+    "target": [
+     10,
+     14
+    ],
+    "labels": [
+     "低精度"
+    ]
+   }
+  },
+  {
+   "wakeDay": "2026-10-01",
+   "tier": "C",
+   "asOf": 1790784000,
+   "asOfLocal": "2026-10-01 00:00",
+   "recovery": {
+    "status": "ok",
+    "score": 68.29,
+    "zone": "green",
+    "raw": 0.2979,
+    "quality": {
+     "level": "low",
+     "total": 0.45,
+     "components": {
+      "hrv": 0.5,
+      "hr": 0.5,
+      "sleep": 0.5,
+      "vitals": 0
+     },
+     "reasons": [
+      "只有每日汇总数据"
+     ]
+    },
+    "labels": [
+     "低精度"
+    ],
+    "inputs": {
+     "hrvMs": 40.45,
+     "hrvLabel": "SDNN · 全天平均（含日间读数）",
+     "rhr": 53.91,
+     "rhrSource": "appleDaily"
+    },
+    "baselines": {
+     "hrvMs": 40.91,
+     "lnSDNN": {
+      "mu": 3.7114,
+      "sigma": 0.1708,
+      "n": 30,
+      "calibrating": false
+     },
+     "restingHeartRate": {
+      "mu": 55.5853,
+      "sigma": 2.9059,
+      "n": 30,
+      "calibrating": false
+     },
+     "restorativeHours": {
+      "mu": 3.2876,
+      "sigma": 0.2714,
+      "n": 30,
+      "calibrating": false
+     }
+    },
+    "z": {
+     "hrv": -0.0659,
+     "rhr": 0.5772,
+     "sleep": 0.9495
+    },
+    "contributions": [
+     {
+      "component": "HRV",
+      "points": -1.17
+     },
+     {
+      "component": "RHR",
+      "points": 4.66
+     },
+     {
+      "component": "SLEEP",
+      "points": 6.14
+     },
+     {
+      "component": "RESP",
+      "points": 0
+     },
+     {
+      "component": "TEMP",
+      "points": 0
+     },
+     {
+      "component": "SPO2",
+      "points": 0
+     },
+     {
+      "component": "BD",
+      "points": 0
+     }
+    ]
+   },
+   "sleep": {
+    "tstHours": 7.8503,
+    "efficiency": 0.9304,
+    "restorativeHours": 3.4856,
+    "stageMinutes": {
+     "awake": 16.3,
+     "rem": 102.7,
+     "light": 261.9,
+     "deep": 106.5
+    },
+    "need": {
+     "base": 7.5,
+     "loadAddition": 0,
+     "napCredit": 0,
+     "repayment": 0.5076,
+     "baseNeed": 7.5,
+     "total": 8.0076
+    },
+    "debtAfterHours": 1.0032,
+    "score": 91.39,
+    "performance": 98.04,
+    "hypnogram": null,
+    "labels": [
+     "低精度",
+     "无分期图"
+    ]
+   },
+   "strain": {
+    "method": "daily-estimate",
+    "trimp": 46.55,
+    "strain": 9.182,
+    "acwr": 0.638,
+    "target": [
+     14,
+     18
+    ],
+    "labels": [
+     "低精度"
+    ]
+   }
+  }
+ ]
+}

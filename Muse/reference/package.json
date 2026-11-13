@@ -1,0 +1,12 @@
+{
+  "name": "vigor-muse-reference",
+  "private": true,
+  "type": "module",
+  "description": "Muse 空间算法的无依赖参考实现（A/B/C 三档），用于验证提示词和导出 golden 数据",
+  "scripts": {
+    "test": "node --test \"test/*.test.js\"",
+    "compare": "node scripts/compare.js",
+    "golden": "node scripts/golden.js"
+  },
+  "engines": { "node": ">=20" }
+}

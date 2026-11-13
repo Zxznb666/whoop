@@ -1,0 +1,4762 @@
+{
+ "tier": "B",
+ "source": "synthetic",
+ "days": [
+  {
+   "wakeDay": "2026-09-18",
+   "tier": "B",
+   "asOf": 1790784000,
+   "asOfLocal": "2026-10-01 00:00",
+   "cycle": {
+    "sleepStart": 1789661137,
+    "sleepEnd": 1789687710,
+    "bedtime": 1789660437,
+    "until": 1789744165
+   },
+   "recovery": {
+    "status": "ok",
+    "score": 51.07,
+    "zone": "yellow",
+    "raw": -0.2193,
+    "capped": false,
+    "contradiction": false,
+    "quality": {
+     "level": "medium",
+     "total": 0.65,
+     "components": {
+      "hrv": 0.5,
+      "hr": 0.5,
+      "sleep": 1,
+      "vitals": 1
+     },
+     "reasons": []
+    },
+    "labels": [
+     "HRV 含日间读数",
+     "负荷为估算"
+    ],
+    "inputs": {
+     "hrvMs": 37.48,
+     "hrvLabel": "SDNN · 全天平均（含日间读数）",
+     "hrvSamples": [],
+     "rhr": 53.09,
+     "rhrSource": "appleDaily",
+     "rhrPoolSize": 0,
+     "respiratoryRate": 14.99,
+     "wristTemperature": 36.376,
+     "tempDelta": 0.259,
+     "spo2Median": null,
+     "breathingElevated": false,
+     "sleepHeartRate": {
+      "count": null,
+      "mean": null,
+      "longestGapMin": null,
+      "partialWear": null
+     }
+    },
+    "baselines": {
+     "hrvMs": 41.9,
+     "lnSDNN": {
+      "mu": 3.7354,
+      "sigma": 0.1643,
+      "n": 30,
+      "calibrating": false
+     },
+     "restingHeartRate": {
+      "mu": 55.1607,
+      "sigma": 3.2986,
+      "n": 30,
+      "calibrating": false
+     },
+     "respiratoryRate": {
+      "mu": 15.0173,
+      "sigma": 0.3,
+      "n": 30,
+      "calibrating": false
+     },
+     "wristTemperature": {
+      "mu": 36.117,
+      "sigma": 0.1909,
+      "n": 30,
+      "calibrating": false
+     },
+     "oxygenSaturation": {
+      "mu": 96.5,
+      "sigma": 1,
+      "n": 0,
+      "calibrating": true
+     },
+     "restorativeHours": {
+      "mu": 3.2307,
+      "sigma": 0.3875,
+      "n": 30,
+      "calibrating": false
+     }
+    },
+    "z": {
+     "hrv": -0.6791,
+     "rhr": 0.6266,
+     "sleep": -0.0125,
+     "resp": -0.1
+    },
+    "penalties": {
+     "resp": 0,
+     "temp": 0,
+     "spo2": 0,
+     "bd": 0
+    },
+    "contributions": [
+     {
+      "component": "HRV",
+      "points": -12.84
+     },
+     {
+      "component": "RHR",
+      "points": 5.34
+     },
+     {
+      "component": "SLEEP",
+      "points": -0.09
+     },
+     {
+      "component": "RESP",
+      "points": 0
+     },
+     {
+      "component": "TEMP",
+      "points": 0
+     },
+     {
+      "component": "SPO2",
+      "points": 0
+     },
+     {
+      "component": "BD",
+      "points": 0
+     }
+    ],
+    "illness": {
+     "level": "none",
+     "signals": {
+      "temp": false,
+      "resp": false,
+      "hrv": false,
+      "rhr": false
+     }
+    },
+    "excludedFromBaseline": false
+   },
+   "sleep": {
+    "onset": 1789661137,
+    "onsetLocal": "00:05",
+    "wake": 1789687710,
+    "wakeLocal": "07:28",
+    "bedtime": 1789660437,
+    "bedtimeLocal": "23:53",
+    "tstHours": 7.1236,
+    "efficiency": 0.9403,
+    "efficiencyIsSleepPeriod": false,
+    "latencyMinutes": 11.7,
+    "wasoMinutes": 15.5,
+    "awakenings": 3,
+    "restorativeHours": 3.1539,
+    "stageMinutes": {
+     "awake": 15.5,
+     "rem": 104.4,
+     "light": 238.2,
+     "deep": 84.8
+    },
+    "sri": 89.11,
+    "consistency": 89.1,
+    "need": {
+     "base": 7.5,
+     "loadAddition": 0.367,
+     "napCredit": 0,
+     "repayment": 0.7526,
+     "baseNeed": 7.867,
+     "total": 8.6196
+    },
+    "debtBeforeHours": 2.5086,
+    "debtAfterHours": 2.7503,
+    "zRestorative": -0.1982,
+    "score": 79.85,
+    "performance": 82.64,
+    "components": {
+     "duration": 0.8264,
+     "efficiency": 0.9515,
+     "consistency": 0.8911,
+     "restorative": 0.4505
+    },
+    "hypnogram": [
+     {
+      "start": 1789661137,
+      "end": 1789663501,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1789663501,
+      "end": 1789665416,
+      "label": "DEEP"
+     },
+     {
+      "start": 1789665416,
+      "end": 1789666157,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1789666157,
+      "end": 1789666983,
+      "label": "REM"
+     },
+     {
+      "start": 1789666983,
+      "end": 1789667166,
+      "label": "AWAKE"
+     },
+     {
+      "start": 1789667166,
+      "end": 1789669560,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1789669560,
+      "end": 1789670912,
+      "label": "DEEP"
+     },
+     {
+      "start": 1789670912,
+      "end": 1789671570,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1789671570,
+      "end": 1789672519,
+      "label": "REM"
+     },
+     {
+      "start": 1789672519,
+      "end": 1789672929,
+      "label": "AWAKE"
+     },
+     {
+      "start": 1789672929,
+      "end": 1789674731,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1789674731,
+      "end": 1789675617,
+      "label": "DEEP"
+     },
+     {
+      "start": 1789675617,
+      "end": 1789676224,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1789676224,
+      "end": 1789677674,
+      "label": "REM"
+     },
+     {
+      "start": 1789677674,
+      "end": 1789679495,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1789679495,
+      "end": 1789680132,
+      "label": "DEEP"
+     },
+     {
+      "start": 1789680132,
+      "end": 1789680817,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1789680817,
+      "end": 1789682153,
+      "label": "REM"
+     },
+     {
+      "start": 1789682153,
+      "end": 1789682488,
+      "label": "AWAKE"
+     },
+     {
+      "start": 1789682488,
+      "end": 1789684612,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1789684612,
+      "end": 1789684912,
+      "label": "DEEP"
+     },
+     {
+      "start": 1789684912,
+      "end": 1789685576,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1789685576,
+      "end": 1789687279,
+      "label": "REM"
+     },
+     {
+      "start": 1789687279,
+      "end": 1789687710,
+      "label": "LIGHT"
+     }
+    ]
+   },
+   "strain": {
+    "method": "workout-estimate",
+    "trimp": 584.881,
+    "strain": 21,
+    "countedMinutes": null,
+    "unwornMinutes": null,
+    "zoneMinutes": null,
+    "nonWorkoutTrimp": 0,
+    "workouts": [
+     {
+      "type": "cycling",
+      "start": 1789693572,
+      "end": 1789702152,
+      "minutes": 143,
+      "trimp": 223.431,
+      "strain": 16.7,
+      "meanHR": 142.8,
+      "peakHR": 165,
+      "zones": null
+     },
+     {
+      "type": "cycling",
+      "start": 1789693572,
+      "end": 1789702152,
+      "minutes": 143,
+      "trimp": 223.431,
+      "strain": 16.7,
+      "meanHR": 142.8,
+      "peakHR": 165,
+      "zones": null
+     },
+     {
+      "type": "traditionalStrengthTraining",
+      "start": 1789722551,
+      "end": 1789726991,
+      "minutes": 74,
+      "trimp": 138.02,
+      "strain": 14.28,
+      "meanHR": 149.7,
+      "peakHR": 170,
+      "zones": null
+     }
+    ],
+    "acwr": 1.116,
+    "target": [
+     10,
+     14
+    ],
+    "curve": null,
+    "labels": [
+     "估算"
+    ]
+   }
+  },
+  {
+   "wakeDay": "2026-09-19",
+   "tier": "B",
+   "asOf": 1790784000,
+   "asOfLocal": "2026-10-01 00:00",
+   "cycle": {
+    "sleepStart": 1789744165,
+    "sleepEnd": 1789774436,
+    "bedtime": 1789743439,
+    "until": 1789834352
+   },
+   "recovery": {
+    "status": "ok",
+    "score": 57.23,
+    "zone": "yellow",
+    "raw": -0.0421,
+    "capped": false,
+    "contradiction": false,
+    "quality": {
+     "level": "medium",
+     "total": 0.65,
+     "components": {
+      "hrv": 0.5,
+      "hr": 0.5,
+      "sleep": 1,
+      "vitals": 1
+     },
+     "reasons": []
+    },
+    "labels": [
+     "HRV 含日间读数",
+     "负荷为估算"
+    ],
+    "inputs": {
+     "hrvMs": 39.88,
+     "hrvLabel": "SDNN · 全天平均（含日间读数）",
+     "hrvSamples": [],
+     "rhr": 55.97,
+     "rhrSource": "appleDaily",
+     "rhrPoolSize": 0,
+     "respiratoryRate": 14.97,
+     "wristTemperature": 36.098,
+     "tempDelta": -0.024,
+     "spo2Median": null,
+     "breathingElevated": false,
+     "sleepHeartRate": {
+      "count": null,
+      "mean": null,
+      "longestGapMin": null,
+      "partialWear": null
+     }
+    },
+    "baselines": {
+     "hrvMs": 41.36,
+     "lnSDNN": {
+      "mu": 3.7223,
+      "sigma": 0.1653,
+      "n": 30,
+      "calibrating": false
+     },
+     "restingHeartRate": {
+      "mu": 54.7859,
+      "sigma": 3.6553,
+      "n": 30,
+      "calibrating": false
+     },
+     "respiratoryRate": {
+      "mu": 15.0173,
+      "sigma": 0.3,
+      "n": 30,
+      "calibrating": false
+     },
+     "wristTemperature": {
+      "mu": 36.122,
+      "sigma": 0.1916,
+      "n": 30,
+      "calibrating": false
+     },
+     "oxygenSaturation": {
+      "mu": 96.5,
+      "sigma": 1,
+      "n": 0,
+      "calibrating": true
+     },
+     "restorativeHours": {
+      "mu": 3.2307,
+      "sigma": 0.3573,
+      "n": 30,
+      "calibrating": false
+     }
+    },
+    "z": {
+     "hrv": -0.2198,
+     "rhr": -0.3243,
+     "sleep": 0.7992,
+     "resp": -0.1742
+    },
+    "penalties": {
+     "resp": 0,
+     "temp": 0,
+     "spo2": 0,
+     "bd": 0
+    },
+    "contributions": [
+     {
+      "component": "HRV",
+      "points": -4.11
+     },
+     {
+      "component": "RHR",
+      "points": -2.76
+     },
+     {
+      "component": "SLEEP",
+      "points": 5.43
+     },
+     {
+      "component": "RESP",
+      "points": 0
+     },
+     {
+      "component": "TEMP",
+      "points": 0
+     },
+     {
+      "component": "SPO2",
+      "points": 0
+     },
+     {
+      "component": "BD",
+      "points": 0
+     }
+    ],
+    "illness": {
+     "level": "none",
+     "signals": {
+      "temp": false,
+      "resp": false,
+      "hrv": false,
+      "rhr": false
+     }
+    },
+    "excludedFromBaseline": false
+   },
+   "sleep": {
+    "onset": 1789744165,
+    "onsetLocal": "23:09",
+    "wake": 1789774436,
+    "wakeLocal": "07:33",
+    "bedtime": 1789743439,
+    "bedtimeLocal": "22:57",
+    "tstHours": 8.185,
+    "efficiency": 0.9506,
+    "efficiencyIsSleepPeriod": false,
+    "latencyMinutes": 12.1,
+    "wasoMinutes": 13.4,
+    "awakenings": 2,
+    "restorativeHours": 3.6978,
+    "stageMinutes": {
+     "awake": 13.4,
+     "rem": 98.4,
+     "light": 269.2,
+     "deep": 123.4
+    },
+    "sri": 88.08,
+    "consistency": 88.1,
+    "need": {
+     "base": 7.5,
+     "loadAddition": 0.8667,
+     "napCredit": 0,
+     "repayment": 0.8251,
+     "baseNeed": 8.3667,
+     "total": 9.1918
+    },
+    "debtBeforeHours": 2.7503,
+    "debtAfterHours": 2.3819,
+    "zRestorative": 1.3074,
+    "score": 89.59,
+    "performance": 89.05,
+    "components": {
+     "duration": 0.8905,
+     "efficiency": 1,
+     "consistency": 0.8808,
+     "restorative": 0.8268
+    },
+    "hypnogram": [
+     {
+      "start": 1789744165,
+      "end": 1789746013,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1789746013,
+      "end": 1789748317,
+      "label": "DEEP"
+     },
+     {
+      "start": 1789748317,
+      "end": 1789749103,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1789749103,
+      "end": 1789749767,
+      "label": "REM"
+     },
+     {
+      "start": 1789749767,
+      "end": 1789750140,
+      "label": "AWAKE"
+     },
+     {
+      "start": 1789750140,
+      "end": 1789752144,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1789752144,
+      "end": 1789753997,
+      "label": "DEEP"
+     },
+     {
+      "start": 1789753997,
+      "end": 1789754653,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1789754653,
+      "end": 1789755409,
+      "label": "REM"
+     },
+     {
+      "start": 1789755409,
+      "end": 1789757409,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1789757409,
+      "end": 1789758852,
+      "label": "DEEP"
+     },
+     {
+      "start": 1789758852,
+      "end": 1789759638,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1789759638,
+      "end": 1789760813,
+      "label": "REM"
+     },
+     {
+      "start": 1789760813,
+      "end": 1789761245,
+      "label": "AWAKE"
+     },
+     {
+      "start": 1789761245,
+      "end": 1789763319,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1789763319,
+      "end": 1789764483,
+      "label": "DEEP"
+     },
+     {
+      "start": 1789764483,
+      "end": 1789765090,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1789765090,
+      "end": 1789766421,
+      "label": "REM"
+     },
+     {
+      "start": 1789766421,
+      "end": 1789768313,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1789768313,
+      "end": 1789768628,
+      "label": "DEEP"
+     },
+     {
+      "start": 1789768628,
+      "end": 1789769440,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1789769440,
+      "end": 1789771042,
+      "label": "REM"
+     },
+     {
+      "start": 1789771042,
+      "end": 1789773004,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1789773004,
+      "end": 1789773331,
+      "label": "DEEP"
+     },
+     {
+      "start": 1789773331,
+      "end": 1789774058,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1789774058,
+      "end": 1789774436,
+      "label": "REM"
+     }
+    ]
+   },
+   "strain": {
+    "method": "workout-estimate",
+    "trimp": 38.025,
+    "strain": 8.316,
+    "countedMinutes": null,
+    "unwornMinutes": null,
+    "zoneMinutes": null,
+    "nonWorkoutTrimp": 38.025,
+    "workouts": [],
+    "acwr": 1.105,
+    "target": [
+     10,
+     14
+    ],
+    "curve": null,
+    "labels": [
+     "估算"
+    ]
+   }
+  },
+  {
+   "wakeDay": "2026-09-20",
+   "tier": "B",
+   "asOf": 1790784000,
+   "asOfLocal": "2026-10-01 00:00",
+   "cycle": {
+    "sleepStart": 1789834352,
+    "sleepEnd": 1789864798,
+    "bedtime": 1789833429,
+    "until": 1789918174
+   },
+   "recovery": {
+    "status": "ok",
+    "score": 59.56,
+    "zone": "yellow",
+    "raw": 0.0266,
+    "capped": false,
+    "contradiction": false,
+    "quality": {
+     "level": "medium",
+     "total": 0.65,
+     "components": {
+      "hrv": 0.5,
+      "hr": 0.5,
+      "sleep": 1,
+      "vitals": 1
+     },
+     "reasons": []
+    },
+    "labels": [
+     "HRV 含日间读数",
+     "负荷为估算"
+    ],
+    "inputs": {
+     "hrvMs": 40.5,
+     "hrvLabel": "SDNN · 全天平均（含日间读数）",
+     "hrvSamples": [],
+     "rhr": 56.88,
+     "rhrSource": "appleDaily",
+     "rhrPoolSize": 0,
+     "respiratoryRate": 14.95,
+     "wristTemperature": 35.883,
+     "tempDelta": -0.234,
+     "spo2Median": null,
+     "breathingElevated": false,
+     "sleepHeartRate": {
+      "count": null,
+      "mean": null,
+      "longestGapMin": null,
+      "partialWear": null
+     }
+    },
+    "baselines": {
+     "hrvMs": 41,
+     "lnSDNN": {
+      "mu": 3.7137,
+      "sigma": 0.1654,
+      "n": 30,
+      "calibrating": false
+     },
+     "restingHeartRate": {
+      "mu": 54.7859,
+      "sigma": 3.2305,
+      "n": 30,
+      "calibrating": false
+     },
+     "respiratoryRate": {
+      "mu": 14.9982,
+      "sigma": 0.3,
+      "n": 30,
+      "calibrating": false
+     },
+     "wristTemperature": {
+      "mu": 36.117,
+      "sigma": 0.1909,
+      "n": 30,
+      "calibrating": false
+     },
+     "oxygenSaturation": {
+      "mu": 96.5,
+      "sigma": 1,
+      "n": 0,
+      "calibrating": true
+     },
+     "restorativeHours": {
+      "mu": 3.2431,
+      "sigma": 0.3836,
+      "n": 30,
+      "calibrating": false
+     }
+    },
+    "z": {
+     "hrv": -0.0751,
+     "rhr": -0.6472,
+     "sleep": 1.1483,
+     "resp": -0.1582
+    },
+    "penalties": {
+     "resp": 0,
+     "temp": 0,
+     "spo2": 0,
+     "bd": 0
+    },
+    "contributions": [
+     {
+      "component": "HRV",
+      "points": -1.39
+     },
+     {
+      "component": "RHR",
+      "points": -5.44
+     },
+     {
+      "component": "SLEEP",
+      "points": 7.73
+     },
+     {
+      "component": "RESP",
+      "points": 0
+     },
+     {
+      "component": "TEMP",
+      "points": 0
+     },
+     {
+      "component": "SPO2",
+      "points": 0
+     },
+     {
+      "component": "BD",
+      "points": 0
+     }
+    ],
+    "illness": {
+     "level": "none",
+     "signals": {
+      "temp": false,
+      "resp": false,
+      "hrv": false,
+      "rhr": false
+     }
+    },
+    "excludedFromBaseline": false
+   },
+   "sleep": {
+    "onset": 1789834352,
+    "onsetLocal": "00:12",
+    "wake": 1789864798,
+    "wakeLocal": "08:39",
+    "bedtime": 1789833429,
+    "bedtimeLocal": "23:57",
+    "tstHours": 8.1908,
+    "efficiency": 0.94,
+    "efficiencyIsSleepPeriod": false,
+    "latencyMinutes": 15.4,
+    "wasoMinutes": 16,
+    "awakenings": 3,
+    "restorativeHours": 3.6728,
+    "stageMinutes": {
+     "awake": 16,
+     "rem": 107.3,
+     "light": 271.1,
+     "deep": 113.1
+    },
+    "sri": 87.52,
+    "consistency": 87.5,
+    "need": {
+     "base": 7.5,
+     "loadAddition": 0.0211,
+     "napCredit": 0,
+     "repayment": 0.7146,
+     "baseNeed": 7.5211,
+     "total": 8.2357
+    },
+    "debtBeforeHours": 2.3819,
+    "debtAfterHours": 1.2358,
+    "zRestorative": 1.1202,
+    "score": 93.78,
+    "performance": 99.46,
+    "components": {
+     "duration": 0.9946,
+     "efficiency": 0.95,
+     "consistency": 0.8752,
+     "restorative": 0.78
+    },
+    "hypnogram": [
+     {
+      "start": 1789834352,
+      "end": 1789836620,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1789836620,
+      "end": 1789838503,
+      "label": "DEEP"
+     },
+     {
+      "start": 1789838503,
+      "end": 1789839128,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1789839128,
+      "end": 1789839902,
+      "label": "REM"
+     },
+     {
+      "start": 1789839902,
+      "end": 1789840355,
+      "label": "AWAKE"
+     },
+     {
+      "start": 1789840355,
+      "end": 1789842441,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1789842441,
+      "end": 1789844382,
+      "label": "DEEP"
+     },
+     {
+      "start": 1789844382,
+      "end": 1789845060,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1789845060,
+      "end": 1789846036,
+      "label": "REM"
+     },
+     {
+      "start": 1789846036,
+      "end": 1789848378,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1789848378,
+      "end": 1789849912,
+      "label": "DEEP"
+     },
+     {
+      "start": 1789849912,
+      "end": 1789850586,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1789850586,
+      "end": 1789851758,
+      "label": "REM"
+     },
+     {
+      "start": 1789851758,
+      "end": 1789852035,
+      "label": "AWAKE"
+     },
+     {
+      "start": 1789852035,
+      "end": 1789854167,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1789854167,
+      "end": 1789855114,
+      "label": "DEEP"
+     },
+     {
+      "start": 1789855114,
+      "end": 1789855816,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1789855816,
+      "end": 1789857450,
+      "label": "REM"
+     },
+     {
+      "start": 1789857450,
+      "end": 1789857679,
+      "label": "AWAKE"
+     },
+     {
+      "start": 1789857679,
+      "end": 1789859994,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1789859994,
+      "end": 1789860473,
+      "label": "DEEP"
+     },
+     {
+      "start": 1789860473,
+      "end": 1789861088,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1789861088,
+      "end": 1789862970,
+      "label": "REM"
+     },
+     {
+      "start": 1789862970,
+      "end": 1789864798,
+      "label": "LIGHT"
+     }
+    ]
+   },
+   "strain": {
+    "method": "workout-estimate",
+    "trimp": 30.3,
+    "strain": 7.387,
+    "countedMinutes": null,
+    "unwornMinutes": null,
+    "zoneMinutes": null,
+    "nonWorkoutTrimp": 30.3,
+    "workouts": [],
+    "acwr": 1.015,
+    "target": [
+     10,
+     14
+    ],
+    "curve": null,
+    "labels": [
+     "估算"
+    ]
+   }
+  },
+  {
+   "wakeDay": "2026-09-21",
+   "tier": "B",
+   "asOf": 1790784000,
+   "asOfLocal": "2026-10-01 00:00",
+   "cycle": {
+    "sleepStart": 1789918174,
+    "sleepEnd": 1789944348,
+    "bedtime": 1789917316,
+    "until": 1790004699
+   },
+   "recovery": {
+    "status": "ok",
+    "score": 68.58,
+    "zone": "green",
+    "raw": 0.3075,
+    "capped": false,
+    "contradiction": false,
+    "quality": {
+     "level": "medium",
+     "total": 0.65,
+     "components": {
+      "hrv": 0.5,
+      "hr": 0.5,
+      "sleep": 1,
+      "vitals": 1
+     },
+     "reasons": []
+    },
+    "labels": [
+     "HRV 含日间读数",
+     "负荷为估算"
+    ],
+    "inputs": {
+     "hrvMs": 43.73,
+     "hrvLabel": "SDNN · 全天平均（含日间读数）",
+     "hrvSamples": [],
+     "rhr": 54.18,
+     "rhrSource": "appleDaily",
+     "rhrPoolSize": 0,
+     "respiratoryRate": 14.81,
+     "wristTemperature": 36.095,
+     "tempDelta": -0.012,
+     "spo2Median": null,
+     "breathingElevated": false,
+     "sleepHeartRate": {
+      "count": null,
+      "mean": null,
+      "longestGapMin": null,
+      "partialWear": null
+     }
+    },
+    "baselines": {
+     "hrvMs": 41,
+     "lnSDNN": {
+      "mu": 3.7137,
+      "sigma": 0.1577,
+      "n": 30,
+      "calibrating": false
+     },
+     "restingHeartRate": {
+      "mu": 55.1607,
+      "sigma": 3.2096,
+      "n": 30,
+      "calibrating": false
+     },
+     "respiratoryRate": {
+      "mu": 14.9982,
+      "sigma": 0.3,
+      "n": 30,
+      "calibrating": false
+     },
+     "wristTemperature": {
+      "mu": 36.1061,
+      "sigma": 0.1918,
+      "n": 30,
+      "calibrating": false
+     },
+     "oxygenSaturation": {
+      "mu": 96.5,
+      "sigma": 1,
+      "n": 0,
+      "calibrating": true
+     },
+     "restorativeHours": {
+      "mu": 3.2724,
+      "sigma": 0.4003,
+      "n": 30,
+      "calibrating": false
+     }
+    },
+    "z": {
+     "hrv": 0.408,
+     "rhr": 0.307,
+     "sleep": 0.0318,
+     "resp": -0.6192
+    },
+    "penalties": {
+     "resp": 0,
+     "temp": 0,
+     "spo2": 0,
+     "bd": 0
+    },
+    "contributions": [
+     {
+      "component": "HRV",
+      "points": 7.24
+     },
+     {
+      "component": "RHR",
+      "points": 2.47
+     },
+     {
+      "component": "SLEEP",
+      "points": 0.2
+     },
+     {
+      "component": "RESP",
+      "points": 0
+     },
+     {
+      "component": "TEMP",
+      "points": 0
+     },
+     {
+      "component": "SPO2",
+      "points": 0
+     },
+     {
+      "component": "BD",
+      "points": 0
+     }
+    ],
+    "illness": {
+     "level": "none",
+     "signals": {
+      "temp": false,
+      "resp": false,
+      "hrv": false,
+      "rhr": false
+     }
+    },
+    "excludedFromBaseline": false
+   },
+   "sleep": {
+    "onset": 1789918174,
+    "onsetLocal": "23:29",
+    "wake": 1789944348,
+    "wakeLocal": "06:45",
+    "bedtime": 1789917316,
+    "bedtimeLocal": "23:15",
+    "tstHours": 6.9256,
+    "efficiency": 0.9223,
+    "efficiencyIsSleepPeriod": false,
+    "latencyMinutes": 14.3,
+    "wasoMinutes": 20.7,
+    "awakenings": 4,
+    "restorativeHours": 3.0956,
+    "stageMinutes": {
+     "awake": 20.7,
+     "rem": 91,
+     "light": 229.8,
+     "deep": 94.7
+    },
+    "sri": 88.13,
+    "consistency": 88.1,
+    "need": {
+     "base": 7.5,
+     "loadAddition": 0,
+     "napCredit": 0,
+     "repayment": 0.3707,
+     "baseNeed": 7.5,
+     "total": 7.8707
+    },
+    "debtBeforeHours": 1.2358,
+    "debtAfterHours": 1.5631,
+    "zRestorative": -0.4417,
+    "score": 80.38,
+    "performance": 87.99,
+    "components": {
+     "duration": 0.8799,
+     "efficiency": 0.8616,
+     "consistency": 0.8813,
+     "restorative": 0.3896
+    },
+    "hypnogram": [
+     {
+      "start": 1789918174,
+      "end": 1789920349,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1789920349,
+      "end": 1789922591,
+      "label": "DEEP"
+     },
+     {
+      "start": 1789922591,
+      "end": 1789923309,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1789923309,
+      "end": 1789923764,
+      "label": "REM"
+     },
+     {
+      "start": 1789923764,
+      "end": 1789923950,
+      "label": "AWAKE"
+     },
+     {
+      "start": 1789923950,
+      "end": 1789925978,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1789925978,
+      "end": 1789927513,
+      "label": "DEEP"
+     },
+     {
+      "start": 1789927513,
+      "end": 1789928289,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1789928289,
+      "end": 1789929253,
+      "label": "REM"
+     },
+     {
+      "start": 1789929253,
+      "end": 1789929475,
+      "label": "AWAKE"
+     },
+     {
+      "start": 1789929475,
+      "end": 1789931307,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1789931307,
+      "end": 1789932251,
+      "label": "DEEP"
+     },
+     {
+      "start": 1789932251,
+      "end": 1789932851,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1789932851,
+      "end": 1789934083,
+      "label": "REM"
+     },
+     {
+      "start": 1789934083,
+      "end": 1789934550,
+      "label": "AWAKE"
+     },
+     {
+      "start": 1789934550,
+      "end": 1789936598,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1789936598,
+      "end": 1789937202,
+      "label": "DEEP"
+     },
+     {
+      "start": 1789937202,
+      "end": 1789937829,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1789937829,
+      "end": 1789939542,
+      "label": "REM"
+     },
+     {
+      "start": 1789939542,
+      "end": 1789939909,
+      "label": "AWAKE"
+     },
+     {
+      "start": 1789939909,
+      "end": 1789942007,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1789942007,
+      "end": 1789942364,
+      "label": "DEEP"
+     },
+     {
+      "start": 1789942364,
+      "end": 1789943250,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1789943250,
+      "end": 1789944348,
+      "label": "REM"
+     }
+    ]
+   },
+   "strain": {
+    "method": "workout-estimate",
+    "trimp": 453.85,
+    "strain": 20.336,
+    "countedMinutes": null,
+    "unwornMinutes": null,
+    "zoneMinutes": null,
+    "nonWorkoutTrimp": 0,
+    "workouts": [
+     {
+      "type": "cycling",
+      "start": 1789953930,
+      "end": 1789962390,
+      "minutes": 141,
+      "trimp": 226.925,
+      "strain": 16.78,
+      "meanHR": 143.9,
+      "peakHR": 167,
+      "zones": null
+     },
+     {
+      "type": "cycling",
+      "start": 1789953930,
+      "end": 1789962390,
+      "minutes": 141,
+      "trimp": 226.925,
+      "strain": 16.78,
+      "meanHR": 143.9,
+      "peakHR": 167,
+      "zones": null
+     }
+    ],
+    "acwr": 0.943,
+    "target": [
+     14,
+     18
+    ],
+    "curve": null,
+    "labels": [
+     "估算"
+    ]
+   }
+  },
+  {
+   "wakeDay": "2026-09-22",
+   "tier": "B",
+   "asOf": 1790784000,
+   "asOfLocal": "2026-10-01 00:00",
+   "cycle": {
+    "sleepStart": 1790004699,
+    "sleepEnd": 1790034702,
+    "bedtime": 1790003300,
+    "until": 1790090466
+   },
+   "recovery": {
+    "status": "ok",
+    "score": 86.52,
+    "zone": "green",
+    "raw": 1.0778,
+    "capped": false,
+    "contradiction": false,
+    "quality": {
+     "level": "medium",
+     "total": 0.65,
+     "components": {
+      "hrv": 0.5,
+      "hr": 0.5,
+      "sleep": 1,
+      "vitals": 1
+     },
+     "reasons": []
+    },
+    "labels": [
+     "HRV 含日间读数",
+     "负荷为估算"
+    ],
+    "inputs": {
+     "hrvMs": 47.92,
+     "hrvLabel": "SDNN · 全天平均（含日间读数）",
+     "hrvSamples": [],
+     "rhr": 50.19,
+     "rhrSource": "appleDaily",
+     "rhrPoolSize": 0,
+     "respiratoryRate": 14.93,
+     "wristTemperature": 36.149,
+     "tempDelta": 0.043,
+     "spo2Median": null,
+     "breathingElevated": false,
+     "sleepHeartRate": {
+      "count": null,
+      "mean": null,
+      "longestGapMin": null,
+      "partialWear": null
+     }
+    },
+    "baselines": {
+     "hrvMs": 41,
+     "lnSDNN": {
+      "mu": 3.7137,
+      "sigma": 0.1514,
+      "n": 30,
+      "calibrating": false
+     },
+     "restingHeartRate": {
+      "mu": 55.1607,
+      "sigma": 3.1489,
+      "n": 30,
+      "calibrating": false
+     },
+     "respiratoryRate": {
+      "mu": 14.9982,
+      "sigma": 0.3,
+      "n": 30,
+      "calibrating": false
+     },
+     "wristTemperature": {
+      "mu": 36.1061,
+      "sigma": 0.1918,
+      "n": 30,
+      "calibrating": false
+     },
+     "oxygenSaturation": {
+      "mu": 96.5,
+      "sigma": 1,
+      "n": 0,
+      "calibrating": true
+     },
+     "restorativeHours": {
+      "mu": 3.2724,
+      "sigma": 0.3729,
+      "n": 30,
+      "calibrating": false
+     }
+    },
+    "z": {
+     "hrv": 1.03,
+     "rhr": 1.5774,
+     "sleep": 0.5848,
+     "resp": -0.2184
+    },
+    "penalties": {
+     "resp": 0,
+     "temp": 0,
+     "spo2": 0,
+     "bd": 0
+    },
+    "contributions": [
+     {
+      "component": "HRV",
+      "points": 14.68
+     },
+     {
+      "component": "RHR",
+      "points": 10.18
+     },
+     {
+      "component": "SLEEP",
+      "points": 3
+     },
+     {
+      "component": "RESP",
+      "points": 0
+     },
+     {
+      "component": "TEMP",
+      "points": 0
+     },
+     {
+      "component": "SPO2",
+      "points": 0
+     },
+     {
+      "component": "BD",
+      "points": 0
+     }
+    ],
+    "illness": {
+     "level": "none",
+     "signals": {
+      "temp": false,
+      "resp": false,
+      "hrv": false,
+      "rhr": false
+     }
+    },
+    "excludedFromBaseline": false
+   },
+   "sleep": {
+    "onset": 1790004699,
+    "onsetLocal": "23:31",
+    "wake": 1790034702,
+    "wakeLocal": "07:51",
+    "bedtime": 1790003300,
+    "bedtimeLocal": "23:08",
+    "tstHours": 7.9678,
+    "efficiency": 0.9134,
+    "efficiencyIsSleepPeriod": false,
+    "latencyMinutes": 23.3,
+    "wasoMinutes": 22,
+    "awakenings": 4,
+    "restorativeHours": 3.2817,
+    "stageMinutes": {
+     "awake": 22,
+     "rem": 88,
+     "light": 281.2,
+     "deep": 108.9
+    },
+    "sri": 87.9,
+    "consistency": 87.9,
+    "need": {
+     "base": 7.5,
+     "loadAddition": 0.8224,
+     "napCredit": 0.3333,
+     "repayment": 0.4689,
+     "baseNeed": 7.9891,
+     "total": 8.458
+    },
+    "debtBeforeHours": 1.5631,
+    "debtAfterHours": 1.2718,
+    "zRestorative": 0.025,
+    "score": 87.02,
+    "performance": 98.15,
+    "components": {
+     "duration": 0.9815,
+     "efficiency": 0.8172,
+     "consistency": 0.879,
+     "restorative": 0.5062
+    },
+    "hypnogram": [
+     {
+      "start": 1790004699,
+      "end": 1790006793,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790006793,
+      "end": 1790008801,
+      "label": "DEEP"
+     },
+     {
+      "start": 1790008801,
+      "end": 1790009453,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790009453,
+      "end": 1790010225,
+      "label": "REM"
+     },
+     {
+      "start": 1790010225,
+      "end": 1790010578,
+      "label": "AWAKE"
+     },
+     {
+      "start": 1790010578,
+      "end": 1790012611,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790012611,
+      "end": 1790014288,
+      "label": "DEEP"
+     },
+     {
+      "start": 1790014288,
+      "end": 1790015080,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790015080,
+      "end": 1790015760,
+      "label": "REM"
+     },
+     {
+      "start": 1790015760,
+      "end": 1790016081,
+      "label": "AWAKE"
+     },
+     {
+      "start": 1790016081,
+      "end": 1790018127,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790018127,
+      "end": 1790019407,
+      "label": "DEEP"
+     },
+     {
+      "start": 1790019407,
+      "end": 1790020235,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790020235,
+      "end": 1790021276,
+      "label": "REM"
+     },
+     {
+      "start": 1790021276,
+      "end": 1790021604,
+      "label": "AWAKE"
+     },
+     {
+      "start": 1790021604,
+      "end": 1790023937,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790023937,
+      "end": 1790024687,
+      "label": "DEEP"
+     },
+     {
+      "start": 1790024687,
+      "end": 1790025464,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790025464,
+      "end": 1790026691,
+      "label": "REM"
+     },
+     {
+      "start": 1790026691,
+      "end": 1790027008,
+      "label": "AWAKE"
+     },
+     {
+      "start": 1790027008,
+      "end": 1790029179,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790029179,
+      "end": 1790029610,
+      "label": "DEEP"
+     },
+     {
+      "start": 1790029610,
+      "end": 1790030345,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790030345,
+      "end": 1790031907,
+      "label": "REM"
+     },
+     {
+      "start": 1790031907,
+      "end": 1790033791,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790033791,
+      "end": 1790034177,
+      "label": "DEEP"
+     },
+     {
+      "start": 1790034177,
+      "end": 1790034702,
+      "label": "LIGHT"
+     }
+    ]
+   },
+   "strain": {
+    "method": "workout-estimate",
+    "trimp": 156.069,
+    "strain": 14.892,
+    "countedMinutes": null,
+    "unwornMinutes": null,
+    "zoneMinutes": null,
+    "nonWorkoutTrimp": 28.725,
+    "workouts": [
+     {
+      "type": "traditionalStrengthTraining",
+      "start": 1790070645,
+      "end": 1790074725,
+      "minutes": 68,
+      "trimp": 127.344,
+      "strain": 13.89,
+      "meanHR": 149.9,
+      "peakHR": 169.9,
+      "zones": null
+     }
+    ],
+    "acwr": 1.271,
+    "target": [
+     14,
+     18
+    ],
+    "curve": null,
+    "labels": [
+     "估算"
+    ]
+   }
+  },
+  {
+   "wakeDay": "2026-09-23",
+   "tier": "B",
+   "asOf": 1790784000,
+   "asOfLocal": "2026-10-01 00:00",
+   "cycle": {
+    "sleepStart": 1790090466,
+    "sleepEnd": 1790117638,
+    "bedtime": 1790089659,
+    "until": 1790180363
+   },
+   "recovery": {
+    "status": "ok",
+    "score": 71.43,
+    "zone": "green",
+    "raw": 0.4044,
+    "capped": false,
+    "contradiction": false,
+    "quality": {
+     "level": "medium",
+     "total": 0.65,
+     "components": {
+      "hrv": 0.5,
+      "hr": 0.5,
+      "sleep": 1,
+      "vitals": 1
+     },
+     "reasons": []
+    },
+    "labels": [
+     "HRV 含日间读数",
+     "负荷为估算"
+    ],
+    "inputs": {
+     "hrvMs": 45.33,
+     "hrvLabel": "SDNN · 全天平均（含日间读数）",
+     "hrvSamples": [],
+     "rhr": 55.48,
+     "rhrSource": "appleDaily",
+     "rhrPoolSize": 0,
+     "respiratoryRate": 14.81,
+     "wristTemperature": 36.01,
+     "tempDelta": -0.096,
+     "spo2Median": null,
+     "breathingElevated": false,
+     "sleepHeartRate": {
+      "count": null,
+      "mean": null,
+      "longestGapMin": null,
+      "partialWear": null
+     }
+    },
+    "baselines": {
+     "hrvMs": 41,
+     "lnSDNN": {
+      "mu": 3.7137,
+      "sigma": 0.1514,
+      "n": 30,
+      "calibrating": false
+     },
+     "restingHeartRate": {
+      "mu": 54.7693,
+      "sigma": 3.3985,
+      "n": 30,
+      "calibrating": false
+     },
+     "respiratoryRate": {
+      "mu": 14.9982,
+      "sigma": 0.3,
+      "n": 30,
+      "calibrating": false
+     },
+     "wristTemperature": {
+      "mu": 36.1061,
+      "sigma": 0.1918,
+      "n": 30,
+      "calibrating": false
+     },
+     "oxygenSaturation": {
+      "mu": 96.5,
+      "sigma": 1,
+      "n": 0,
+      "calibrating": true
+     },
+     "restorativeHours": {
+      "mu": 3.2664,
+      "sigma": 0.3295,
+      "n": 30,
+      "calibrating": false
+     }
+    },
+    "z": {
+     "hrv": 0.6624,
+     "rhr": -0.2094,
+     "sleep": 0.4622,
+     "resp": -0.6394
+    },
+    "penalties": {
+     "resp": 0,
+     "temp": 0,
+     "spo2": 0,
+     "bd": 0
+    },
+    "contributions": [
+     {
+      "component": "HRV",
+      "points": 11.5
+     },
+     {
+      "component": "RHR",
+      "points": -1.64
+     },
+     {
+      "component": "SLEEP",
+      "points": 2.9
+     },
+     {
+      "component": "RESP",
+      "points": 0
+     },
+     {
+      "component": "TEMP",
+      "points": 0
+     },
+     {
+      "component": "SPO2",
+      "points": 0
+     },
+     {
+      "component": "BD",
+      "points": 0
+     }
+    ],
+    "illness": {
+     "level": "none",
+     "signals": {
+      "temp": false,
+      "resp": false,
+      "hrv": false,
+      "rhr": false
+     }
+    },
+    "excludedFromBaseline": false
+   },
+   "sleep": {
+    "onset": 1790090466,
+    "onsetLocal": "23:21",
+    "wake": 1790117638,
+    "wakeLocal": "06:53",
+    "bedtime": 1790089659,
+    "bedtimeLocal": "23:07",
+    "tstHours": 7.3944,
+    "efficiency": 0.9514,
+    "efficiencyIsSleepPeriod": false,
+    "latencyMinutes": 13.5,
+    "wasoMinutes": 9.2,
+    "awakenings": 2,
+    "restorativeHours": 3.3747,
+    "stageMinutes": {
+     "awake": 9.2,
+     "rem": 89.7,
+     "light": 241.2,
+     "deep": 112.8
+    },
+    "sri": 87.03,
+    "consistency": 87,
+    "need": {
+     "base": 7.5,
+     "loadAddition": 0.4595,
+     "napCredit": 0,
+     "repayment": 0.3815,
+     "baseNeed": 7.9595,
+     "total": 8.341
+    },
+    "debtBeforeHours": 1.2718,
+    "debtAfterHours": 1.5824,
+    "zRestorative": 0.3288,
+    "score": 85.55,
+    "performance": 88.65,
+    "components": {
+     "duration": 0.8865,
+     "efficiency": 1,
+     "consistency": 0.8703,
+     "restorative": 0.5822
+    },
+    "hypnogram": [
+     {
+      "start": 1790090466,
+      "end": 1790092508,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790092508,
+      "end": 1790094907,
+      "label": "DEEP"
+     },
+     {
+      "start": 1790094907,
+      "end": 1790095576,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790095576,
+      "end": 1790096405,
+      "label": "REM"
+     },
+     {
+      "start": 1790096405,
+      "end": 1790096754,
+      "label": "AWAKE"
+     },
+     {
+      "start": 1790096754,
+      "end": 1790099123,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790099123,
+      "end": 1790101002,
+      "label": "DEEP"
+     },
+     {
+      "start": 1790101002,
+      "end": 1790101706,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790101706,
+      "end": 1790102877,
+      "label": "REM"
+     },
+     {
+      "start": 1790102877,
+      "end": 1790105264,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790105264,
+      "end": 1790106540,
+      "label": "DEEP"
+     },
+     {
+      "start": 1790106540,
+      "end": 1790107332,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790107332,
+      "end": 1790108382,
+      "label": "REM"
+     },
+     {
+      "start": 1790108382,
+      "end": 1790108585,
+      "label": "AWAKE"
+     },
+     {
+      "start": 1790108585,
+      "end": 1790110603,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790110603,
+      "end": 1790111279,
+      "label": "DEEP"
+     },
+     {
+      "start": 1790111279,
+      "end": 1790112162,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790112162,
+      "end": 1790113903,
+      "label": "REM"
+     },
+     {
+      "start": 1790113903,
+      "end": 1790115710,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790115710,
+      "end": 1790116246,
+      "label": "DEEP"
+     },
+     {
+      "start": 1790116246,
+      "end": 1790117046,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790117046,
+      "end": 1790117638,
+      "label": "REM"
+     }
+    ]
+   },
+   "strain": {
+    "method": "workout-estimate",
+    "trimp": 159.763,
+    "strain": 15.009,
+    "countedMinutes": null,
+    "unwornMinutes": null,
+    "zoneMinutes": null,
+    "nonWorkoutTrimp": 37.425,
+    "workouts": [
+     {
+      "type": "cycling",
+      "start": 1790156180,
+      "end": 1790160080,
+      "minutes": 65,
+      "trimp": 122.338,
+      "strain": 13.69,
+      "meanHR": 149.9,
+      "peakHR": 170,
+      "zones": null
+     }
+    ],
+    "acwr": 1.286,
+    "target": [
+     14,
+     18
+    ],
+    "curve": null,
+    "labels": [
+     "估算"
+    ]
+   }
+  },
+  {
+   "wakeDay": "2026-09-24",
+   "tier": "B",
+   "asOf": 1790784000,
+   "asOfLocal": "2026-10-01 00:00",
+   "cycle": {
+    "sleepStart": 1790180363,
+    "sleepEnd": 1790207957,
+    "bedtime": 1790179654,
+    "until": 1790267356
+   },
+   "recovery": {
+    "status": "ok",
+    "score": 55.54,
+    "zone": "yellow",
+    "raw": -0.0912,
+    "capped": false,
+    "contradiction": false,
+    "quality": {
+     "level": "medium",
+     "total": 0.65,
+     "components": {
+      "hrv": 0.5,
+      "hr": 0.5,
+      "sleep": 1,
+      "vitals": 1
+     },
+     "reasons": []
+    },
+    "labels": [
+     "HRV 含日间读数",
+     "负荷为估算"
+    ],
+    "inputs": {
+     "hrvMs": 41.23,
+     "hrvLabel": "SDNN · 全天平均（含日间读数）",
+     "hrvSamples": [],
+     "rhr": 56.99,
+     "rhrSource": "appleDaily",
+     "rhrPoolSize": 0,
+     "respiratoryRate": 14.96,
+     "wristTemperature": 36.105,
+     "tempDelta": -0.001,
+     "spo2Median": null,
+     "breathingElevated": false,
+     "sleepHeartRate": {
+      "count": null,
+      "mean": null,
+      "longestGapMin": null,
+      "partialWear": null
+     }
+    },
+    "baselines": {
+     "hrvMs": 41.24,
+     "lnSDNN": {
+      "mu": 3.7194,
+      "sigma": 0.156,
+      "n": 30,
+      "calibrating": false
+     },
+     "restingHeartRate": {
+      "mu": 55.1607,
+      "sigma": 3.1489,
+      "n": 30,
+      "calibrating": false
+     },
+     "respiratoryRate": {
+      "mu": 14.9982,
+      "sigma": 0.3,
+      "n": 30,
+      "calibrating": false
+     },
+     "wristTemperature": {
+      "mu": 36.1061,
+      "sigma": 0.1918,
+      "n": 30,
+      "calibrating": false
+     },
+     "oxygenSaturation": {
+      "mu": 96.5,
+      "sigma": 1,
+      "n": 0,
+      "calibrating": true
+     },
+     "restorativeHours": {
+      "mu": 3.2876,
+      "sigma": 0.2928,
+      "n": 30,
+      "calibrating": false
+     }
+    },
+    "z": {
+     "hrv": -0.0018,
+     "rhr": -0.5807,
+     "sleep": 0.2748,
+     "resp": -0.1367
+    },
+    "penalties": {
+     "resp": 0,
+     "temp": 0,
+     "spo2": 0,
+     "bd": 0
+    },
+    "contributions": [
+     {
+      "component": "HRV",
+      "points": -0.03
+     },
+     {
+      "component": "RHR",
+      "points": -4.97
+     },
+     {
+      "component": "SLEEP",
+      "points": 1.88
+     },
+     {
+      "component": "RESP",
+      "points": 0
+     },
+     {
+      "component": "TEMP",
+      "points": 0
+     },
+     {
+      "component": "SPO2",
+      "points": 0
+     },
+     {
+      "component": "BD",
+      "points": 0
+     }
+    ],
+    "illness": {
+     "level": "none",
+     "signals": {
+      "temp": false,
+      "resp": false,
+      "hrv": false,
+      "rhr": false
+     }
+    },
+    "excludedFromBaseline": false
+   },
+   "sleep": {
+    "onset": 1790180363,
+    "onsetLocal": "00:19",
+    "wake": 1790207957,
+    "wakeLocal": "07:59",
+    "bedtime": 1790179654,
+    "bedtimeLocal": "00:07",
+    "tstHours": 7.3356,
+    "efficiency": 0.933,
+    "efficiencyIsSleepPeriod": false,
+    "latencyMinutes": 11.8,
+    "wasoMinutes": 19.8,
+    "awakenings": 4,
+    "restorativeHours": 3.3753,
+    "stageMinutes": {
+     "awake": 19.8,
+     "rem": 92.3,
+     "light": 237.6,
+     "deep": 110.2
+    },
+    "sri": 87.7,
+    "consistency": 87.7,
+    "need": {
+     "base": 7.5,
+     "loadAddition": 0.4672,
+     "napCredit": 0,
+     "repayment": 0.4747,
+     "baseNeed": 7.9672,
+     "total": 8.442
+    },
+    "debtBeforeHours": 1.5824,
+    "debtAfterHours": 1.8976,
+    "zRestorative": 0.2993,
+    "score": 83.3,
+    "performance": 86.89,
+    "components": {
+     "duration": 0.8689,
+     "efficiency": 0.9152,
+     "consistency": 0.877,
+     "restorative": 0.5748
+    },
+    "hypnogram": [
+     {
+      "start": 1790180363,
+      "end": 1790182467,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790182467,
+      "end": 1790184821,
+      "label": "DEEP"
+     },
+     {
+      "start": 1790184821,
+      "end": 1790185718,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790185718,
+      "end": 1790186228,
+      "label": "REM"
+     },
+     {
+      "start": 1790186228,
+      "end": 1790186638,
+      "label": "AWAKE"
+     },
+     {
+      "start": 1790186638,
+      "end": 1790188528,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790188528,
+      "end": 1790190276,
+      "label": "DEEP"
+     },
+     {
+      "start": 1790190276,
+      "end": 1790190936,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790190936,
+      "end": 1790191724,
+      "label": "REM"
+     },
+     {
+      "start": 1790191724,
+      "end": 1790191981,
+      "label": "AWAKE"
+     },
+     {
+      "start": 1790191981,
+      "end": 1790193808,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790193808,
+      "end": 1790195026,
+      "label": "DEEP"
+     },
+     {
+      "start": 1790195026,
+      "end": 1790195853,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790195853,
+      "end": 1790196879,
+      "label": "REM"
+     },
+     {
+      "start": 1790196879,
+      "end": 1790197089,
+      "label": "AWAKE"
+     },
+     {
+      "start": 1790197089,
+      "end": 1790199320,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790199320,
+      "end": 1790200311,
+      "label": "DEEP"
+     },
+     {
+      "start": 1790200311,
+      "end": 1790201036,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790201036,
+      "end": 1790202319,
+      "label": "REM"
+     },
+     {
+      "start": 1790202319,
+      "end": 1790202628,
+      "label": "AWAKE"
+     },
+     {
+      "start": 1790202628,
+      "end": 1790204455,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790204455,
+      "end": 1790204755,
+      "label": "DEEP"
+     },
+     {
+      "start": 1790204755,
+      "end": 1790205537,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790205537,
+      "end": 1790207470,
+      "label": "REM"
+     },
+     {
+      "start": 1790207470,
+      "end": 1790207957,
+      "label": "LIGHT"
+     }
+    ]
+   },
+   "strain": {
+    "method": "workout-estimate",
+    "trimp": 37.8,
+    "strain": 8.292,
+    "countedMinutes": null,
+    "unwornMinutes": null,
+    "zoneMinutes": null,
+    "nonWorkoutTrimp": 37.8,
+    "workouts": [],
+    "acwr": 1.273,
+    "target": [
+     10,
+     14
+    ],
+    "curve": null,
+    "labels": [
+     "估算"
+    ]
+   }
+  },
+  {
+   "wakeDay": "2026-09-25",
+   "tier": "B",
+   "asOf": 1790784000,
+   "asOfLocal": "2026-10-01 00:00",
+   "cycle": {
+    "sleepStart": 1790267356,
+    "sleepEnd": 1790292428,
+    "bedtime": 1790266200,
+    "until": 1790349410
+   },
+   "recovery": {
+    "status": "ok",
+    "score": 79.9,
+    "zone": "green",
+    "raw": 0.7359,
+    "capped": false,
+    "contradiction": false,
+    "quality": {
+     "level": "medium",
+     "total": 0.65,
+     "components": {
+      "hrv": 0.5,
+      "hr": 0.5,
+      "sleep": 1,
+      "vitals": 1
+     },
+     "reasons": []
+    },
+    "labels": [
+     "HRV 含日间读数",
+     "负荷为估算"
+    ],
+    "inputs": {
+     "hrvMs": 49.72,
+     "hrvLabel": "SDNN · 全天平均（含日间读数）",
+     "hrvSamples": [],
+     "rhr": 53.81,
+     "rhrSource": "appleDaily",
+     "rhrPoolSize": 0,
+     "respiratoryRate": 15.01,
+     "wristTemperature": 35.906,
+     "tempDelta": -0.203,
+     "spo2Median": null,
+     "breathingElevated": false,
+     "sleepHeartRate": {
+      "count": null,
+      "mean": null,
+      "longestGapMin": null,
+      "partialWear": null
+     }
+    },
+    "baselines": {
+     "hrvMs": 41.05,
+     "lnSDNN": {
+      "mu": 3.7149,
+      "sigma": 0.1493,
+      "n": 30,
+      "calibrating": false
+     },
+     "restingHeartRate": {
+      "mu": 55.3909,
+      "sigma": 3.4731,
+      "n": 30,
+      "calibrating": false
+     },
+     "respiratoryRate": {
+      "mu": 14.9833,
+      "sigma": 0.3,
+      "n": 30,
+      "calibrating": false
+     },
+     "wristTemperature": {
+      "mu": 36.1096,
+      "sigma": 0.1884,
+      "n": 30,
+      "calibrating": false
+     },
+     "oxygenSaturation": {
+      "mu": 96.5,
+      "sigma": 1,
+      "n": 0,
+      "calibrating": true
+     },
+     "restorativeHours": {
+      "mu": 3.3047,
+      "sigma": 0.2955,
+      "n": 30,
+      "calibrating": false
+     }
+    },
+    "z": {
+     "hrv": 1.2828,
+     "rhr": 0.4543,
+     "sleep": -0.416,
+     "resp": 0.0948
+    },
+    "penalties": {
+     "resp": 0,
+     "temp": 0,
+     "spo2": 0,
+     "bd": 0
+    },
+    "contributions": [
+     {
+      "component": "HRV",
+      "points": 20.37
+     },
+     {
+      "component": "RHR",
+      "points": 3.22
+     },
+     {
+      "component": "SLEEP",
+      "points": -2.34
+     },
+     {
+      "component": "RESP",
+      "points": 0
+     },
+     {
+      "component": "TEMP",
+      "points": 0
+     },
+     {
+      "component": "SPO2",
+      "points": 0
+     },
+     {
+      "component": "BD",
+      "points": 0
+     }
+    ],
+    "illness": {
+     "level": "none",
+     "signals": {
+      "temp": false,
+      "resp": false,
+      "hrv": false,
+      "rhr": false
+     }
+    },
+    "excludedFromBaseline": false
+   },
+   "sleep": {
+    "onset": 1790267356,
+    "onsetLocal": "00:29",
+    "wake": 1790292428,
+    "wakeLocal": "07:27",
+    "bedtime": 1790266200,
+    "bedtimeLocal": "00:10",
+    "tstHours": 6.6681,
+    "efficiency": 0.9152,
+    "efficiencyIsSleepPeriod": false,
+    "latencyMinutes": 19.3,
+    "wasoMinutes": 17.8,
+    "awakenings": 4,
+    "restorativeHours": 3.0369,
+    "stageMinutes": {
+     "awake": 17.8,
+     "rem": 75.5,
+     "light": 217.9,
+     "deep": 106.7
+    },
+    "sri": 87.82,
+    "consistency": 87.8,
+    "need": {
+     "base": 7.5,
+     "loadAddition": 0.0194,
+     "napCredit": 0,
+     "repayment": 0.5693,
+     "baseNeed": 7.5194,
+     "total": 8.0887
+    },
+    "debtBeforeHours": 1.8976,
+    "debtAfterHours": 2.3695,
+    "zRestorative": -0.9062,
+    "score": 75.01,
+    "performance": 82.44,
+    "components": {
+     "duration": 0.8244,
+     "efficiency": 0.8262,
+     "consistency": 0.8782,
+     "restorative": 0.2734
+    },
+    "hypnogram": [
+     {
+      "start": 1790267356,
+      "end": 1790269199,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790269199,
+      "end": 1790271117,
+      "label": "DEEP"
+     },
+     {
+      "start": 1790271117,
+      "end": 1790271811,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790271811,
+      "end": 1790272592,
+      "label": "REM"
+     },
+     {
+      "start": 1790272592,
+      "end": 1790272890,
+      "label": "AWAKE"
+     },
+     {
+      "start": 1790272890,
+      "end": 1790274820,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790274820,
+      "end": 1790276695,
+      "label": "DEEP"
+     },
+     {
+      "start": 1790276695,
+      "end": 1790277501,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790277501,
+      "end": 1790278517,
+      "label": "REM"
+     },
+     {
+      "start": 1790278517,
+      "end": 1790278839,
+      "label": "AWAKE"
+     },
+     {
+      "start": 1790278839,
+      "end": 1790281143,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790281143,
+      "end": 1790282564,
+      "label": "DEEP"
+     },
+     {
+      "start": 1790282564,
+      "end": 1790283167,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790283167,
+      "end": 1790284463,
+      "label": "REM"
+     },
+     {
+      "start": 1790284463,
+      "end": 1790284666,
+      "label": "AWAKE"
+     },
+     {
+      "start": 1790284666,
+      "end": 1790286529,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790286529,
+      "end": 1790287257,
+      "label": "DEEP"
+     },
+     {
+      "start": 1790287257,
+      "end": 1790288011,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790288011,
+      "end": 1790289448,
+      "label": "REM"
+     },
+     {
+      "start": 1790289448,
+      "end": 1790289692,
+      "label": "AWAKE"
+     },
+     {
+      "start": 1790289692,
+      "end": 1790291509,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790291509,
+      "end": 1790291970,
+      "label": "DEEP"
+     },
+     {
+      "start": 1790291970,
+      "end": 1790292428,
+      "label": "LIGHT"
+     }
+    ]
+   },
+   "strain": {
+    "method": "workout-estimate",
+    "trimp": 117.964,
+    "strain": 13.511,
+    "countedMinutes": null,
+    "unwornMinutes": null,
+    "zoneMinutes": null,
+    "nonWorkoutTrimp": 0,
+    "workouts": [
+     {
+      "type": "cycling",
+      "start": 1790303107,
+      "end": 1790308327,
+      "minutes": 87,
+      "trimp": 0,
+      "strain": 0,
+      "meanHR": null,
+      "peakHR": null,
+      "zones": null
+     },
+     {
+      "type": "running",
+      "start": 1790333229,
+      "end": 1790337009,
+      "minutes": 63,
+      "trimp": 117.964,
+      "strain": 13.51,
+      "meanHR": 149.9,
+      "peakHR": 170,
+      "zones": null
+     }
+    ],
+    "acwr": 1.219,
+    "target": [
+     14,
+     18
+    ],
+    "curve": null,
+    "labels": [
+     "估算"
+    ]
+   }
+  },
+  {
+   "wakeDay": "2026-09-26",
+   "tier": "B",
+   "asOf": 1790784000,
+   "asOfLocal": "2026-10-01 00:00",
+   "cycle": {
+    "sleepStart": 1790349410,
+    "sleepEnd": 1790379310,
+    "bedtime": 1790348837,
+    "until": 1790435391
+   },
+   "recovery": {
+    "status": "ok",
+    "score": 58.15,
+    "zone": "yellow",
+    "raw": -0.015,
+    "capped": false,
+    "contradiction": false,
+    "quality": {
+     "level": "medium",
+     "total": 0.65,
+     "components": {
+      "hrv": 0.5,
+      "hr": 0.5,
+      "sleep": 1,
+      "vitals": 1
+     },
+     "reasons": []
+    },
+    "labels": [
+     "HRV 含日间读数",
+     "负荷为估算"
+    ],
+    "inputs": {
+     "hrvMs": 41.84,
+     "hrvLabel": "SDNN · 全天平均（含日间读数）",
+     "hrvSamples": [],
+     "rhr": 57.55,
+     "rhrSource": "appleDaily",
+     "rhrPoolSize": 0,
+     "respiratoryRate": 14.98,
+     "wristTemperature": 36.238,
+     "tempDelta": 0.129,
+     "spo2Median": null,
+     "breathingElevated": false,
+     "sleepHeartRate": {
+      "count": null,
+      "mean": null,
+      "longestGapMin": null,
+      "partialWear": null
+     }
+    },
+    "baselines": {
+     "hrvMs": 41.41,
+     "lnSDNN": {
+      "mu": 3.7235,
+      "sigma": 0.1542,
+      "n": 30,
+      "calibrating": false
+     },
+     "restingHeartRate": {
+      "mu": 54.9094,
+      "sigma": 2.9566,
+      "n": 30,
+      "calibrating": false
+     },
+     "respiratoryRate": {
+      "mu": 14.9833,
+      "sigma": 0.3,
+      "n": 30,
+      "calibrating": false
+     },
+     "wristTemperature": {
+      "mu": 36.1096,
+      "sigma": 0.1884,
+      "n": 30,
+      "calibrating": false
+     },
+     "oxygenSaturation": {
+      "mu": 96.5,
+      "sigma": 1,
+      "n": 0,
+      "calibrating": true
+     },
+     "restorativeHours": {
+      "mu": 3.3047,
+      "sigma": 0.2955,
+      "n": 30,
+      "calibrating": false
+     }
+    },
+    "z": {
+     "hrv": 0.0677,
+     "rhr": -0.8924,
+     "sleep": 0.8543,
+     "resp": -0.0181
+    },
+    "penalties": {
+     "resp": 0,
+     "temp": 0,
+     "spo2": 0,
+     "bd": 0
+    },
+    "contributions": [
+     {
+      "component": "HRV",
+      "points": 1.26
+     },
+     {
+      "component": "RHR",
+      "points": -7.54
+     },
+     {
+      "component": "SLEEP",
+      "points": 5.78
+     },
+     {
+      "component": "RESP",
+      "points": 0
+     },
+     {
+      "component": "TEMP",
+      "points": 0
+     },
+     {
+      "component": "SPO2",
+      "points": 0
+     },
+     {
+      "component": "BD",
+      "points": 0
+     }
+    ],
+    "illness": {
+     "level": "none",
+     "signals": {
+      "temp": false,
+      "resp": false,
+      "hrv": false,
+      "rhr": false
+     }
+    },
+    "excludedFromBaseline": false
+   },
+   "sleep": {
+    "onset": 1790349410,
+    "onsetLocal": "23:16",
+    "wake": 1790379310,
+    "wakeLocal": "07:35",
+    "bedtime": 1790348837,
+    "bedtimeLocal": "23:07",
+    "tstHours": 8.1736,
+    "efficiency": 0.9656,
+    "efficiencyIsSleepPeriod": false,
+    "latencyMinutes": 9.6,
+    "wasoMinutes": 7.9,
+    "awakenings": 2,
+    "restorativeHours": 3.4689,
+    "stageMinutes": {
+     "awake": 7.9,
+     "rem": 99.7,
+     "light": 282.3,
+     "deep": 108.5
+    },
+    "sri": 88.41,
+    "consistency": 88.4,
+    "need": {
+     "base": 7.5,
+     "loadAddition": 0.3674,
+     "napCredit": 0,
+     "repayment": 0.7108,
+     "baseNeed": 7.8674,
+     "total": 8.5782
+    },
+    "debtBeforeHours": 2.3695,
+    "debtAfterHours": 1.5893,
+    "zRestorative": 0.5556,
+    "score": 90.25,
+    "performance": 95.28,
+    "components": {
+     "duration": 0.9528,
+     "efficiency": 1,
+     "consistency": 0.8841,
+     "restorative": 0.6389
+    },
+    "hypnogram": [
+     {
+      "start": 1790349410,
+      "end": 1790351763,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790351763,
+      "end": 1790353640,
+      "label": "DEEP"
+     },
+     {
+      "start": 1790353640,
+      "end": 1790354301,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790354301,
+      "end": 1790354974,
+      "label": "REM"
+     },
+     {
+      "start": 1790354974,
+      "end": 1790357082,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790357082,
+      "end": 1790358782,
+      "label": "DEEP"
+     },
+     {
+      "start": 1790358782,
+      "end": 1790359651,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790359651,
+      "end": 1790360600,
+      "label": "REM"
+     },
+     {
+      "start": 1790360600,
+      "end": 1790360886,
+      "label": "AWAKE"
+     },
+     {
+      "start": 1790360886,
+      "end": 1790363118,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790363118,
+      "end": 1790364334,
+      "label": "DEEP"
+     },
+     {
+      "start": 1790364334,
+      "end": 1790365015,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790365015,
+      "end": 1790366245,
+      "label": "REM"
+     },
+     {
+      "start": 1790366245,
+      "end": 1790366434,
+      "label": "AWAKE"
+     },
+     {
+      "start": 1790366434,
+      "end": 1790368492,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790368492,
+      "end": 1790369478,
+      "label": "DEEP"
+     },
+     {
+      "start": 1790369478,
+      "end": 1790370215,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790370215,
+      "end": 1790371818,
+      "label": "REM"
+     },
+     {
+      "start": 1790371818,
+      "end": 1790373972,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790373972,
+      "end": 1790374401,
+      "label": "DEEP"
+     },
+     {
+      "start": 1790374401,
+      "end": 1790375268,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790375268,
+      "end": 1790376793,
+      "label": "REM"
+     },
+     {
+      "start": 1790376793,
+      "end": 1790378894,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790378894,
+      "end": 1790379194,
+      "label": "DEEP"
+     },
+     {
+      "start": 1790379194,
+      "end": 1790379310,
+      "label": "LIGHT"
+     }
+    ]
+   },
+   "strain": {
+    "method": "workout-estimate",
+    "trimp": 32.55,
+    "strain": 7.675,
+    "countedMinutes": null,
+    "unwornMinutes": null,
+    "zoneMinutes": null,
+    "nonWorkoutTrimp": 32.55,
+    "workouts": [],
+    "acwr": 0.911,
+    "target": [
+     10,
+     14
+    ],
+    "curve": null,
+    "labels": [
+     "估算"
+    ]
+   }
+  },
+  {
+   "wakeDay": "2026-09-27",
+   "tier": "B",
+   "asOf": 1790784000,
+   "asOfLocal": "2026-10-01 00:00",
+   "cycle": {
+    "sleepStart": 1790435391,
+    "sleepEnd": 1790461132,
+    "bedtime": 1790434507,
+    "until": 1790525251
+   },
+   "recovery": {
+    "status": "ok",
+    "score": 82.66,
+    "zone": "green",
+    "raw": 0.8654,
+    "capped": false,
+    "contradiction": false,
+    "quality": {
+     "level": "medium",
+     "total": 0.65,
+     "components": {
+      "hrv": 0.5,
+      "hr": 0.5,
+      "sleep": 1,
+      "vitals": 1
+     },
+     "reasons": []
+    },
+    "labels": [
+     "HRV 含日间读数",
+     "负荷为估算"
+    ],
+    "inputs": {
+     "hrvMs": 51.84,
+     "hrvLabel": "SDNN · 全天平均（含日间读数）",
+     "hrvSamples": [],
+     "rhr": 53.74,
+     "rhrSource": "appleDaily",
+     "rhrPoolSize": 0,
+     "respiratoryRate": 15.05,
+     "wristTemperature": 35.99,
+     "tempDelta": -0.127,
+     "spo2Median": null,
+     "breathingElevated": false,
+     "sleepHeartRate": {
+      "count": null,
+      "mean": null,
+      "longestGapMin": null,
+      "partialWear": null
+     }
+    },
+    "baselines": {
+     "hrvMs": 41.41,
+     "lnSDNN": {
+      "mu": 3.7235,
+      "sigma": 0.1434,
+      "n": 30,
+      "calibrating": false
+     },
+     "restingHeartRate": {
+      "mu": 55.3909,
+      "sigma": 3.3017,
+      "n": 30,
+      "calibrating": false
+     },
+     "respiratoryRate": {
+      "mu": 14.9786,
+      "sigma": 0.3,
+      "n": 30,
+      "calibrating": false
+     },
+     "wristTemperature": {
+      "mu": 36.117,
+      "sigma": 0.1849,
+      "n": 30,
+      "calibrating": false
+     },
+     "oxygenSaturation": {
+      "mu": 96.5,
+      "sigma": 1,
+      "n": 0,
+      "calibrating": true
+     },
+     "restorativeHours": {
+      "mu": 3.3172,
+      "sigma": 0.2708,
+      "n": 30,
+      "calibrating": false
+     }
+    },
+    "z": {
+     "hrv": 1.5671,
+     "rhr": 0.4991,
+     "sleep": -0.6062,
+     "resp": 0.2449
+    },
+    "penalties": {
+     "resp": 0,
+     "temp": 0,
+     "spo2": 0,
+     "bd": 0
+    },
+    "contributions": [
+     {
+      "component": "HRV",
+      "points": 23.88
+     },
+     {
+      "component": "RHR",
+      "points": 3.38
+     },
+     {
+      "component": "SLEEP",
+      "points": -3.26
+     },
+     {
+      "component": "RESP",
+      "points": 0
+     },
+     {
+      "component": "TEMP",
+      "points": 0
+     },
+     {
+      "component": "SPO2",
+      "points": 0
+     },
+     {
+      "component": "BD",
+      "points": 0
+     }
+    ],
+    "illness": {
+     "level": "none",
+     "signals": {
+      "temp": false,
+      "resp": false,
+      "hrv": false,
+      "rhr": false
+     }
+    },
+    "excludedFromBaseline": false
+   },
+   "sleep": {
+    "onset": 1790435391,
+    "onsetLocal": "23:09",
+    "wake": 1790461132,
+    "wakeLocal": "06:18",
+    "bedtime": 1790434507,
+    "bedtimeLocal": "22:55",
+    "tstHours": 6.7769,
+    "efficiency": 0.9163,
+    "efficiencyIsSleepPeriod": false,
+    "latencyMinutes": 14.7,
+    "wasoMinutes": 22.4,
+    "awakenings": 4,
+    "restorativeHours": 2.7917,
+    "stageMinutes": {
+     "awake": 22.4,
+     "rem": 77.9,
+     "light": 239.1,
+     "deep": 89.6
+    },
+    "sri": 88.69,
+    "consistency": 88.7,
+    "need": {
+     "base": 7.5,
+     "loadAddition": 0,
+     "napCredit": 0,
+     "repayment": 0.4768,
+     "baseNeed": 7.5,
+     "total": 7.9768
+    },
+    "debtBeforeHours": 1.5893,
+    "debtAfterHours": 1.9945,
+    "zRestorative": -1.9409,
+    "score": 72.73,
+    "performance": 84.96,
+    "components": {
+     "duration": 0.8496,
+     "efficiency": 0.8316,
+     "consistency": 0.8869,
+     "restorative": 0.0148
+    },
+    "hypnogram": [
+     {
+      "start": 1790435391,
+      "end": 1790437468,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790437468,
+      "end": 1790439370,
+      "label": "DEEP"
+     },
+     {
+      "start": 1790439370,
+      "end": 1790440157,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790440157,
+      "end": 1790440538,
+      "label": "REM"
+     },
+     {
+      "start": 1790440538,
+      "end": 1790440886,
+      "label": "AWAKE"
+     },
+     {
+      "start": 1790440886,
+      "end": 1790443259,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790443259,
+      "end": 1790444618,
+      "label": "DEEP"
+     },
+     {
+      "start": 1790444618,
+      "end": 1790445381,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790445381,
+      "end": 1790446521,
+      "label": "REM"
+     },
+     {
+      "start": 1790446521,
+      "end": 1790446856,
+      "label": "AWAKE"
+     },
+     {
+      "start": 1790446856,
+      "end": 1790449112,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790449112,
+      "end": 1790450215,
+      "label": "DEEP"
+     },
+     {
+      "start": 1790450215,
+      "end": 1790450984,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790450984,
+      "end": 1790452299,
+      "label": "REM"
+     },
+     {
+      "start": 1790452299,
+      "end": 1790452759,
+      "label": "AWAKE"
+     },
+     {
+      "start": 1790452759,
+      "end": 1790454878,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790454878,
+      "end": 1790455588,
+      "label": "DEEP"
+     },
+     {
+      "start": 1790455588,
+      "end": 1790456201,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790456201,
+      "end": 1790458041,
+      "label": "REM"
+     },
+     {
+      "start": 1790458041,
+      "end": 1790458242,
+      "label": "AWAKE"
+     },
+     {
+      "start": 1790458242,
+      "end": 1790460192,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790460192,
+      "end": 1790460492,
+      "label": "DEEP"
+     },
+     {
+      "start": 1790460492,
+      "end": 1790461132,
+      "label": "LIGHT"
+     }
+    ]
+   },
+   "strain": {
+    "method": "workout-estimate",
+    "trimp": 39.975,
+    "strain": 8.527,
+    "countedMinutes": null,
+    "unwornMinutes": null,
+    "zoneMinutes": null,
+    "nonWorkoutTrimp": 39.975,
+    "workouts": [],
+    "acwr": 0.921,
+    "target": [
+     14,
+     18
+    ],
+    "curve": null,
+    "labels": [
+     "估算"
+    ]
+   }
+  },
+  {
+   "wakeDay": "2026-09-28",
+   "tier": "B",
+   "asOf": 1790784000,
+   "asOfLocal": "2026-10-01 00:00",
+   "cycle": {
+    "sleepStart": 1790525251,
+    "sleepEnd": 1790553444,
+    "bedtime": 1790524934,
+    "until": 1790611729
+   },
+   "recovery": {
+    "status": "ok",
+    "score": 36.76,
+    "zone": "yellow",
+    "raw": -0.6375,
+    "capped": false,
+    "contradiction": false,
+    "quality": {
+     "level": "medium",
+     "total": 0.65,
+     "components": {
+      "hrv": 0.5,
+      "hr": 0.5,
+      "sleep": 1,
+      "vitals": 1
+     },
+     "reasons": []
+    },
+    "labels": [
+     "HRV 含日间读数",
+     "负荷为估算"
+    ],
+    "inputs": {
+     "hrvMs": 30.95,
+     "hrvLabel": "SDNN · 全天平均（含日间读数）",
+     "hrvSamples": [],
+     "rhr": 50.05,
+     "rhrSource": "appleDaily",
+     "rhrPoolSize": 0,
+     "respiratoryRate": 14.89,
+     "wristTemperature": 36.017,
+     "tempDelta": -0.1,
+     "spo2Median": null,
+     "breathingElevated": false,
+     "sleepHeartRate": {
+      "count": null,
+      "mean": null,
+      "longestGapMin": null,
+      "partialWear": null
+     }
+    },
+    "baselines": {
+     "hrvMs": 41.72,
+     "lnSDNN": {
+      "mu": 3.731,
+      "sigma": 0.1418,
+      "n": 30,
+      "calibrating": false
+     },
+     "restingHeartRate": {
+      "mu": 54.9094,
+      "sigma": 2.8864,
+      "n": 30,
+      "calibrating": false
+     },
+     "respiratoryRate": {
+      "mu": 14.9826,
+      "sigma": 0.3,
+      "n": 30,
+      "calibrating": false
+     },
+     "wristTemperature": {
+      "mu": 36.117,
+      "sigma": 0.184,
+      "n": 30,
+      "calibrating": false
+     },
+     "oxygenSaturation": {
+      "mu": 96.5,
+      "sigma": 1,
+      "n": 0,
+      "calibrating": true
+     },
+     "restorativeHours": {
+      "mu": 3.3047,
+      "sigma": 0.2955,
+      "n": 30,
+      "calibrating": false
+     }
+    },
+    "z": {
+     "hrv": -2.106,
+     "rhr": 1.6826,
+     "sleep": 0.5009,
+     "resp": -0.3153
+    },
+    "penalties": {
+     "resp": 0,
+     "temp": 0,
+     "spo2": 0,
+     "bd": 0
+    },
+    "contributions": [
+     {
+      "component": "HRV",
+      "points": -37.54
+     },
+     {
+      "component": "RHR",
+      "points": 12.58
+     },
+     {
+      "component": "SLEEP",
+      "points": 3.06
+     },
+     {
+      "component": "RESP",
+      "points": 0
+     },
+     {
+      "component": "TEMP",
+      "points": 0
+     },
+     {
+      "component": "SPO2",
+      "points": 0
+     },
+     {
+      "component": "BD",
+      "points": 0
+     }
+    ],
+    "illness": {
+     "level": "none",
+     "signals": {
+      "temp": false,
+      "resp": false,
+      "hrv": true,
+      "rhr": false
+     }
+    },
+    "excludedFromBaseline": false
+   },
+   "sleep": {
+    "onset": 1790525251,
+    "onsetLocal": "00:07",
+    "wake": 1790553444,
+    "wakeLocal": "07:57",
+    "bedtime": 1790524934,
+    "bedtimeLocal": "00:02",
+    "tstHours": 7.4922,
+    "efficiency": 0.9461,
+    "efficiencyIsSleepPeriod": false,
+    "latencyMinutes": 5.3,
+    "wasoMinutes": 20.4,
+    "awakenings": 4,
+    "restorativeHours": 3.3028,
+    "stageMinutes": {
+     "awake": 20.4,
+     "rem": 94.2,
+     "light": 251.4,
+     "deep": 104
+    },
+    "sri": 87.78,
+    "consistency": 87.8,
+    "need": {
+     "base": 7.5,
+     "loadAddition": 0.0352,
+     "napCredit": 0,
+     "repayment": 0.5984,
+     "baseNeed": 7.5352,
+     "total": 8.1335
+    },
+    "debtBeforeHours": 1.9945,
+    "debtAfterHours": 1.6386,
+    "zRestorative": -0.0066,
+    "score": 86.01,
+    "performance": 92.12,
+    "components": {
+     "duration": 0.9212,
+     "efficiency": 0.9803,
+     "consistency": 0.8778,
+     "restorative": 0.4984
+    },
+    "hypnogram": [
+     {
+      "start": 1790525251,
+      "end": 1790527428,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790527428,
+      "end": 1790529457,
+      "label": "DEEP"
+     },
+     {
+      "start": 1790529457,
+      "end": 1790530214,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790530214,
+      "end": 1790530960,
+      "label": "REM"
+     },
+     {
+      "start": 1790530960,
+      "end": 1790531354,
+      "label": "AWAKE"
+     },
+     {
+      "start": 1790531354,
+      "end": 1790533287,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790533287,
+      "end": 1790534854,
+      "label": "DEEP"
+     },
+     {
+      "start": 1790534854,
+      "end": 1790535613,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790535613,
+      "end": 1790536318,
+      "label": "REM"
+     },
+     {
+      "start": 1790536318,
+      "end": 1790536515,
+      "label": "AWAKE"
+     },
+     {
+      "start": 1790536515,
+      "end": 1790538431,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790538431,
+      "end": 1790539601,
+      "label": "DEEP"
+     },
+     {
+      "start": 1790539601,
+      "end": 1790540362,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790540362,
+      "end": 1790541487,
+      "label": "REM"
+     },
+     {
+      "start": 1790541487,
+      "end": 1790541890,
+      "label": "AWAKE"
+     },
+     {
+      "start": 1790541890,
+      "end": 1790544056,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790544056,
+      "end": 1790545155,
+      "label": "DEEP"
+     },
+     {
+      "start": 1790545155,
+      "end": 1790545808,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790545808,
+      "end": 1790547190,
+      "label": "REM"
+     },
+     {
+      "start": 1790547190,
+      "end": 1790547417,
+      "label": "AWAKE"
+     },
+     {
+      "start": 1790547417,
+      "end": 1790549349,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790549349,
+      "end": 1790549724,
+      "label": "DEEP"
+     },
+     {
+      "start": 1790549724,
+      "end": 1790550417,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790550417,
+      "end": 1790552109,
+      "label": "REM"
+     },
+     {
+      "start": 1790552109,
+      "end": 1790553444,
+      "label": "LIGHT"
+     }
+    ]
+   },
+   "strain": {
+    "method": "workout-estimate",
+    "trimp": 64.8,
+    "strain": 10.665,
+    "countedMinutes": null,
+    "unwornMinutes": null,
+    "zoneMinutes": null,
+    "nonWorkoutTrimp": 0,
+    "workouts": [
+     {
+      "type": "cycling",
+      "start": 1790562794,
+      "end": 1790567534,
+      "minutes": 79,
+      "trimp": 0,
+      "strain": 0,
+      "meanHR": null,
+      "peakHR": null,
+      "zones": null
+     },
+     {
+      "type": "traditionalStrengthTraining",
+      "start": 1790586582,
+      "end": 1790588622,
+      "minutes": 34,
+      "trimp": 64.8,
+      "strain": 10.66,
+      "meanHR": 150.5,
+      "peakHR": 170,
+      "zones": null
+     }
+    ],
+    "acwr": 0.95,
+    "target": [
+     10,
+     14
+    ],
+    "curve": null,
+    "labels": [
+     "估算"
+    ]
+   }
+  },
+  {
+   "wakeDay": "2026-09-29",
+   "tier": "B",
+   "asOf": 1790784000,
+   "asOfLocal": "2026-10-01 00:00",
+   "cycle": {
+    "sleepStart": 1790611729,
+    "sleepEnd": 1790638693,
+    "bedtime": 1790610943,
+    "until": 1790699230
+   },
+   "recovery": {
+    "status": "ok",
+    "score": 84.45,
+    "zone": "green",
+    "raw": 0.9584,
+    "capped": false,
+    "contradiction": false,
+    "quality": {
+     "level": "medium",
+     "total": 0.65,
+     "components": {
+      "hrv": 0.5,
+      "hr": 0.5,
+      "sleep": 1,
+      "vitals": 1
+     },
+     "reasons": []
+    },
+    "labels": [
+     "HRV 含日间读数",
+     "负荷为估算"
+    ],
+    "inputs": {
+     "hrvMs": 52.25,
+     "hrvLabel": "SDNN · 全天平均（含日间读数）",
+     "hrvSamples": [],
+     "rhr": 55.27,
+     "rhrSource": "appleDaily",
+     "rhrPoolSize": 0,
+     "respiratoryRate": 15.06,
+     "wristTemperature": 35.814,
+     "tempDelta": -0.303,
+     "spo2Median": null,
+     "breathingElevated": false,
+     "sleepHeartRate": {
+      "count": null,
+      "mean": null,
+      "longestGapMin": null,
+      "partialWear": null
+     }
+    },
+    "baselines": {
+     "hrvMs": 41.41,
+     "lnSDNN": {
+      "mu": 3.7235,
+      "sigma": 0.1434,
+      "n": 30,
+      "calibrating": false
+     },
+     "restingHeartRate": {
+      "mu": 54.9094,
+      "sigma": 2.8864,
+      "n": 30,
+      "calibrating": false
+     },
+     "respiratoryRate": {
+      "mu": 14.9714,
+      "sigma": 0.3,
+      "n": 30,
+      "calibrating": false
+     },
+     "wristTemperature": {
+      "mu": 36.117,
+      "sigma": 0.184,
+      "n": 30,
+      "calibrating": false
+     },
+     "oxygenSaturation": {
+      "mu": 96.5,
+      "sigma": 1,
+      "n": 0,
+      "calibrating": true
+     },
+     "restorativeHours": {
+      "mu": 3.2982,
+      "sigma": 0.2858,
+      "n": 30,
+      "calibrating": false
+     }
+    },
+    "z": {
+     "hrv": 1.6213,
+     "rhr": -0.1262,
+     "sleep": 0.4913,
+     "resp": 0.2943
+    },
+    "penalties": {
+     "resp": 0,
+     "temp": 0,
+     "spo2": 0,
+     "bd": 0
+    },
+    "contributions": [
+     {
+      "component": "HRV",
+      "points": 24.02
+     },
+     {
+      "component": "RHR",
+      "points": -0.83
+     },
+     {
+      "component": "SLEEP",
+      "points": 2.59
+     },
+     {
+      "component": "RESP",
+      "points": 0
+     },
+     {
+      "component": "TEMP",
+      "points": 0
+     },
+     {
+      "component": "SPO2",
+      "points": 0
+     },
+     {
+      "component": "BD",
+      "points": 0
+     }
+    ],
+    "illness": {
+     "level": "none",
+     "signals": {
+      "temp": false,
+      "resp": false,
+      "hrv": false,
+      "rhr": false
+     }
+    },
+    "excludedFromBaseline": false
+   },
+   "sleep": {
+    "onset": 1790611729,
+    "onsetLocal": "00:08",
+    "wake": 1790638693,
+    "wakeLocal": "07:38",
+    "bedtime": 1790610943,
+    "bedtimeLocal": "23:55",
+    "tstHours": 7.2011,
+    "efficiency": 0.9342,
+    "efficiencyIsSleepPeriod": false,
+    "latencyMinutes": 13.1,
+    "wasoMinutes": 17.3,
+    "awakenings": 3,
+    "restorativeHours": 3.1831,
+    "stageMinutes": {
+     "awake": 17.3,
+     "rem": 94.8,
+     "light": 241.1,
+     "deep": 96.2
+    },
+    "sri": 88.05,
+    "consistency": 88,
+    "need": {
+     "base": 7.5,
+     "loadAddition": 0.1777,
+     "napCredit": 0.3333,
+     "repayment": 0.4916,
+     "baseNeed": 7.3443,
+     "total": 7.8359
+    },
+    "debtBeforeHours": 1.6386,
+    "debtAfterHours": 1.4541,
+    "zRestorative": -0.4028,
+    "score": 85.9,
+    "performance": 96.15,
+    "components": {
+     "duration": 0.9615,
+     "efficiency": 0.921,
+     "consistency": 0.8805,
+     "restorative": 0.3993
+    },
+    "hypnogram": [
+     {
+      "start": 1790611729,
+      "end": 1790613809,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790613809,
+      "end": 1790615653,
+      "label": "DEEP"
+     },
+     {
+      "start": 1790615653,
+      "end": 1790616422,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790616422,
+      "end": 1790616977,
+      "label": "REM"
+     },
+     {
+      "start": 1790616977,
+      "end": 1790618828,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790618828,
+      "end": 1790620386,
+      "label": "DEEP"
+     },
+     {
+      "start": 1790620386,
+      "end": 1790621141,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790621141,
+      "end": 1790621809,
+      "label": "REM"
+     },
+     {
+      "start": 1790621809,
+      "end": 1790622250,
+      "label": "AWAKE"
+     },
+     {
+      "start": 1790622250,
+      "end": 1790624387,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790624387,
+      "end": 1790625423,
+      "label": "DEEP"
+     },
+     {
+      "start": 1790625423,
+      "end": 1790626031,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790626031,
+      "end": 1790627314,
+      "label": "REM"
+     },
+     {
+      "start": 1790627314,
+      "end": 1790627505,
+      "label": "AWAKE"
+     },
+     {
+      "start": 1790627505,
+      "end": 1790629797,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790629797,
+      "end": 1790630387,
+      "label": "DEEP"
+     },
+     {
+      "start": 1790630387,
+      "end": 1790631044,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790631044,
+      "end": 1790632340,
+      "label": "REM"
+     },
+     {
+      "start": 1790632340,
+      "end": 1790632748,
+      "label": "AWAKE"
+     },
+     {
+      "start": 1790632748,
+      "end": 1790634711,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790634711,
+      "end": 1790635453,
+      "label": "DEEP"
+     },
+     {
+      "start": 1790635453,
+      "end": 1790636084,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790636084,
+      "end": 1790637971,
+      "label": "REM"
+     },
+     {
+      "start": 1790637971,
+      "end": 1790638693,
+      "label": "LIGHT"
+     }
+    ]
+   },
+   "strain": {
+    "method": "workout-estimate",
+    "trimp": 114.652,
+    "strain": 13.372,
+    "countedMinutes": null,
+    "unwornMinutes": null,
+    "zoneMinutes": null,
+    "nonWorkoutTrimp": 36,
+    "workouts": [
+     {
+      "type": "cycling",
+      "start": 1790674607,
+      "end": 1790677127,
+      "minutes": 42,
+      "trimp": 78.652,
+      "strain": 11.57,
+      "meanHR": 149.8,
+      "peakHR": 169.9,
+      "zones": null
+     }
+    ],
+    "acwr": 0.646,
+    "target": [
+     14,
+     18
+    ],
+    "curve": null,
+    "labels": [
+     "估算"
+    ]
+   }
+  },
+  {
+   "wakeDay": "2026-09-30",
+   "tier": "B",
+   "asOf": 1790784000,
+   "asOfLocal": "2026-10-01 00:00",
+   "cycle": {
+    "sleepStart": 1790699230,
+    "sleepEnd": 1790727909,
+    "bedtime": 1790697968,
+    "until": 1790784396
+   },
+   "recovery": {
+    "status": "ok",
+    "score": 55.75,
+    "zone": "yellow",
+    "raw": -0.085,
+    "capped": false,
+    "contradiction": false,
+    "quality": {
+     "level": "medium",
+     "total": 0.65,
+     "components": {
+      "hrv": 0.5,
+      "hr": 0.5,
+      "sleep": 1,
+      "vitals": 1
+     },
+     "reasons": []
+    },
+    "labels": [
+     "HRV 含日间读数",
+     "负荷为估算"
+    ],
+    "inputs": {
+     "hrvMs": 40.6,
+     "hrvLabel": "SDNN · 全天平均（含日间读数）",
+     "hrvSamples": [],
+     "rhr": 55.95,
+     "rhrSource": "appleDaily",
+     "rhrPoolSize": 0,
+     "respiratoryRate": 14.77,
+     "wristTemperature": 36.087,
+     "tempDelta": -0.022,
+     "spo2Median": null,
+     "breathingElevated": false,
+     "sleepHeartRate": {
+      "count": null,
+      "mean": null,
+      "longestGapMin": null,
+      "partialWear": null
+     }
+    },
+    "baselines": {
+     "hrvMs": 41.72,
+     "lnSDNN": {
+      "mu": 3.731,
+      "sigma": 0.1418,
+      "n": 30,
+      "calibrating": false
+     },
+     "restingHeartRate": {
+      "mu": 55.2871,
+      "sigma": 2.9122,
+      "n": 30,
+      "calibrating": false
+     },
+     "respiratoryRate": {
+      "mu": 14.9714,
+      "sigma": 0.3,
+      "n": 30,
+      "calibrating": false
+     },
+     "wristTemperature": {
+      "mu": 36.1096,
+      "sigma": 0.196,
+      "n": 30,
+      "calibrating": false
+     },
+     "oxygenSaturation": {
+      "mu": 96.5,
+      "sigma": 1,
+      "n": 0,
+      "calibrating": true
+     },
+     "restorativeHours": {
+      "mu": 3.2982,
+      "sigma": 0.2648,
+      "n": 30,
+      "calibrating": false
+     }
+    },
+    "z": {
+     "hrv": -0.1919,
+     "rhr": -0.2273,
+     "sleep": 0.3867,
+     "resp": -0.6675
+    },
+    "penalties": {
+     "resp": 0,
+     "temp": 0,
+     "spo2": 0,
+     "bd": 0
+    },
+    "contributions": [
+     {
+      "component": "HRV",
+      "points": -3.61
+     },
+     {
+      "component": "RHR",
+      "points": -1.94
+     },
+     {
+      "component": "SLEEP",
+      "points": 2.64
+     },
+     {
+      "component": "RESP",
+      "points": 0
+     },
+     {
+      "component": "TEMP",
+      "points": 0
+     },
+     {
+      "component": "SPO2",
+      "points": 0
+     },
+     {
+      "component": "BD",
+      "points": 0
+     }
+    ],
+    "illness": {
+     "level": "none",
+     "signals": {
+      "temp": false,
+      "resp": false,
+      "hrv": false,
+      "rhr": false
+     }
+    },
+    "excludedFromBaseline": false
+   },
+   "sleep": {
+    "onset": 1790699230,
+    "onsetLocal": "00:27",
+    "wake": 1790727909,
+    "wakeLocal": "08:25",
+    "bedtime": 1790697968,
+    "bedtimeLocal": "00:06",
+    "tstHours": 7.6069,
+    "efficiency": 0.9146,
+    "efficiencyIsSleepPeriod": false,
+    "latencyMinutes": 21,
+    "wasoMinutes": 21.6,
+    "awakenings": 4,
+    "restorativeHours": 3.3864,
+    "stageMinutes": {
+     "awake": 21.6,
+     "rem": 103.5,
+     "light": 253.2,
+     "deep": 99.7
+    },
+    "sri": 87.35,
+    "consistency": 87.4,
+    "need": {
+     "base": 7.5,
+     "loadAddition": 0.3581,
+     "napCredit": 0,
+     "repayment": 0.4362,
+     "baseNeed": 7.8581,
+     "total": 8.2943
+    },
+    "debtBeforeHours": 1.4541,
+    "debtAfterHours": 1.4144,
+    "zRestorative": 0.333,
+    "score": 84.64,
+    "performance": 91.71,
+    "components": {
+     "duration": 0.9171,
+     "efficiency": 0.8232,
+     "consistency": 0.8735,
+     "restorative": 0.5833
+    },
+    "hypnogram": [
+     {
+      "start": 1790699230,
+      "end": 1790701503,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790701503,
+      "end": 1790703404,
+      "label": "DEEP"
+     },
+     {
+      "start": 1790703404,
+      "end": 1790704126,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790704126,
+      "end": 1790704662,
+      "label": "REM"
+     },
+     {
+      "start": 1790704662,
+      "end": 1790704869,
+      "label": "AWAKE"
+     },
+     {
+      "start": 1790704869,
+      "end": 1790707023,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790707023,
+      "end": 1790708789,
+      "label": "DEEP"
+     },
+     {
+      "start": 1790708789,
+      "end": 1790709676,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790709676,
+      "end": 1790710512,
+      "label": "REM"
+     },
+     {
+      "start": 1790710512,
+      "end": 1790710823,
+      "label": "AWAKE"
+     },
+     {
+      "start": 1790710823,
+      "end": 1790712759,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790712759,
+      "end": 1790713973,
+      "label": "DEEP"
+     },
+     {
+      "start": 1790713973,
+      "end": 1790714652,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790714652,
+      "end": 1790716077,
+      "label": "REM"
+     },
+     {
+      "start": 1790716077,
+      "end": 1790716450,
+      "label": "AWAKE"
+     },
+     {
+      "start": 1790716450,
+      "end": 1790718692,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790718692,
+      "end": 1790719492,
+      "label": "DEEP"
+     },
+     {
+      "start": 1790719492,
+      "end": 1790720204,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790720204,
+      "end": 1790721837,
+      "label": "REM"
+     },
+     {
+      "start": 1790721837,
+      "end": 1790722240,
+      "label": "AWAKE"
+     },
+     {
+      "start": 1790722240,
+      "end": 1790724132,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790724132,
+      "end": 1790724432,
+      "label": "DEEP"
+     },
+     {
+      "start": 1790724432,
+      "end": 1790725196,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790725196,
+      "end": 1790726976,
+      "label": "REM"
+     },
+     {
+      "start": 1790726976,
+      "end": 1790727909,
+      "label": "LIGHT"
+     }
+    ]
+   },
+   "strain": {
+    "method": "workout-estimate",
+    "trimp": 34.875,
+    "strain": 7.957,
+    "countedMinutes": null,
+    "unwornMinutes": null,
+    "zoneMinutes": null,
+    "nonWorkoutTrimp": 34.875,
+    "workouts": [],
+    "acwr": 0.59,
+    "target": [
+     10,
+     14
+    ],
+    "curve": null,
+    "labels": [
+     "估算"
+    ]
+   }
+  },
+  {
+   "wakeDay": "2026-10-01",
+   "tier": "B",
+   "asOf": 1790784000,
+   "asOfLocal": "2026-10-01 00:00",
+   "cycle": {
+    "sleepStart": 1790784396,
+    "sleepEnd": 1790813632,
+    "bedtime": 1790783257,
+    "until": 1790784000
+   },
+   "recovery": {
+    "status": "ok",
+    "score": 66.23,
+    "zone": "yellow",
+    "raw": 0.2312,
+    "capped": false,
+    "contradiction": false,
+    "quality": {
+     "level": "medium",
+     "total": 0.65,
+     "components": {
+      "hrv": 0.5,
+      "hr": 0.5,
+      "sleep": 1,
+      "vitals": 1
+     },
+     "reasons": []
+    },
+    "labels": [
+     "HRV 含日间读数",
+     "负荷为估算"
+    ],
+    "inputs": {
+     "hrvMs": 40.45,
+     "hrvLabel": "SDNN · 全天平均（含日间读数）",
+     "hrvSamples": [],
+     "rhr": 53.91,
+     "rhrSource": "appleDaily",
+     "rhrPoolSize": 0,
+     "respiratoryRate": 14.97,
+     "wristTemperature": 36.235,
+     "tempDelta": 0.126,
+     "spo2Median": null,
+     "breathingElevated": false,
+     "sleepHeartRate": {
+      "count": null,
+      "mean": null,
+      "longestGapMin": null,
+      "partialWear": null
+     }
+    },
+    "baselines": {
+     "hrvMs": 41.41,
+     "lnSDNN": {
+      "mu": 3.7235,
+      "sigma": 0.1434,
+      "n": 30,
+      "calibrating": false
+     },
+     "restingHeartRate": {
+      "mu": 55.3909,
+      "sigma": 2.7584,
+      "n": 30,
+      "calibrating": false
+     },
+     "respiratoryRate": {
+      "mu": 14.9626,
+      "sigma": 0.3,
+      "n": 30,
+      "calibrating": false
+     },
+     "wristTemperature": {
+      "mu": 36.1096,
+      "sigma": 0.196,
+      "n": 30,
+      "calibrating": false
+     },
+     "oxygenSaturation": {
+      "mu": 96.5,
+      "sigma": 1,
+      "n": 0,
+      "calibrating": true
+     },
+     "restorativeHours": {
+      "mu": 3.2982,
+      "sigma": 0.2648,
+      "n": 30,
+      "calibrating": false
+     }
+    },
+    "z": {
+     "hrv": -0.1631,
+     "rhr": 0.5376,
+     "sleep": 0.9327,
+     "resp": 0.0291
+    },
+    "penalties": {
+     "resp": 0,
+     "temp": 0,
+     "spo2": 0,
+     "bd": 0
+    },
+    "contributions": [
+     {
+      "component": "HRV",
+      "points": -2.92
+     },
+     {
+      "component": "RHR",
+      "points": 4.39
+     },
+     {
+      "component": "SLEEP",
+      "points": 6.1
+     },
+     {
+      "component": "RESP",
+      "points": 0
+     },
+     {
+      "component": "TEMP",
+      "points": 0
+     },
+     {
+      "component": "SPO2",
+      "points": 0
+     },
+     {
+      "component": "BD",
+      "points": 0
+     }
+    ],
+    "illness": {
+     "level": "none",
+     "signals": {
+      "temp": false,
+      "resp": false,
+      "hrv": false,
+      "rhr": false
+     }
+    },
+    "excludedFromBaseline": false
+   },
+   "sleep": {
+    "onset": 1790784396,
+    "onsetLocal": "00:06",
+    "wake": 1790813632,
+    "wakeLocal": "08:13",
+    "bedtime": 1790783257,
+    "bedtimeLocal": "23:47",
+    "tstHours": 7.8503,
+    "efficiency": 0.9304,
+    "efficiencyIsSleepPeriod": false,
+    "latencyMinutes": 19,
+    "wasoMinutes": 16.3,
+    "awakenings": 3,
+    "restorativeHours": 3.4856,
+    "stageMinutes": {
+     "awake": 16.3,
+     "rem": 102.7,
+     "light": 261.9,
+     "deep": 106.5
+    },
+    "sri": 86.82,
+    "consistency": 86.8,
+    "need": {
+     "base": 7.5,
+     "loadAddition": 0,
+     "napCredit": 0,
+     "repayment": 0.4243,
+     "baseNeed": 7.5,
+     "total": 7.9243
+    },
+    "debtBeforeHours": 1.4144,
+    "debtAfterHours": 0.7813,
+    "zRestorative": 0.7075,
+    "score": 91.19,
+    "performance": 99.07,
+    "components": {
+     "duration": 0.9907,
+     "efficiency": 0.902,
+     "consistency": 0.8682,
+     "restorative": 0.6769
+    },
+    "hypnogram": [
+     {
+      "start": 1790784396,
+      "end": 1790786579,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790786579,
+      "end": 1790788961,
+      "label": "DEEP"
+     },
+     {
+      "start": 1790788961,
+      "end": 1790789753,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790789753,
+      "end": 1790790545,
+      "label": "REM"
+     },
+     {
+      "start": 1790790545,
+      "end": 1790790831,
+      "label": "AWAKE"
+     },
+     {
+      "start": 1790790831,
+      "end": 1790792659,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790792659,
+      "end": 1790794092,
+      "label": "DEEP"
+     },
+     {
+      "start": 1790794092,
+      "end": 1790794742,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790794742,
+      "end": 1790795501,
+      "label": "REM"
+     },
+     {
+      "start": 1790795501,
+      "end": 1790797511,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790797511,
+      "end": 1790798764,
+      "label": "DEEP"
+     },
+     {
+      "start": 1790798764,
+      "end": 1790799407,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790799407,
+      "end": 1790800627,
+      "label": "REM"
+     },
+     {
+      "start": 1790800627,
+      "end": 1790801015,
+      "label": "AWAKE"
+     },
+     {
+      "start": 1790801015,
+      "end": 1790803049,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790803049,
+      "end": 1790803712,
+      "label": "DEEP"
+     },
+     {
+      "start": 1790803712,
+      "end": 1790804327,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790804327,
+      "end": 1790805972,
+      "label": "REM"
+     },
+     {
+      "start": 1790805972,
+      "end": 1790806273,
+      "label": "AWAKE"
+     },
+     {
+      "start": 1790806273,
+      "end": 1790808603,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790808603,
+      "end": 1790809260,
+      "label": "DEEP"
+     },
+     {
+      "start": 1790809260,
+      "end": 1790809939,
+      "label": "LIGHT"
+     },
+     {
+      "start": 1790809939,
+      "end": 1790811683,
+      "label": "REM"
+     },
+     {
+      "start": 1790811683,
+      "end": 1790813632,
+      "label": "LIGHT"
+     }
+    ]
+   },
+   "strain": {
+    "method": "workout-estimate",
+    "trimp": 0,
+    "strain": 0,
+    "countedMinutes": null,
+    "unwornMinutes": null,
+    "zoneMinutes": null,
+    "nonWorkoutTrimp": 0,
+    "workouts": [],
+    "acwr": 0.456,
+    "target": [
+     10,
+     14
+    ],
+    "curve": null,
+    "labels": [
+     "估算"
+    ]
+   }
+  }
+ ]
+}
