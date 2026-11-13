@@ -1,0 +1,8 @@
+# Swift 构建产物
+reference/vigor-export/.build/
+# 未压缩的快照（提交的是 .json.gz）
+reference/fixtures/*/snapshot.json
+# 真实数据快照不提交（只在本机）
+reference/fixtures/real-*/
+reference/golden/real-*/
+*.tmp
