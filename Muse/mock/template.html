@@ -91,8 +91,9 @@ const DATA = /*__DATA__*/null;
 const TZ = 8 * 3600;
 const C = { green: '#16EC06', yellow: '#FFDE00', red: '#FF0026', strain: '#0093E7', sleep: '#7BA1BB', teal: '#00F19F', line: '#1F262B', dim: '#5A646B', muted: '#8A979F', awake: '#E5E5E5', rem: '#00F19F', light: '#7BA1BB', deep: '#5B3FD9' };
 const TABS = ['OVERVIEW', 'RECOVERY', 'STRAIN', 'SLEEP'];
-const state = { tier: 'A', tab: 'OVERVIEW', idx: null, unworn: false };
+const state = { tier: 'H', tab: 'OVERVIEW', idx: null, unworn: false };
 try { const s = JSON.parse(localStorage.getItem('muse-mock') || '{}'); Object.assign(state, { tab: s.tab || state.tab, tier: s.tier || state.tier }); } catch (e) {}
+if (!DATA.tiers[state.tier]) state.tier = 'H';
 const save = () => { try { localStorage.setItem('muse-mock', JSON.stringify({ tab: state.tab, tier: state.tier })); } catch (e) {} };
 
 const pad = (n) => String(n).padStart(2, '0');
@@ -175,7 +176,7 @@ function recovery(d) {
   ];
   if (bl.respiratoryRate) rows.push(['RESP RATE', fmt(ins.respiratoryRate, 1) + ' rpm', `基线 ${fmt(bl.respiratoryRate.mu, 1)}`, arrow(ins.respiratoryRate, bl.respiratoryRate.mu, bl.respiratoryRate.sigma, false), pen.resp]);
   if ('tempDelta' in ins) rows.push(['WRIST TEMP', ins.tempDelta == null ? '—' : (ins.tempDelta >= 0 ? '+' : '') + fmt(ins.tempDelta, 2) + ' °C', '相对基线', arrow(ins.tempDelta, 0, 0.15, false), pen.temp]);
-  if (bl.oxygenSaturation && state.tier === 'A') rows.push(['SPO2', ins.spo2Median == null ? '—' : fmt(ins.spo2Median, 1) + ' %', `基线 ${fmt(bl.oxygenSaturation.mu, 1)}`, arrow(ins.spo2Median, bl.oxygenSaturation.mu, bl.oxygenSaturation.sigma, true), pen.spo2]);
+  if (bl.oxygenSaturation && (state.tier === 'A' || state.tier === 'H')) rows.push(['SPO2', ins.spo2Median == null ? '—' : fmt(ins.spo2Median, 1) + ' %', `基线 ${fmt(bl.oxygenSaturation.mu, 1)}`, arrow(ins.spo2Median, bl.oxygenSaturation.mu, bl.oxygenSaturation.sigma, true), pen.spo2]);
   rows.push(['SLEEP PERF.', fmt(d.sleep.performance) + ' %', `睡眠分 ${fmt(d.sleep.score)}`, '', '']);
   html += `<div class="card"><div class="label" style="margin-bottom:6px">贡献项 · 当日 / 基线</div>${rows.map(([k, v, b, a, p]) => `<div class="row"><span class="k">${k}</span><span class="x">${v}</span><span class="bl">${b}${p ? `<span class="pen">扣 ${fmt(p, 2)}</span>` : ''}</span><span>${a}</span></div>`).join('')}</div>`;
   if (r.contributions) {
@@ -208,6 +209,10 @@ function strain(d) {
     <div class="note">${target ? `目标区间 <b style="color:${C.teal}">${target[0]}–${target[1]}</b>（来自今日恢复${st.acwr != null && st.acwr > 1.3 ? '，ACWR 偏高已下调' : ''}）` : '没有恢复分数，不给目标区间'} · TRIMP ${fmt(st.trimp, 0)}${st.unwornMinutes ? ` · 未佩戴 ${st.unwornMinutes} 分钟` : ''}</div>
     <div>${tags(st.labels)}</div></div>`;
   if (st.curve && st.curve.length) html += hrCurve(st);
+  if (st.nonWorkoutTrimp != null) {
+    const wt = Math.max(0, st.trimp - st.nonWorkoutTrimp), tot = Math.max(1e-9, st.trimp);
+    html += `<div class="card"><div class="label">负荷构成 · TRIMP ${fmt(st.trimp, 0)}</div><div class="hbar" style="display:flex"><i style="width:${(100 * wt) / tot}%;background:${C.strain}"></i><i style="width:${(100 * st.nonWorkoutTrimp) / tot}%;background:${C.sleep}"></i></div><div class="note"><span style="color:${C.strain}">■</span> 训练 ${fmt(wt, 0)} · <span style="color:${C.sleep}">■</span> 日常活动 ${fmt(st.nonWorkoutTrimp, 0)}${st.acwr == null ? ' · ACWR：历史不足 7 天' : ` · ACWR ${fmt(st.acwr, 2)}`}</div></div>`;
+  }
   if (st.zoneMinutes) {
     const mx = Math.max(1, ...st.zoneMinutes);
     html += `<div class="card"><div class="label">心率区间（按 HRR%）</div>${st.zoneMinutes.map((m, i) => `<div class="zone"><span>Z${i + 1}</span><div class="t"><i style="width:${(100 * m) / mx}%"></i></div><span style="text-align:right">${m} 分钟</span></div>`).join('')}</div>`;
@@ -236,7 +241,7 @@ function hrCurve(st) {
     <path d="${path}" fill="none" stroke="${C.strain}" stroke-width="1.6"/>
     ${gaps.filter(([a, b]) => b - a > 1800).map(([a, b]) => `<rect x="${x(a)}" y="${H - padB - 3}" width="${x(b) - x(a)}" height="3" fill="${C.dim}"/>`).join('')}
     ${ticks.map((t) => `<text x="${x(t)}" y="${H - 3}" text-anchor="middle" fill="${C.muted}" style="font-size:10px">${hm(t)}</text>`).join('')}
-  </svg><div class="note">蓝色底为训练时段；底部灰条为超过 30 分钟没有心率的时段。</div></div>`;
+  </svg><div class="note">${state.tier === 'H' ? '每小时平均心率；' : ''}蓝色底为训练时段；底部灰条为超过 30 分钟没有心率的时段。</div></div>`;
 }
 
 function sleep(d) {
@@ -251,10 +256,11 @@ function sleep(d) {
   if (s.hypnogram) html += hypno(s);
   const tot = s.stageMinutes.awake + s.stageMinutes.rem + s.stageMinutes.light + s.stageMinutes.deep;
   const tst = s.tstHours * 60;
-  html += `<div class="card"><div class="label">分期</div>${[['AWAKE', 'awake'], ['REM', 'rem'], ['LIGHT', 'light'], ['SWS (DEEP)', 'deep']].map(([n, k]) => `<div class="stage"><span class="sw" style="background:${C[k]}"></span><span>${n}</span><span class="num" style="font-size:18px">${hhmmDur(s.stageMinutes[k] / 60)}</span><span class="p">${k === 'awake' ? fmt((100 * s.stageMinutes[k]) / tot) : fmt((100 * s.stageMinutes[k]) / tst)}%</span></div>`).join('')}<div class="note">REM / LIGHT / DEEP 的百分比是占睡眠时长；AWAKE 占整段。</div></div>`;
+  const smx = Math.max(1, s.stageMinutes.awake, s.stageMinutes.rem, s.stageMinutes.light, s.stageMinutes.deep);
+  html += `<div class="card"><div class="label">分期</div>${[['AWAKE', 'awake'], ['REM', 'rem'], ['LIGHT', 'light'], ['SWS (DEEP)', 'deep']].map(([n, k]) => `<div class="stage"><span class="sw" style="background:${C[k]}"></span><span>${n}</span><span class="num" style="font-size:18px">${hhmmDur(s.stageMinutes[k] / 60)}</span><span class="p">${k === 'awake' ? fmt((100 * s.stageMinutes[k]) / tot) : fmt((100 * s.stageMinutes[k]) / tst)}%</span></div>${s.hypnogram ? '' : `<div class="hbar" style="margin:2px 0 8px"><i style="width:${(100 * s.stageMinutes[k]) / smx}%;background:${C[k]}"></i></div>`}`).join('')}<div class="note">REM / LIGHT / DEEP 的百分比是占睡眠时长；AWAKE 占整段。${s.hypnogram ? '' : '只有整晚总量，没有时间线，所以不画分期图。'}</div></div>`;
   html += `<div class="grid2" style="margin-top:12px">
     ${stat('EFFICIENCY', fmt(s.efficiency * 100), '%', '', s.efficiencyIsSleepPeriod ? '睡眠期效率' : '睡着 ÷ 在床')}
-    ${stat('CONSISTENCY', s.consistency == null ? '—' : fmt(s.consistency), '', '', s.consistency == null ? '数据不足或 C 档' : '近 7 天 SRI')}
+    ${stat('CONSISTENCY', s.consistency == null ? '—' : fmt(s.consistency), '', '', s.consistency == null ? (state.tier === 'H' ? '没有分期时间线，算不了' : '数据不足或 C 档') : '近 7 天 SRI')}
     ${stat('SLEEP DEBT', fmt(s.debtAfterHours * 60), 'min', '', '今晚之后的负债')}
     ${stat('BED · WAKE', s.onsetLocal ? s.onsetLocal : '—', '', '', s.wakeLocal ? `醒来 ${s.wakeLocal}${s.awakenings != null ? ` · 觉醒 ${s.awakenings} 次` : ''}` : '')}
   </div>`;
@@ -286,7 +292,7 @@ function render() {
   document.getElementById('meta').innerHTML = (q ? `<span class="dot" style="background:${qColor[q.level]}"></span> 质量${qName[q.level]} · ` : '') + `数据截至 ${d.asOfLocal ? d.asOfLocal.slice(5).replace('-', '/') : '—'}`;
   document.getElementById('prev').disabled = state.unworn || state.idx === 0;
   document.getElementById('next').disabled = state.unworn || state.idx === list.length - 1;
-  document.getElementById('tiers').innerHTML = ['A', 'B', 'C'].map((t) => `<button class="${t === state.tier ? 'on' : ''}" data-tier="${t}">${t} 档</button>`).join('');
+  document.getElementById('tiers').innerHTML = ['H', 'A', 'B', 'C'].map((t) => `<button class="${t === state.tier ? 'on' : ''}" data-tier="${t}">${t === 'H' ? 'H 档 · Muse 实测' : t + ' 档'}</button>`).join('');
   document.getElementById('tabs').innerHTML = TABS.map((t) => `<button class="${t === state.tab ? 'on' : ''}" data-tab="${t}">${t}</button>`).join('');
   const fn = { OVERVIEW: overview, RECOVERY: recovery, STRAIN: strain, SLEEP: sleep }[state.tab];
   document.getElementById('page').innerHTML = fn(d);

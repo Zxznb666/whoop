@@ -1,6 +1,6 @@
 # Muse 参考实现
 
-无依赖的 JavaScript（ES 模块 + Node 自带测试运行器），实现 `Muse/ALGORITHM.md` 的 A / B / C 三档算法。用途：
+无依赖的 JavaScript（ES 模块 + Node 自带测试运行器），实现 `Muse/ALGORITHM.md` 的 H（Muse 实测档）与 A / B / C 档算法。用途：
 
 1. 证明算法正确：和 Vigor 完整管线逐项对照（`COMPARISON.md`）。
 2. 导出 golden：每天每个中间量的“标准答案”，用来核对 Muse 空间里的数字。
@@ -16,11 +16,11 @@
 | `src/sleep.js` | 睡眠会话、睡眠指标、SRI、需求与负债、睡眠分、分期图 |
 | `src/baseline.js` | 稳健基线 |
 | `src/recovery.js` | 恢复分数、扣分、Shapley、生病预警、负荷目标、ACWR |
-| `src/load.js` | 分钟网格、TRIMP、Strain；B/C 档负荷估算 |
-| `src/tiers.js` | 把完整快照降级成 A / B / C 档的输入 |
+| `src/load.js` | 分钟网格、TRIMP、Strain；B/C/H 档负荷估算 |
+| `src/tiers.js` | 把完整快照降级成 A / B / C / H 档的输入（H：每小时汇总 + 整晚睡眠会话总量） |
 | `src/pipeline.js` | 逐晚评分流水线 |
 | `test/` | 36 项测试：核心数学、9 条 noop 缺陷、合成数据整体对照与 golden 回归 |
-| `scripts/compare.js` | 三档 vs Vigor 对照 → `golden/comparison.json`（`COMPARISON.md` 由它的输出整理） |
+| `scripts/compare.js` | 各档 vs Vigor 对照 → `golden/comparison.json`（`COMPARISON.md` 由它的输出整理） |
 | `scripts/golden.js` | 导出 golden → `golden/<数据名>/{A,B,C}.json` 与 `*-days.csv` |
 | `vigor-export/` | 小型 Swift 工具，只读调用 `Packages/VigorScoring`、`VigorHealth`，导出快照与 Vigor 结果 |
 | `fixtures/synthetic-seed42/` | 合成快照（去掉逐拍序列，gzip）+ Vigor 结果 |

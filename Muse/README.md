@@ -4,11 +4,19 @@
 
 | 路径 | 内容 | 状态 |
 |---|---|---|
-| `prompts/00-probe.md` | 阶段 0：探测 Muse 读 Apple Health 的粒度、确定性、绘图、长度上限 | **请在 Muse 里运行，把结果贴回** |
-| `ALGORITHM.md` | 分档（A 逐条样本 / B 分期睡眠 + 每日值 / C 只有每日汇总）算法规格，noop 九个缺陷与对策 | 完成 |
-| `reference/` | Node 参考实现（零依赖）、测试、Vigor 对拍、golden 数据 | `npm test` 36/36 通过 |
-| `DESIGN.md`、`mock/index.html` | WHOOP 风格视觉规格与单文件样机 | 完成 |
-| `prompts/drafts/` | 阶段 4 构建提示词草稿（A/B/C） | **待探测结果确认** |
+| `prompts/00-probe.md` | 阶段 0：探测 Muse 读 Apple Health 的粒度、确定性、绘图、长度上限 | P1–P9 已完成（结论在文末）；P10 待做 |
+| `ALGORITHM.md` | 分档算法规格：**H 每小时汇总 + 整晚睡眠会话（Muse 实测，§6A）**，以及 A / B / C 对照档；noop 九个缺陷与对策 | 完成 |
+| `reference/` | Node 参考实现（零依赖）、测试、Vigor 对拍、golden 数据 | `npm test` 45/45 通过 |
+| `DESIGN.md`、`mock/index.html` | WHOOP 风格视觉规格与单文件样机（默认 H 档） | 完成 |
+| `prompts/01–08` | 阶段 4 构建提示词（H 档定稿），按编号依次粘贴到 Muse | **请按下面的顺序使用** |
+
+## 构建顺序
+
+1. `01-data-layer.md`：先填出生年、性别、验收日，粘贴；把 Muse 列出的那一行和小时值贴回核对。
+2. `02-baseline.md` → `03-strain.md` → `04-sleep.md` → `05-recovery.md`：每条做完都贴回 `{验收日}` 的结果核对，对了再发下一条（负荷在睡眠之前，因为睡眠需求要用前一天的负荷；睡眠在恢复之前，因为恢复要用睡眠分）。
+3. `06-pages.md`：四条页面提示词，一次一条，每条截图对照样机。
+4. `07-check-and-fix.md`：全部做完后的验收；数字或样子不对时用里面的修正提示词。
+5. `08-settings.md`：固定到主页、自动刷新、早晨提醒（等 P10 结果再调）。
 
 ## 常用命令
 
